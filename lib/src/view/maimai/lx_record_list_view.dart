@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
@@ -17,88 +19,92 @@ class LxMaiRecordList extends StatelessWidget {
       child: Consumer<RecordListViewModel>(
         builder: (context, viewModel, child) {
           return Scaffold(
-            body: Builder(
-              builder: (ctx) {
-                if (viewModel.isLoading && viewModel.scores.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+              extendBody: true,
+              body: Builder(
+                builder: (ctx) {
+                  if (viewModel.isLoading && viewModel.scores.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (viewModel.hasError) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Text(
-                            'Failed to load records',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            viewModel.errorMessage,
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.red),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () =>
-                                viewModel.fetchRecords(force: true),
-                            child: const Text('Retry'),
-                          ),
-                        ],
+                  if (viewModel.hasError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Failed to load records',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              viewModel.errorMessage,
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.red),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () =>
+                                  viewModel.fetchRecords(force: true),
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
                       ),
+                    );
+                  }
+
+                  if (viewModel.filteredScores.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No records found',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    );
+                  }
+
+                  return RefreshIndicator(
+                    edgeOffset: 176,
+                    onRefresh: () => viewModel.fetchRecords(force: true),
+                    child: GridView.builder(
+                      controller: viewModel.scrollController,
+                      gridDelegate:
+                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 600, // 每个项目的最大宽度
+                        crossAxisSpacing: 8, // 网格之间的横向间距
+                        mainAxisSpacing: 8, // 网格之间的纵向间距
+                        childAspectRatio: 1.8,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 176),
+                      itemCount: viewModel.filteredScores.length,
+                      itemBuilder: (context, index) {
+                        return LxMaiRecordCard(
+                          recordData: viewModel.filteredScores[index],
+                        );
+                      },
                     ),
                   );
-                }
-
-                if (viewModel.filteredScores.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No records found',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: () => viewModel.fetchRecords(force: true),
-                  child: GridView.builder(
-                    controller: viewModel.scrollController,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 600, // 每个项目的最大宽度
-                      crossAxisSpacing: 8, // 网格之间的横向间距
-                      mainAxisSpacing: 8, // 网格之间的纵向间距
-                      childAspectRatio: 1.8,
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: viewModel.filteredScores.length,
-                    itemBuilder: (context, index) {
-                      return LxMaiRecordCard(
-                        recordData: viewModel.filteredScores[index],
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () => _showFilterSheet(context),
-              tooltip: '高级筛选',
-              elevation: viewModel.isVisible ? 0.0 : null,
-              child: const Icon(Icons.filter_list),
-            ),
-            floatingActionButtonLocation: viewModel.isVisible
-                ? FloatingActionButtonLocation.endContained
-                : FloatingActionButtonLocation.endFloat,
-            bottomNavigationBar: _RankFilterBar(
-              isVisible: viewModel.isVisible,
-              searchController: viewModel.searchController,
-              focusNode: viewModel.focusNode,
-            ),
-          );
+                },
+              ),
+              floatingActionButton: SafeArea(
+                  child: FloatingActionButton(
+                onPressed: () => _showFilterSheet(context),
+                tooltip: '高级筛选',
+                elevation: viewModel.isVisible ? 0.0 : null,
+                child: const Icon(Icons.filter_list),
+              )),
+              floatingActionButtonLocation: viewModel.isVisible
+                  ? FloatingActionButtonLocation.endDocked
+                  : FloatingActionButtonLocation.endFloat,
+              bottomNavigationBar: SafeArea(
+                child: _RankFilterBar(
+                  isVisible: viewModel.isVisible,
+                  searchController: viewModel.searchController,
+                  focusNode: viewModel.focusNode,
+                ),
+              ));
         },
       ),
     );
@@ -121,27 +127,32 @@ class _RankFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: isVisible ? 80.0 : 0,
-      child: BottomAppBar(
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: searchController,
-                focusNode: focusNode,
-                decoration: const InputDecoration(
-                  filled: true,
-                  labelText: "搜索歌曲",
-                  hintText: "支持 ID, 曲名, 艺术家, 别名 查找",
-                  prefixIcon: Icon(Icons.search),
+        duration: const Duration(milliseconds: 200),
+        height: isVisible ? 80.0 : 0,
+        child: ClipRRect(
+            child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: BottomAppBar(
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+            surfaceTintColor: Colors.transparent,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    focusNode: focusNode,
+                    decoration: const InputDecoration(
+                      fillColor: Colors.transparent,
+                      labelText: "搜索歌曲",
+                      hintText: "支持 ID, 曲名, 艺术家, 别名 查找",
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 72),
+              ],
             ),
-            const SizedBox(width: 72),
-          ],
-        ),
-      ),
-    );
+          ),
+        )));
   }
 }

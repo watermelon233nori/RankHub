@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -177,25 +178,6 @@ class _SongDetailScreenState extends State<SongDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    const double maxWidth = 300; // Define maximum width for the text container
-
-    const TextStyle titleStyle = TextStyle(
-      fontSize: 32,
-      fontWeight: FontWeight.bold,
-    );
-    const TextStyle artistStyle = TextStyle(
-      fontSize: 16,
-    );
-
-    // Calculate the text width
-    final double titleWidth =
-        _calculateTextWidth(widget.song.title, titleStyle);
-    final double artistWidth =
-        _calculateTextWidth(widget.song.artist, artistStyle);
-
-    double? progress =
-        _totalDuration > 0 ? _currentPosition / _totalDuration : null;
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: NestedScrollView(
@@ -204,35 +186,47 @@ class _SongDetailScreenState extends State<SongDetailScreen>
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
             SliverAppBar(
+              primary: true,
               titleSpacing: 0,
               stretch: true,
               forceElevated: true,
               centerTitle: false,
+              backgroundColor:
+                  Theme.of(context).scaffoldBackgroundColor,
+              surfaceTintColor: Colors.transparent,
               title: Opacity(
                   opacity: _titleOpacity,
                   child: ListTile(
-            contentPadding: const EdgeInsets.all(10),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(4), // Rounded corners
-              child: CachedNetworkImage(
-                imageUrl:
-                    'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png',
-                width: 32,
-                height: 32,
-                fit: BoxFit.cover,
-                fadeInDuration:
-                    const Duration(milliseconds: 500), // Fade-in duration
-                placeholder: (context, url) => Transform.scale(
-                  scale: 0.4,
-                  child: const CircularProgressIndicator(),
-                ),
-                errorWidget: (context, url, error) =>
-                    const Icon(Icons.image_not_supported),
-              ),
-            ),
-            title: Text(widget.song.title, maxLines: 1, overflow: TextOverflow.fade,),
-            subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-          )),
+                    contentPadding: const EdgeInsets.all(10),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(4), // Rounded corners
+                      child: CachedNetworkImage(
+                        imageUrl:
+                            'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                        fadeInDuration: const Duration(
+                            milliseconds: 500), // Fade-in duration
+                        placeholder: (context, url) => Transform.scale(
+                          scale: 0.4,
+                          child: const CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.image_not_supported),
+                      ),
+                    ),
+                    title: Text(
+                      widget.song.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.fade,
+                    ),
+                    subtitle: Text(
+                      widget.song.artist,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )),
               expandedHeight: 300.0,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
@@ -252,125 +246,14 @@ class _SongDetailScreenState extends State<SongDetailScreen>
                             const Icon(Icons.image_not_supported),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 40,
-                                child: titleWidth > maxWidth
-                                    ? SizedBox(
-                                        width: 299,
-                                        child: Marquee(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          fadingEdgeEndFraction: 0.1,
-                                          fadingEdgeStartFraction: 0.1,
-                                          showFadingOnlyWhenScrolling: true,
-                                          text: widget.song.title,
-                                          style: const TextStyle(
-                                            fontSize: 32,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          scrollAxis: Axis.horizontal,
-                                          blankSpace: 20.0,
-                                          velocity: 50.0,
-                                          pauseAfterRound:
-                                              const Duration(seconds: 1),
-                                        ),
-                                      )
-                                    : Text(
-                                        widget.song.title,
-                                        style: titleStyle,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                              ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                height: 20,
-                                child: artistWidth > maxWidth
-                                    ? SizedBox(
-                                        width: 299,
-                                        child: Marquee(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          fadingEdgeEndFraction: 0.1,
-                                          fadingEdgeStartFraction: 0.1,
-                                          showFadingOnlyWhenScrolling: true,
-                                          text: widget.song.artist,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                          scrollAxis: Axis.horizontal,
-                                          blankSpace: 20.0,
-                                          velocity: 50.0,
-                                          pauseAfterRound:
-                                              const Duration(seconds: 1),
-                                        ),
-                                      )
-                                    : Text(
-                                        widget.song.artist,
-                                        style: artistStyle,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          Stack(
-                            alignment: Alignment.center, // 使内容居中对齐
-                            children: [
-                              // 圆形按钮
-                              SizedBox(
-                                width: 64,
-                                height: 64,
-                                child: ElevatedButton(
-                                  style: const ButtonStyle(
-                                    padding:
-                                        WidgetStatePropertyAll(EdgeInsets.zero),
-                                    shape:
-                                        WidgetStatePropertyAll(CircleBorder()),
-                                  ),
-                                  onPressed: _playPauseAudio,
-                                  child: AnimatedIcon(
-                                    icon: AnimatedIcons
-                                        .play_pause, // 使用 play/pause 动画
-                                    progress: _iconController, // 动画控制器
-                                    size: 32,
-                                  ),
-                                ),
-                              ),
-                              // 圆形进度指示器
-                              if (_isLoaded || _isLoading)
-                                IgnorePointer(
-                                  ignoring: !_isLoading,
-                                  child: SizedBox(
-                                      width: 64,
-                                      height: 64,
-                                      child: CircularProgressIndicator(
-                                        value: progress,
-                                        strokeWidth: 4.0,
-                                        backgroundColor: Colors.transparent,
-                                      )),
-                                )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    buildExtentedContent(),
                   ],
                 ),
               ),
             ),
             SliverPersistentHeader(
               pinned: true,
-              delegate: _SliverAppBarDelegate(
+              delegate: _SliverTabDelegate(
                 TabBar(
                   controller: _tabController,
                   tabs: const [
@@ -449,12 +332,139 @@ class _SongDetailScreenState extends State<SongDetailScreen>
       ),
     );
   }
+
+  Widget buildExtentedContent() {
+    const double maxWidth = 300;
+
+    const TextStyle titleStyle = TextStyle(
+      fontSize: 32,
+      fontWeight: FontWeight.bold,
+    );
+    const TextStyle artistStyle = TextStyle(
+      fontSize: 16,
+    );
+
+    // Calculate the text width
+    final double titleWidth =
+        _calculateTextWidth(widget.song.title, titleStyle);
+    final double artistWidth =
+        _calculateTextWidth(widget.song.artist, artistStyle);
+
+    double? progress =
+        _totalDuration > 0 ? _currentPosition / _totalDuration : null;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 40,
+                child: titleWidth > maxWidth
+                    ? SizedBox(
+                        width: 299,
+                        child: Marquee(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          fadingEdgeEndFraction: 0.1,
+                          fadingEdgeStartFraction: 0.1,
+                          showFadingOnlyWhenScrolling: true,
+                          text: widget.song.title,
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          scrollAxis: Axis.horizontal,
+                          blankSpace: 20.0,
+                          velocity: 50.0,
+                          pauseAfterRound: const Duration(seconds: 1),
+                        ),
+                      )
+                    : Text(
+                        widget.song.title,
+                        style: titleStyle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 20,
+                child: artistWidth > maxWidth
+                    ? SizedBox(
+                        width: 299,
+                        child: Marquee(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          fadingEdgeEndFraction: 0.1,
+                          fadingEdgeStartFraction: 0.1,
+                          showFadingOnlyWhenScrolling: true,
+                          text: widget.song.artist,
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                          scrollAxis: Axis.horizontal,
+                          blankSpace: 20.0,
+                          velocity: 50.0,
+                          pauseAfterRound: const Duration(seconds: 1),
+                        ),
+                      )
+                    : Text(
+                        widget.song.artist,
+                        style: artistStyle,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Stack(
+            alignment: Alignment.center, // 使内容居中对齐
+            children: [
+              // 圆形按钮
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: ElevatedButton(
+                  style: const ButtonStyle(
+                    padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                    shape: WidgetStatePropertyAll(CircleBorder()),
+                  ),
+                  onPressed: _playPauseAudio,
+                  child: AnimatedIcon(
+                    icon: AnimatedIcons.play_pause, // 使用 play/pause 动画
+                    progress: _iconController, // 动画控制器
+                    size: 32,
+                  ),
+                ),
+              ),
+              // 圆形进度指示器
+              if (_isLoaded || _isLoading)
+                IgnorePointer(
+                  ignoring: !_isLoading,
+                  child: SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: CircularProgressIndicator(
+                        value: progress,
+                        strokeWidth: 4.0,
+                        backgroundColor: Colors.transparent,
+                      )),
+                )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+class _SliverTabDelegate extends SliverPersistentHeaderDelegate {
   final TabBar _tabBar;
 
-  _SliverAppBarDelegate(this._tabBar);
+  _SliverTabDelegate(this._tabBar);
 
   @override
   double get minExtent => _tabBar.preferredSize.height;
@@ -466,13 +476,19 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: _tabBar,
+      color: (Theme.of(context).scaffoldBackgroundColor).withOpacity(0.6),
+      child: ClipRect(
+        clipBehavior: Clip.antiAlias,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: _tabBar,
+        ),
+      ),
     );
   }
 
   @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+  bool shouldRebuild(_SliverTabDelegate oldDelegate) {
     return false;
   }
 }

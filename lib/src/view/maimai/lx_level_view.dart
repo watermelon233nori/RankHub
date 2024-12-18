@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
@@ -44,7 +46,11 @@ class _LxMaiLevelViewState extends State<LxMaiLevelView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor:
+            Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+        surfaceTintColor: Colors.transparent,
         centerTitle: false,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +65,12 @@ class _LxMaiLevelViewState extends State<LxMaiLevelView> {
             )
           ],
         ),
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1),
+            child: Container(
+              color: Colors.grey.withOpacity(0.1),
+              height: 1,
+            )),
         actions: [
           TextButton(
             onPressed: () {},
@@ -78,6 +90,14 @@ class _LxMaiLevelViewState extends State<LxMaiLevelView> {
             width: 8,
           )
         ],
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rank_hub/src/pages/data_src_page.dart';
@@ -14,8 +16,8 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   static const _channel = MethodChannel('fun.meow0.rankhub.network');
-  int _selectedIndex = 0; // 当前选中的导航索引
-  late final PageController _pageController; // 延迟初始化 PageController
+  int _selectedIndex = 0;
+  late final PageController _pageController;
 
   Future<void> startTunnel() async {
     await _channel.invokeMethod('startTunnel');
@@ -53,31 +55,16 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     _pageController =
-        PageController(initialPage: _selectedIndex); // 初始化 PageController
+        PageController(initialPage: _selectedIndex);
   }
 
   @override
   void dispose() {
-    _pageController.dispose(); // 销毁 PageController
+    _pageController.dispose();
     super.dispose();
   }
 
-  // 导航项点击事件处理
   void _onNavItemTapped(int index) {
-    if (_selectedIndex != index) {
-      setState(() {
-        _selectedIndex = index;
-      });
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutExpo,
-      ); // 平滑滚动到目标页面
-    }
-  }
-
-  // 页面切换事件处理
-  void _onPageChanged(int index) {
     if (_selectedIndex != index) {
       setState(() {
         _selectedIndex = index;
@@ -89,23 +76,13 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     // 页面列表
     final List<Widget> pages = [
-      const Center(child:  Text("还没想好这部分要怎么写")),
-      //Center(
-      //  child: Column(
-      //    children: [
-      //      SizedBox(
-      //        height: 64,
-      //      ),
-      //      ElevatedButton(onPressed: startTunnel, child: Text('启动')),
-      //      ElevatedButton(onPressed: stopTunnel, child: Text('关闭')),
-      //  ],
-      //)),
+      const Center(child: Text("还没想好这部分要怎么写")),
       const RankPage(),
       const WikiPage(),
       const DataSrcPage(),
       SettingsPage(),
     ];
-    // 设置系统界面样式
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -113,15 +90,35 @@ class _MainPageState extends State<MainPage> {
     ));
 
     return Scaffold(
-      bottomNavigationBar: NavigationBar(
-        destinations: _navItems,
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onNavItemTapped,
-      ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: _onPageChanged,
-        children: pages,
+      extendBody: true,
+      bottomNavigationBar: ClipRRect(
+          child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              child: NavigationBar(
+                backgroundColor:
+                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+                destinations: _navItems,
+                selectedIndex: _selectedIndex,
+                onDestinationSelected: _onNavItemTapped,
+              ))),
+      body: Stack(
+        children: pages
+            .asMap()
+            .entries
+            .map((entry) => AnimatedOpacity(
+                  curve: Curves.easeInOutExpo,
+                  opacity: _selectedIndex == entry.key ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: AnimatedScale(
+                    scale: _selectedIndex == entry.key ? 1.0 : 0.98,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOutExpo,
+                    child: IgnorePointer(
+                        ignoring: _selectedIndex != entry.key,
+                        child: entry.value),
+                  ),
+                ))
+            .toList(),
       ),
     );
   }

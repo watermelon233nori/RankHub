@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
@@ -35,9 +37,21 @@ class MaiRankPage extends StatelessWidget {
                           length: 2,
                           initialIndex: 0,
                           child: Scaffold(
+                            extendBody: true,
+                            extendBodyBehindAppBar: true,
                             appBar: AppBar(
+                              backgroundColor: Theme.of(context)
+                                  .scaffoldBackgroundColor
+                                  .withOpacity(0.9),
+                              surfaceTintColor: Colors.transparent,
                               centerTitle: false,
                               automaticallyImplyLeading: false,
+                              flexibleSpace: ClipRRect(
+                                  child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                          sigmaX: 8, sigmaY: 8),
+                                      child: Container(
+                                          color: Colors.transparent))),
                               bottom: const TabBar(tabs: [
                                 Tab(text: '所有成绩'),
                                 Tab(text: 'B50'),
