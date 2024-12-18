@@ -191,8 +191,7 @@ class _SongDetailScreenState extends State<SongDetailScreen>
               stretch: true,
               forceElevated: true,
               centerTitle: false,
-              backgroundColor:
-                  Theme.of(context).scaffoldBackgroundColor,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               surfaceTintColor: Colors.transparent,
               title: Opacity(
                   opacity: _titleOpacity,

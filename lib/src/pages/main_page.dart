@@ -15,17 +15,17 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  static const _channel = MethodChannel('fun.meow0.rankhub.network');
+  //static const _channel = MethodChannel('fun.meow0.rankhub.network');
   int _selectedIndex = 0;
   late final PageController _pageController;
 
-  Future<void> startTunnel() async {
-    await _channel.invokeMethod('startTunnel');
-  }
+  //Future<void> startTunnel() async {
+  //  await _channel.invokeMethod('startTunnel');
+  //}
 
-  Future<void> stopTunnel() async {
-    await _channel.invokeMethod('stopTunnel');
-  }
+  //Future<void> stopTunnel() async {
+  //  await _channel.invokeMethod('stopTunnel');
+  //}
 
   // 底部导航项列表
   final List<NavigationDestination> _navItems = const [

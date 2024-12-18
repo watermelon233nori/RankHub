@@ -16,7 +16,6 @@ class MaiNoteTable extends StatelessWidget {
 
   MaiNoteTable({super.key, required this.notes, required this.calculateMode});
 
-  // 补正总物量计算
   double calculateTotalWeight() {
     return notes.tap.toDouble() +
         notes.touch.toDouble() +

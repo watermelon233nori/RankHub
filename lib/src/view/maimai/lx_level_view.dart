@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
 import 'package:rank_hub/src/model/maimai/song_notes.dart';
+import 'package:rank_hub/src/widget/mai_calculate.dart';
 import 'package:rank_hub/src/widget/mai_note_table.dart';
 import 'package:rank_hub/src/widget/mai_rating_table.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -31,6 +32,15 @@ class _LxMaiLevelViewState extends State<LxMaiLevelView> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void openCalcTool(BuildContext buildContext) {
+    showModalBottomSheet(
+        context: buildContext,
+        showDragHandle: true,
+        builder: (BuildContext ctx) {
+          return MaiTapGreatCalculator(notes: widget.difficulty.notes as SongNotes,);
+        });
   }
 
   int noteTableShowMode = 0;
@@ -73,7 +83,9 @@ class _LxMaiLevelViewState extends State<LxMaiLevelView> {
             )),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              openCalcTool(context);
+            },
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16),
             ),

@@ -90,6 +90,7 @@ class LxMaiRecordList extends StatelessWidget {
               ),
               floatingActionButton: SafeArea(
                   child: FloatingActionButton(
+                    heroTag: "lrlvfb",
                 onPressed: () => _showFilterSheet(context),
                 tooltip: '高级筛选',
                 elevation: viewModel.isVisible ? 0.0 : null,

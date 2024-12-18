@@ -1,12 +1,7 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
-import 'package:rank_hub/src/model/maimai/mai_cover_feature.dart';
-import 'package:rank_hub/src/pages/mai_cover_recognition_page.dart';
-import 'package:rank_hub/src/pages/mai_cover_recognition_setup.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/view/maimai/lx_song_list.dart';
 import 'package:rank_hub/src/viewmodel/maimai/lx_wiki_page_vm.dart';
@@ -89,31 +84,8 @@ class WikiPage extends StatelessWidget {
                         ),
               floatingActionButton: SafeArea(
                   child: FloatingActionButton(
-                onPressed: () async {
-                  final box = await Hive.openLazyBox<MaiCoverFeature>(
-                      'mai_cn_cover_features');
-                  if (box.isNotEmpty) {
-                    print(File(box.path!).lengthSync() / (1024 * 1024));
-                    await box.close();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          fullscreenDialog: true,
-                          builder: (context) =>
-                              const MaiCoverRecognitionPage()),
-                    );
-                    return;
-                  }
-                  await box.close();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        fullscreenDialog: true,
-                        builder: (context) {
-                          return const MaiCoverRecognitionSetup();
-                        }),
-                  );
-                },
+                    heroTag: "lslvfb",
+                onPressed: null,
                 tooltip: '曲绘识别',
                 elevation: viewModel.isVisible ? 0.0 : null,
                 child: const Icon(Icons.center_focus_weak),
