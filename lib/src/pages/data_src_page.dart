@@ -17,7 +17,7 @@ class _DataSrcPageState extends State<DataSrcPage> {
     return CupertinoScaffold(
         body: Builder(builder: (cupertinoScaffoldContext) => DefaultTabController(
             length: 2,
-            child: Scaffold(
+            child: SafeArea(top: false, child: Scaffold(
               appBar: AppBar(
                 centerTitle: false,
                 title: Text('数据源'),
@@ -32,7 +32,7 @@ class _DataSrcPageState extends State<DataSrcPage> {
                   ),
                 ]),
               ),
-              floatingActionButton: FloatingActionButton(
+              floatingActionButton:FloatingActionButton(
                 onPressed: () {
                   CupertinoScaffold.showCupertinoModalBottomSheet(
                     animationCurve: Curves.easeOutCirc,
@@ -42,6 +42,7 @@ class _DataSrcPageState extends State<DataSrcPage> {
                 },
                 child: Icon(Icons.add),
               ),
+              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
               body: TabBarView(
                 children: [
                   MaiPlayerCard(),
@@ -73,6 +74,6 @@ class _DataSrcPageState extends State<DataSrcPage> {
                   ),
                 ],
               ),
-            ))));
+            )))));
   }
 }

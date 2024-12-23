@@ -1,8 +1,10 @@
 import 'dart:ui';
 
+import 'package:animated_digit/animated_digit.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
+import 'package:rank_hub/src/pages/lx_sync_page.dart';
 import 'package:rank_hub/src/pages/player_switch_page.dart';
 import 'package:rank_hub/src/view/maimai/lx_b50_export_view.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
@@ -80,10 +82,15 @@ class MaiRankPage extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              actions: const [
+                              actions: [
                                 IconButton(
                                     //onPressed: () {ProxyServer().startProxyServer();},
-                                    onPressed: null,
+                                    onPressed: () {
+                                      Navigator.push(context,
+                                          MaterialPageRoute(fullscreenDialog: true, builder: (_) {
+                                        return LxSyncPage();
+                                      }));
+                                    },
                                     icon: Icon(Icons.more_vert)),
                                 SizedBox(width: 8),
                               ],
@@ -102,16 +109,16 @@ class MaiRankPage extends StatelessWidget {
                                               height: 140,
                                               child: Column(
                                                 children: [
-                                                  SizedBox(height: 32),
+                                                  const SizedBox(height: 32),
                                                   Row(
                                                     children: [
-                                                      SizedBox(width: 32),
+                                                      const SizedBox(width: 32),
                                                       Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
                                                                 .start,
                                                         children: [
-                                                          Text(
+                                                          const Text(
                                                             "当前 RATING",
                                                             style: TextStyle(
                                                                 fontSize: 24,
@@ -119,18 +126,18 @@ class MaiRankPage extends StatelessWidget {
                                                                     FontWeight
                                                                         .bold),
                                                           ),
-                                                          SizedBox(height: 16),
+                                                          const SizedBox(
+                                                              height: 16),
                                                           SizedBox(
                                                             height: 40, // 明确的高度
                                                             child: viewModel
                                                                 .getShaderMaskByRating(
                                                               viewModel
                                                                   .playerRating,
-                                                              Text(
-                                                                viewModel
-                                                                    .playerRating
-                                                                    .toString(),
-                                                                style: TextStyle(
+                                                              AnimatedDigitWidget(
+                                                                value: viewModel
+                                                                    .playerRating,
+                                                                textStyle: const TextStyle(
                                                                     fontSize:
                                                                         24,
                                                                     fontWeight:
@@ -141,7 +148,7 @@ class MaiRankPage extends StatelessWidget {
                                                           ),
                                                         ],
                                                       ),
-                                                      Spacer(),
+                                                      const Spacer(),
                                                       Column(
                                                         crossAxisAlignment:
                                                             CrossAxisAlignment
@@ -149,14 +156,14 @@ class MaiRankPage extends StatelessWidget {
                                                         children: [
                                                           Text(
                                                               "当期版本 Rating: ${viewModel.currentVerRating}"),
-                                                          SizedBox(
+                                                          const SizedBox(
                                                               height:
                                                                   16), // 替换 Spacer，避免无约束布局
                                                           Text(
                                                               "往期版本 Rating: ${viewModel.pastVerRating}"),
                                                         ],
                                                       ),
-                                                      SizedBox(width: 32)
+                                                      const SizedBox(width: 32)
                                                     ],
                                                   )
                                                 ],
@@ -176,8 +183,9 @@ class MaiRankPage extends StatelessWidget {
                                                                         viewModel)),
                                                       );
                                                     },
-                                                    child: Text('导出 B50 成绩图'))),
-                                            SizedBox(height: 16),
+                                                    child: const Text(
+                                                        '导出 B50 成绩图'))),
+                                            const SizedBox(height: 16),
                                             const Center(
                                               child: Text(
                                                 '当期版本成绩',

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rank_hub/src/model/mai_types.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/viewmodel/maimai/lx_record_list_vm.dart';
@@ -77,7 +78,8 @@ class LxMaiRecordList extends StatelessWidget {
                         mainAxisSpacing: 8, // 网格之间的纵向间距
                         childAspectRatio: 1.8,
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 176),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 176),
                       itemCount: viewModel.filteredScores.length,
                       itemBuilder: (context, index) {
                         return LxMaiRecordCard(
@@ -88,72 +90,429 @@ class LxMaiRecordList extends StatelessWidget {
                   );
                 },
               ),
-              floatingActionButton: SafeArea(
-                  child: FloatingActionButton(
-                    heroTag: "lrlvfb",
-                onPressed: () => _showFilterSheet(context),
-                tooltip: '高级筛选',
-                elevation: viewModel.isVisible ? 0.0 : null,
-                child: const Icon(Icons.filter_list),
-              )),
-              floatingActionButtonLocation: viewModel.isVisible
-                  ? FloatingActionButtonLocation.endDocked
-                  : FloatingActionButtonLocation.endFloat,
               bottomNavigationBar: SafeArea(
                 child: _RankFilterBar(
                   isVisible: viewModel.isVisible,
                   searchController: viewModel.searchController,
                   focusNode: viewModel.focusNode,
+                  viewModel: viewModel,
                 ),
               ));
         },
       ),
     );
   }
-
-  void _showFilterSheet(BuildContext context) {}
 }
 
 class _RankFilterBar extends StatelessWidget {
   final bool isVisible;
   final TextEditingController searchController;
   final FocusNode focusNode;
+  final RecordListViewModel viewModel;
 
   const _RankFilterBar({
     required this.isVisible,
     required this.searchController,
     required this.focusNode,
+    required this.viewModel,
   });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        height: isVisible ? 80.0 : 0,
+        height: isVisible ? 144.0 : 0,
         child: ClipRRect(
             child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: BottomAppBar(
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
-            surfaceTintColor: Colors.transparent,
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    focusNode: focusNode,
-                    decoration: const InputDecoration(
-                      fillColor: Colors.transparent,
-                      labelText: "搜索歌曲",
-                      hintText: "支持 ID, 曲名, 艺术家, 别名 查找",
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                  ),
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: BottomAppBar(
+                    color: Theme.of(context)
+                        .scaffoldBackgroundColor
+                        .withOpacity(0.9),
+                    surfaceTintColor: Colors.transparent,
+                    child: OverflowBox(
+                      maxHeight: 144,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: searchController,
+                                focusNode: focusNode,
+                                decoration: const InputDecoration(
+                                  fillColor: Colors.transparent,
+                                  labelText: "搜索歌曲",
+                                  hintText: "支持 ID, 曲名, 艺术家, 别名 查找",
+                                  prefixIcon: Icon(Icons.search),
+                                ),
+                              ),
+                            ),
+                            SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Wrap(
+                                  spacing: 8,
+                                  children: [
+                                    TextButton(
+                                        onPressed: viewModel.resetFilter,
+                                        child: Row(children: [
+                                          Icon(Icons.refresh),
+                                          SizedBox(
+                                            width: 4,
+                                          ),
+                                          Text('重置过滤条件')
+                                        ])),
+                                    ActionChip(
+                                      onPressed: viewModel.openLevelMultiSelectDialog,
+                                      label: Row(
+                                        children: [
+                                          Text(viewModel.getLevelIndexText()),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down)
+                                        ],
+                                      ),
+                                    ),
+                                    Chip(
+                                      label: Row(
+                                        children: [
+                                          Text("分类"),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down)
+                                        ],
+                                      ),
+                                    ),
+                                    Chip(
+                                      label: Row(
+                                        children: [
+                                          Text("版本"),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down),
+                                        ],
+                                      ),
+                                    ),
+                                    ActionChip(
+                                      onPressed:
+                                          viewModel.openDateRangePickerDialog,
+                                      label: Row(
+                                        children: [
+                                          Text(viewModel.getDateRangeText()),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down)
+                                        ],
+                                      ),
+                                    ),
+                                    ActionChip(
+                                      onPressed: viewModel
+                                          .openLevelValueRangeSliderDialog,
+                                      label: Row(
+                                        children: [
+                                          Text(viewModel
+                                              .getLevelValueRangeText()),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down)
+                                        ],
+                                      ),
+                                    ),
+                                    ActionChip(
+                                      onPressed: viewModel.openFCTypeMultiSelectDialog,
+                                      label: Row(
+                                        children: [
+                                          Text(viewModel.getFCTypeText()),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down)
+                                        ],
+                                      ),
+                                    ),
+                                    ActionChip(
+                                      onPressed: viewModel.openFSTypeMultiSelectDialog,
+                                      label: Row(
+                                        children: [
+                                          Text(viewModel.getFSTypeText()),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down)
+                                        ],
+                                      ),
+                                    ),
+                                    Chip(
+                                      label: Row(
+                                        children: [
+                                          Text("谱面类型"),
+                                          SizedBox(width: 8),
+                                          Icon(Icons.arrow_drop_down)
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                          ],
+                        ),
+                      ),
+                    )))));
+  }
+}
+
+class LevelValueRangeSliderDialog extends StatefulWidget {
+  final RangeValues initialRange;
+
+  const LevelValueRangeSliderDialog({
+    super.key,
+    required this.initialRange,
+  });
+
+  @override
+  State<LevelValueRangeSliderDialog> createState() =>
+      _LevelValueRangeSliderDialogState();
+}
+
+class _LevelValueRangeSliderDialogState
+    extends State<LevelValueRangeSliderDialog> {
+  late RangeValues _currentRange;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentRange = widget.initialRange;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+        title: const Text('选择谱面定数范围'),
+        content: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8, // 设置宽度为屏幕宽度的80%
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 32),
+              Text(
+                  '当前范围: ${_currentRange.start.toStringAsFixed(1)} - ${_currentRange.end.toStringAsFixed(1)}'),
+              RangeSlider(
+                values: _currentRange,
+                min: 1.0,
+                max: 15.0,
+                divisions: 140,
+                labels: RangeLabels(
+                  _currentRange.start.toStringAsFixed(1),
+                  _currentRange.end.toStringAsFixed(1),
                 ),
-                const SizedBox(width: 72),
-              ],
+                onChanged: (RangeValues newRange) {
+                  setState(() {
+                    _currentRange = newRange;
+                  });
+                },
+              ),
+            ],
+          )),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
             ),
-          ),
-        )));
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(_currentRange);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+  }
+}
+
+class LevelMultiSelectDialog extends StatefulWidget {
+  final List<LevelIndex> initialSelected;
+
+  const LevelMultiSelectDialog({
+    super.key,
+    required this.initialSelected,
+  });
+
+  @override
+  State<LevelMultiSelectDialog> createState() => _LevelMultiSelectDialogState();
+}
+
+class _LevelMultiSelectDialogState extends State<LevelMultiSelectDialog> {
+  late List<LevelIndex> _selectedLevels;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLevels = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('选择谱面难度'),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: LevelIndex.values.map((level) {
+            return CheckboxListTile(
+              title: Text(level.label),
+              value: _selectedLevels.contains(level),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedLevels.add(level);
+                  } else {
+                    _selectedLevels.remove(level);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_selectedLevels);
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    );
+  }
+}
+
+class FCTypeMultiSelectDialog extends StatefulWidget {
+  final List<FCType> initialSelected;
+
+  const FCTypeMultiSelectDialog({
+    super.key,
+    required this.initialSelected,
+  });
+
+  @override
+  State<FCTypeMultiSelectDialog> createState() => _FCTypeMultiSelectDialogState();
+}
+
+class _FCTypeMultiSelectDialogState extends State<FCTypeMultiSelectDialog> {
+  late List<FCType> _selectedLevels;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLevels = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('选择 FC 类型'),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: FCType.values.map((fcType) {
+            return CheckboxListTile(
+              title: Text(fcType.label),
+              value: _selectedLevels.contains(fcType),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedLevels.add(fcType);
+                  } else {
+                    _selectedLevels.remove(fcType);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_selectedLevels);
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    );
+  }
+}
+
+
+
+class FSTypeMultiSelectDialog extends StatefulWidget {
+  final List<FSType> initialSelected;
+
+  const FSTypeMultiSelectDialog({
+    super.key,
+    required this.initialSelected,
+  });
+
+  @override
+  State<FSTypeMultiSelectDialog> createState() => _FSTypeMultiSelectDialogState();
+}
+
+class _FSTypeMultiSelectDialogState extends State<FSTypeMultiSelectDialog> {
+  late List<FSType> _selectedLevels;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLevels = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('选择 FS 类型'),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: FSType.values.map((fsType) {
+            return CheckboxListTile(
+              title: Text(fsType.label),
+              value: _selectedLevels.contains(fsType),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedLevels.add(fsType);
+                  } else {
+                    _selectedLevels.remove(fsType);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_selectedLevels);
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    );
   }
 }

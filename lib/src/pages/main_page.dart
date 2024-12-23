@@ -110,7 +110,7 @@ class _MainPageState extends State<MainPage> {
                   opacity: _selectedIndex == entry.key ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: AnimatedScale(
-                    scale: _selectedIndex == entry.key ? 1.0 : 0.98,
+                    scale: _selectedIndex == entry.key ? 1.0 : 0.99,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOutExpo,
                     child: IgnorePointer(

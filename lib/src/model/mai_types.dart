@@ -18,6 +18,7 @@ enum LevelIndex {
 }
 
 enum FCType {
+  none("none", 'None'),
   app("app", 'AP+'),    // AP+
   ap("ap", 'AP'),       // AP
   fcp("fcp", 'FC+'),    // FC+
@@ -36,11 +37,12 @@ enum FCType {
 }
 
 enum FSType {
+  none("nono", 'None'),
   fsdp("fsdp", 'FDX+'),   // FDX+
   fsd("fsd", 'FDX'),      // FDX
   fsp("fsp", 'FS+'),      // FS+
   fs("fs", 'FS'),         // FS
-  sync("sync", 'SYNC');   // SYNC PLAY
+  syncp("sync", 'SYNC');   // SYNC PLAY
 
   final String value;
   final String label;
