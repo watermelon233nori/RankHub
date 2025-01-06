@@ -238,8 +238,18 @@ class LxApiService {
     return aliasBox.get(id);
   }
 
+  static Future<List<SongVersion>> getSongVersions() async {
+    final versionsBox = await Hive.openBox<SongVersion>('MaiCnVersions');
+    return versionsBox.values.toList();
+  }
+
+  static Future<List<SongGenre>> getSongGenres() async {
+    final genresBox = await Hive.openBox<SongGenre>('MaiCnGenres');
+    return genresBox.values.toList();
+  }
+
   // 获取歌曲版本名称
-  Future<String> getTitleByVersion(int version) async {
+  static Future<String> getTitleByVersion(int version) async {
     final box = await Hive.openBox<SongVersion>('MaiCnVersions');
     List<SongVersion> versions = box.values.toList();
     versions.sort((a, b) => a.version.compareTo(b.version));

@@ -65,7 +65,7 @@ class _MaiTapGreatCalculatorState extends State<MaiTapGreatCalculator> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(child: Padding(
       padding: const EdgeInsets.all(32.0),
       child: Form(
         key: _formKey,
@@ -145,7 +145,7 @@ class _MaiTapGreatCalculatorState extends State<MaiTapGreatCalculator> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildChip(String label, double value) {

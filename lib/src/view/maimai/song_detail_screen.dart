@@ -115,9 +115,7 @@ class _SongDetailScreenState extends State<SongDetailScreen>
   }
 
   Future<void> getVersion() async {
-    var a = await LxMaiProvider(context: context)
-        .lxApiService
-        .getTitleByVersion(widget.song.version);
+    var a = await LxApiService.getTitleByVersion(widget.song.version);
     setState(() {
       _version = a;
     });

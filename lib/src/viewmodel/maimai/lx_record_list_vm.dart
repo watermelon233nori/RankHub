@@ -4,9 +4,12 @@ import 'package:flutter/rendering.dart';
 import 'package:rank_hub/src/model/mai_song_filter_data.dart';
 import 'package:rank_hub/src/model/mai_types.dart';
 import 'package:rank_hub/src/model/maimai/player_data.dart';
+import 'package:rank_hub/src/model/maimai/song_genre.dart';
 import 'package:rank_hub/src/model/maimai/song_info.dart';
 import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/model/maimai/song_version.dart';
 import 'package:rank_hub/src/provider/data_source_provider.dart';
+import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/view/maimai/lx_record_list_view.dart';
 
 class RecordListViewModel extends ChangeNotifier {
@@ -135,6 +138,57 @@ class RecordListViewModel extends ChangeNotifier {
     },);
   }
 
+  Future<void> openVersionMultiSelectDialog() async {
+    final List<SongVersion> versions = await LxApiService.getSongVersions();
+    List<SongVersion> list =
+        filterData.version == null ? [] : filterData.version!;
+    showDialog<List<SongVersion>>(
+      context: buildContext,
+      builder: (BuildContext context) {
+        return VersionMultiSelectDialog(
+          initialSelected: list,
+          versions: versions,
+        );
+      },
+    ).then((value) {
+      filterData.updateVersion(value);
+      _requestRebuild();
+    },);
+  }
+
+  Future<void> openGenreMultiSelectDialog() async {
+    final List<SongGenre> genres = await LxApiService.getSongGenres();
+    List<SongGenre> list = filterData.genre == null ? [] : filterData.genre!;
+    showDialog<List<SongGenre>>(
+      context: buildContext,
+      builder: (BuildContext context) {
+        return GenreMultiSelectDialog(
+          initialSelected: list,
+          genres: genres,
+        );
+      },
+    ).then((value) {
+      filterData.updateGenre(value);
+      _requestRebuild();
+    },);
+  }
+
+  void openSongTypeMultiSelectDialog() {
+    List<SongType> list =
+        filterData.songType == null ? [] : filterData.songType!;
+    showDialog<List<SongType>>(
+      context: buildContext,
+      builder: (BuildContext context) {
+        return SongTypeMultiSelectDialog(
+          initialSelected: list,
+        );
+      },
+    ).then((value) {
+      filterData.updateSongType(value);
+      _requestRebuild();
+    },);
+  }
+
   String getDateRangeText() {
     return filterData.uploadTimeRange == null
         ? '上传时间'
@@ -169,6 +223,30 @@ class RecordListViewModel extends ChangeNotifier {
         : filterData.fsType!.length == 1
             ? filterData.fsTypeLabel!.first
             : '${filterData.fsType!.length} 个 FS 类型';
+  }
+
+  String getVersionText() {
+    return filterData.version == null || filterData.version!.isEmpty
+        ? '版本'
+        : filterData.version!.length == 1
+            ? filterData.versionLabel!.first
+            : '${filterData.version!.length} 个版本';
+  }
+
+  String getGenreText() {
+    return filterData.genre == null || filterData.genre!.isEmpty
+        ? '分类'
+        : filterData.genre!.length == 1
+            ? filterData.genreLabel!.first
+            : '${filterData.genre!.length} 个分类';
+  }
+
+  String getSongTypeText() {
+    return filterData.songType == null || filterData.songType!.isEmpty
+        ? '谱面类型'
+        : filterData.songType!.length == 1
+            ? filterData.songTypeLabel!.first
+            : '${filterData.songType!.length} 个谱面类型';
   }
 
   void _listenToScroll() {

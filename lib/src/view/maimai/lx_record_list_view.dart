@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rank_hub/src/model/mai_types.dart';
+import 'package:rank_hub/src/model/maimai/song_genre.dart';
+import 'package:rank_hub/src/model/maimai/song_version.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/viewmodel/maimai/lx_record_list_vm.dart';
@@ -73,6 +75,7 @@ class LxMaiRecordList extends StatelessWidget {
                       controller: viewModel.scrollController,
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
+                        mainAxisExtent: 240,
                         maxCrossAxisExtent: 600, // 每个项目的最大宽度
                         crossAxisSpacing: 8, // 网格之间的横向间距
                         mainAxisSpacing: 8, // 网格之间的纵向间距
@@ -165,7 +168,8 @@ class _RankFilterBar extends StatelessWidget {
                                           Text('重置过滤条件')
                                         ])),
                                     ActionChip(
-                                      onPressed: viewModel.openLevelMultiSelectDialog,
+                                      onPressed:
+                                          viewModel.openLevelMultiSelectDialog,
                                       label: Row(
                                         children: [
                                           Text(viewModel.getLevelIndexText()),
@@ -174,21 +178,24 @@ class _RankFilterBar extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                    Chip(
+                                    ActionChip(
+                                      onPressed: viewModel.openGenreMultiSelectDialog,
                                       label: Row(
                                         children: [
-                                          Text("分类"),
+                                          Text(viewModel.getGenreText()),
                                           SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          Icon(Icons.arrow_drop_down),
                                         ],
                                       ),
                                     ),
-                                    Chip(
+                                    ActionChip(
+                                      onPressed: viewModel
+                                          .openVersionMultiSelectDialog,
                                       label: Row(
                                         children: [
-                                          Text("版本"),
+                                          Text(viewModel.getVersionText()),
                                           SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down),
+                                          Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
@@ -216,7 +223,8 @@ class _RankFilterBar extends StatelessWidget {
                                       ),
                                     ),
                                     ActionChip(
-                                      onPressed: viewModel.openFCTypeMultiSelectDialog,
+                                      onPressed:
+                                          viewModel.openFCTypeMultiSelectDialog,
                                       label: Row(
                                         children: [
                                           Text(viewModel.getFCTypeText()),
@@ -226,7 +234,8 @@ class _RankFilterBar extends StatelessWidget {
                                       ),
                                     ),
                                     ActionChip(
-                                      onPressed: viewModel.openFSTypeMultiSelectDialog,
+                                      onPressed:
+                                          viewModel.openFSTypeMultiSelectDialog,
                                       label: Row(
                                         children: [
                                           Text(viewModel.getFSTypeText()),
@@ -235,10 +244,11 @@ class _RankFilterBar extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                    Chip(
+                                    ActionChip(
+                                      onPressed: viewModel.openSongTypeMultiSelectDialog,
                                       label: Row(
                                         children: [
-                                          Text("谱面类型"),
+                                          Text(viewModel.getSongTypeText()),
                                           SizedBox(width: 8),
                                           Icon(Icons.arrow_drop_down)
                                         ],
@@ -279,8 +289,8 @@ class _LevelValueRangeSliderDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        title: const Text('选择谱面定数范围'),
-        content: SizedBox(
+      title: const Text('选择谱面定数范围'),
+      content: SizedBox(
           width: MediaQuery.of(context).size.width * 0.8, // 设置宽度为屏幕宽度的80%
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -305,21 +315,21 @@ class _LevelValueRangeSliderDialogState
               ),
             ],
           )),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(_currentRange);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_currentRange);
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    );
   }
 }
 
@@ -396,7 +406,8 @@ class FCTypeMultiSelectDialog extends StatefulWidget {
   });
 
   @override
-  State<FCTypeMultiSelectDialog> createState() => _FCTypeMultiSelectDialogState();
+  State<FCTypeMultiSelectDialog> createState() =>
+      _FCTypeMultiSelectDialogState();
 }
 
 class _FCTypeMultiSelectDialogState extends State<FCTypeMultiSelectDialog> {
@@ -451,8 +462,6 @@ class _FCTypeMultiSelectDialogState extends State<FCTypeMultiSelectDialog> {
   }
 }
 
-
-
 class FSTypeMultiSelectDialog extends StatefulWidget {
   final List<FSType> initialSelected;
 
@@ -462,7 +471,8 @@ class FSTypeMultiSelectDialog extends StatefulWidget {
   });
 
   @override
-  State<FSTypeMultiSelectDialog> createState() => _FSTypeMultiSelectDialogState();
+  State<FSTypeMultiSelectDialog> createState() =>
+      _FSTypeMultiSelectDialogState();
 }
 
 class _FSTypeMultiSelectDialogState extends State<FSTypeMultiSelectDialog> {
@@ -492,6 +502,207 @@ class _FSTypeMultiSelectDialogState extends State<FSTypeMultiSelectDialog> {
                     _selectedLevels.add(fsType);
                   } else {
                     _selectedLevels.remove(fsType);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_selectedLevels);
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    );
+  }
+}
+
+class VersionMultiSelectDialog extends StatefulWidget {
+  final List<SongVersion> initialSelected;
+  final List<SongVersion> versions;
+
+  const VersionMultiSelectDialog({
+    super.key,
+    required this.initialSelected,
+    required this.versions,
+  });
+
+  @override
+  State<VersionMultiSelectDialog> createState() =>
+      _VersionMultiSelectDialogState();
+}
+
+class _VersionMultiSelectDialogState extends State<VersionMultiSelectDialog> {
+  late List<SongVersion> _selectedVersions;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedVersions = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('选择版本'),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: widget.versions.map((version) {
+            return CheckboxListTile(
+              title: Text(version.title),
+              value: _selectedVersions.contains(version),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedVersions.add(version);
+                  } else {
+                    _selectedVersions.remove(version);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_selectedVersions);
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    );
+  }
+}
+
+
+
+class GenreMultiSelectDialog extends StatefulWidget {
+  final List<SongGenre> initialSelected;
+  final List<SongGenre> genres;
+
+  const GenreMultiSelectDialog({
+    super.key,
+    required this.initialSelected,
+    required this.genres,
+  });
+
+  @override
+  State<GenreMultiSelectDialog> createState() =>
+      _GenreMultiSelectDialogState();
+}
+
+class _GenreMultiSelectDialogState extends State<GenreMultiSelectDialog> {
+  late List<SongGenre> _selectedGenres;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedGenres = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('选择分类'),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: widget.genres.map((version) {
+            return CheckboxListTile(
+              title: Text(version.title),
+              value: _selectedGenres.contains(version),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedGenres.add(version);
+                  } else {
+                    _selectedGenres.remove(version);
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(_selectedGenres);
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    );
+  }
+}
+
+class SongTypeMultiSelectDialog extends StatefulWidget {
+  final List<SongType> initialSelected;
+
+  const SongTypeMultiSelectDialog({
+    super.key,
+    required this.initialSelected,
+  });
+
+  @override
+  State<SongTypeMultiSelectDialog> createState() =>
+      _SongTypeMultiSelectDialogState();
+}
+
+class _SongTypeMultiSelectDialogState extends State<SongTypeMultiSelectDialog> {
+  late List<SongType> _selectedLevels;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedLevels = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('选择谱面类型'),
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: SongType.values.map((songType) {
+            return CheckboxListTile(
+              title: Text(songType.label),
+              value: _selectedLevels.contains(songType),
+              onChanged: (bool? value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedLevels.add(songType);
+                  } else {
+                    _selectedLevels.remove(songType);
                   }
                 });
               },

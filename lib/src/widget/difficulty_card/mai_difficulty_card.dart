@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
 import 'package:rank_hub/src/model/maimai/song_score.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
+import 'package:rank_hub/src/services/lx_api_services.dart';
 
 class MaiDifficultyCard extends StatefulWidget {
   final SongDifficulty songDifficulty;
@@ -26,9 +27,7 @@ class _MaiDifficultyCardState extends State<MaiDifficultyCard> {
   }
 
   Future<void> getVersion() async {
-    var a = await LxMaiProvider(context: context)
-        .lxApiService
-        .getTitleByVersion(widget.songDifficulty.version);
+    var a = await LxApiService.getTitleByVersion(widget.songDifficulty.version);
     setState(() {
       version = a;
     });
