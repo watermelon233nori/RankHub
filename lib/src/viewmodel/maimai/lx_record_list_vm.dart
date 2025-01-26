@@ -1,6 +1,7 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_date_range_picker/flutter_date_range_picker.dart';
 import 'package:rank_hub/src/model/mai_song_filter_data.dart';
 import 'package:rank_hub/src/model/mai_types.dart';
 import 'package:rank_hub/src/model/maimai/player_data.dart';
@@ -13,7 +14,7 @@ import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/view/maimai/lx_record_list_view.dart';
 
 class RecordListViewModel extends ChangeNotifier {
-  final DataSourceProvider<SongScore, PlayerData, SongInfo> dataSourceProvider;
+  final DataSourceProvider<SongScore, PlayerData, SongInfo, MaiSongFilterData> dataSourceProvider;
   final BuildContext buildContext;
   final FocusNode focusNode = FocusNode();
   final TextEditingController searchController = TextEditingController();
@@ -25,6 +26,7 @@ class RecordListViewModel extends ChangeNotifier {
   String searchQuery = "";
   List<SongScore> scores = [];
   List<SongScore> filteredScores = [];
+  List<SongScore> searchResults = [];
   bool isLoading = true;
   bool hasError = false;
   String errorMessage = '';
@@ -56,37 +58,34 @@ class RecordListViewModel extends ChangeNotifier {
     showCalendarDatePicker2Dialog(
       dialogSize: const Size(350, 370),
       context: buildContext,
-      value: [filterData.uploadTimeStart, filterData.uploadTimeEnd],
+      value: filterData.uploadTimeRange == null ? [DateTime.now(), DateTime.now()] : [filterData.uploadTimeRange!.start, filterData.uploadTimeRange!.end],
       config: CalendarDatePicker2WithActionButtonsConfig(
           calendarType: CalendarDatePicker2Type.range),
     ).then((values) {
       if (values != null && values.isNotEmpty) {
-        filterData.updateUploadTimeStart(values.first);
-        filterData.updateUploadTimeEnd(values.last);
+        if (values[0] == null || values[1] == null) {
+          filterData.updateUploadTimeRange(null);
+        }
+        filterData.updateUploadTimeRange(DateRange(values[0]!, values[1]!),
+        );
       } else {
-        filterData.updateUploadTimeStart(null);
-        filterData.updateUploadTimeEnd(null);
+        filterData.updateUploadTimeRange(null);
       }
-      _requestRebuild();
+      filterRecords();
     });
   }
 
   void openLevelValueRangeSliderDialog() {
-    double startValue =
-        filterData.levelValueStart == null ? 1.0 : filterData.levelValueStart!;
-    double endValue =
-        filterData.levelValueEnd == null ? 15.0 : filterData.levelValueEnd!;
     showDialog<RangeValues>(
       context: buildContext,
       builder: (BuildContext context) {
         return LevelValueRangeSliderDialog(
-          initialRange: RangeValues(startValue, endValue),
+          initialRange: filterData.levelValueRange == null ? const RangeValues(1.0, 15.0) : filterData.levelValueRange!,
         );
       },
     ).then((range) {
-      filterData.updateLevelValueStart(startValue);
-      filterData.updateLevelValueEnd(endValue);
-      _requestRebuild();
+      filterData.updateLevelValueRange(range);
+      filterRecords();
     });
   }
 
@@ -102,7 +101,7 @@ class RecordListViewModel extends ChangeNotifier {
       },
     ).then((value) {
       filterData.updateLevelIndex(value);
-      _requestRebuild();
+      filterRecords();
     },);
   }
 
@@ -118,7 +117,7 @@ class RecordListViewModel extends ChangeNotifier {
       },
     ).then((value) {
       filterData.updateFCType(value);
-      _requestRebuild();
+      filterRecords();
     },);
   }
 
@@ -134,7 +133,7 @@ class RecordListViewModel extends ChangeNotifier {
       },
     ).then((value) {
       filterData.updateFSType(value);
-      _requestRebuild();
+      filterRecords();
     },);
   }
 
@@ -152,7 +151,7 @@ class RecordListViewModel extends ChangeNotifier {
       },
     ).then((value) {
       filterData.updateVersion(value);
-      _requestRebuild();
+      filterRecords();
     },);
   }
 
@@ -169,7 +168,7 @@ class RecordListViewModel extends ChangeNotifier {
       },
     ).then((value) {
       filterData.updateGenre(value);
-      _requestRebuild();
+      filterRecords();
     },);
   }
 
@@ -185,20 +184,20 @@ class RecordListViewModel extends ChangeNotifier {
       },
     ).then((value) {
       filterData.updateSongType(value);
-      _requestRebuild();
+      filterRecords();
     },);
   }
 
   String getDateRangeText() {
-    return filterData.uploadTimeRange == null
+    return filterData.uploadTimeRangeLabel == null
         ? '上传时间'
-        : filterData.uploadTimeRange!;
+        : filterData.uploadTimeRangeLabel!;
   }
 
   String getLevelValueRangeText() {
-    return filterData.levelValueRange == null
+    return filterData.levelValueRangeLabel == null
         ? '谱面定数'
-        : filterData.levelValueRange!;
+        : filterData.levelValueRangeLabel!;
   }
 
   String getLevelIndexText() {
@@ -299,18 +298,52 @@ class RecordListViewModel extends ChangeNotifier {
 
   Future<void> filterSearchResults() async {
     if (searchQuery.isEmpty) {
-      filteredScores = scores;
+      searchResults = scores;
     } else {
       List<SongInfo> preFiltered =
           await dataSourceProvider.searchSongs(searchQuery);
 
-      filteredScores = scores
+      searchResults = scores
           .where((song) => preFiltered.any((filteredSong) {
                 return filteredSong.id == song.id;
               }))
           .toList();
     }
     _requestRebuild();
+  }
+
+  Future<void> filterRecords() async {
+    isLoading = true;
+    hasError = false;
+    errorMessage = '';
+    _requestRebuild();
+
+    try {
+      filteredScores = await dataSourceProvider.filterRecords(filterData);
+      isLoading = false;
+    } catch (e) {
+      isLoading = false;
+      hasError = true;
+      errorMessage = 'Failed to filter songs: $e';
+    }
+    _requestRebuild();
+  }
+
+  List<SongScore> getRecordsList() {
+    if (searchQuery.isEmpty && filterData.areAllValuesNull) {
+      return scores;
+    }
+    if (searchQuery.isNotEmpty && filterData.areAllValuesNull) {
+      return searchResults;
+    }
+    if (searchQuery.isEmpty && !filterData.areAllValuesNull) {
+      return filteredScores;
+    }
+    return searchResults.where((song) {
+        return filteredScores.any((filteredSong) {
+          return filteredSong.id == song.id;
+        });
+      }).toList();
   }
 
   void _requestRebuild() {

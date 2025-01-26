@@ -83,6 +83,8 @@ class MaiRankPage extends StatelessWidget {
                                 ),
                               ),
                               actions: [
+                                IconButton(onPressed: () {}, icon: Icon(Icons.add)),
+                                SizedBox(width: 4),
                                 IconButton(
                                     //onPressed: () {ProxyServer().startProxyServer();},
                                     onPressed: () {
@@ -91,7 +93,7 @@ class MaiRankPage extends StatelessWidget {
                                         return LxSyncPage();
                                       }));
                                     },
-                                    icon: Icon(Icons.more_vert)),
+                                    icon: Icon(Icons.cloud_sync)),
                                 SizedBox(width: 8),
                               ],
                             ),

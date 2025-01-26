@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rank_hub/src/model/maimai/song_info.dart';
 import 'package:rank_hub/src/model/maimai/song_score.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
@@ -9,7 +10,16 @@ import 'package:rank_hub/src/view/maimai/song_detail_screen.dart';
 import 'package:rank_hub/src/widget/record_card.dart';
 
 class LxMaiRecordCard extends RecordCard<SongScore> {
-  const LxMaiRecordCard({super.key, required super.recordData});
+  LxMaiRecordCard({super.key, required super.recordData});
+
+    // Map level index to its corresponding prefix
+    final levelPrefixes = [
+      "BASIC", // 0
+      "ADVANCED", // 1
+      "EXPERT", // 2
+      "MASTER", // 3
+      "Re:MASTER", // 4
+    ];
 
   // Method to get level index color based on the level index
   Color _getLevelColor(int levelIndex) {
@@ -94,6 +104,31 @@ class LxMaiRecordCard extends RecordCard<SongScore> {
     }
   }
 
+  void _showActionSheet(BuildContext context) {
+    HapticFeedback.mediumImpact();
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text('成绩操作'),
+        message: Text('点击下方按钮修改 ${recordData.songName} ${levelPrefixes[recordData.levelIndex]} 的成绩'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('修改',),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('取消'),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Split achievements into integer and decimal parts
@@ -101,15 +136,6 @@ class LxMaiRecordCard extends RecordCard<SongScore> {
         recordData.achievements.toStringAsFixed(4).split('.');
     final intPart = achievementsParts[0];
     final decimalPart = achievementsParts[1];
-
-    // Map level index to its corresponding prefix
-    final levelPrefixes = [
-      "BASIC", // 0
-      "ADVANCED", // 1
-      "EXPERT", // 2
-      "MASTER", // 3
-      "Re:MASTER", // 4
-    ];
 
     final levelPrefix = levelPrefixes[recordData.levelIndex];
 
@@ -123,6 +149,9 @@ class LxMaiRecordCard extends RecordCard<SongScore> {
               fetchData: () async =>
                   await LxApiService.getSongDataById(recordData.id),
               builder: (song) => SongDetailScreen(song: song));
+        },
+        onLongPress: () {
+          _showActionSheet(context);
         },
         child: Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

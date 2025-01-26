@@ -2,7 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rank_hub/src/model/mai_song_filter_data.dart';
+import 'package:rank_hub/src/model/mai_types.dart';
 import 'package:rank_hub/src/model/maimai/player_data.dart';
+import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
 import 'package:rank_hub/src/model/maimai/song_info.dart';
 import 'package:rank_hub/src/model/maimai/song_score.dart';
 import 'package:rank_hub/src/pages/add_lx_mai_screen.dart';
@@ -15,7 +18,8 @@ import 'package:rank_hub/src/provider/player_manager.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
 
-class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo> {
+class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
+    MaiSongFilterData> {
   late PlayerManager _playerManager;
   late LxApiService _lxApiService;
 
@@ -26,10 +30,9 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo> 
     _lxApiService = LxApiService(_playerManager, this);
 
     lxApiService.getAllPlayerUUID().then((players) => {
-      for (String playerUUID in players) {
-        _playerManager.addPlayer(playerUUID, getProviderName())
-      }
-    });
+          for (String playerUUID in players)
+            {_playerManager.addPlayer(playerUUID, getProviderName())}
+        });
   }
   @override
   Future<PlayerData> addPlayer(String? token) async {
@@ -123,7 +126,7 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo> 
 
   @override
   Widget buildRecordList() {
-    return MaiRankPage();
+    return const MaiRankPage();
   }
 
   @override
@@ -138,7 +141,7 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo> 
 
   @override
   Widget buildSongList() {
-    return WikiPage();
+    return const WikiPage();
   }
 
   @override
@@ -174,9 +177,11 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo> 
   }
 
   @override
-  Future<Map<String, List<SongScore>>> getRankedRecords() {
-    // TODO: implement getRankedRecords
-    throw UnimplementedError();
+  Future<Map<String, List<SongScore>>> getRankedRecords() async {
+    return {
+      'B15': await lxApiService.getB15Records(),
+      'B35': await lxApiService.getB35Records(),
+    };
   }
 
   @override
@@ -189,7 +194,95 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo> 
     // TODO: implement getSongDetail
     throw UnimplementedError();
   }
-  
+
+  @override
+  Future<List<SongScore>> filterRecords(MaiSongFilterData filterData) async {
+    // Pre-fetch data
+    final songs = await getAllSongs();
+    final records = await getRecords();
+
+    // Return early if no filters are applied
+    if (filterData.areAllValuesNull) {
+      return records;
+    }
+
+    // Convert filter data into efficient lookup sets/maps
+    final levelIndexSet = filterData.levelIndex?.map((e) => e.value).toSet();
+    final genreSet = filterData.genre?.map((e) => e.genre).toSet();
+    final versionSet = filterData.version?.map((e) => e.version).toSet();
+    final fcTypeSet = filterData.fcType?.map((e) => e.value).toSet();
+    final fsTypeSet = filterData.fsType?.map((e) => e.value).toSet();
+    final levelValueStart = filterData.levelValueRange?.start;
+    final levelValueEnd = filterData.levelValueRange?.end;
+    final uploadTimeStart = filterData.uploadTimeRange?.start;
+    final uploadTimeEnd = filterData.uploadTimeRange?.end;
+
+    // Pre-filter songs based on genre and version
+    final preFilteredSongIds = songs
+        .where((song) =>
+            (genreSet == null || genreSet.contains(song.genre)) &&
+            (versionSet == null || versionSet.contains(song.version)))
+        .map((song) => song.id)
+        .toSet();
+
+    // Filter records based on song and record-specific criteria
+    return records.where((record) {
+      // Check if the song ID matches pre-filtered IDs
+      if (!preFilteredSongIds.contains(record.id)) {
+        return false;
+      }
+
+      // Check level index
+      if (levelIndexSet != null && !levelIndexSet.contains(record.levelIndex)) {
+        return false;
+      }
+
+      // Retrieve the corresponding song and difficulties
+      final song = songs.firstWhere((song) => song.id == record.id);
+      final difficulties = song.difficulties;
+      final recordType = record.type;
+
+      // Helper function for level value filtering
+      bool isLevelValueOutOfRange(List<SongDifficulty>? diffs) {
+        if (diffs == null) return false;
+        return diffs.any((diff) =>
+            diff.difficulty == record.levelIndex &&
+            ((levelValueStart != null && diff.levelValue < levelValueStart) ||
+                (levelValueEnd != null && diff.levelValue > levelValueEnd)));
+      }
+
+      // Check level value range based on record type
+      if (recordType == SongType.dx.value &&
+              isLevelValueOutOfRange(difficulties.dx) ||
+          recordType == SongType.standard.value &&
+              isLevelValueOutOfRange(difficulties.standard) ||
+          recordType == SongType.utage.value &&
+              isLevelValueOutOfRange(difficulties.utage)) {
+        return false;
+      }
+
+      // Check upload time
+      if (uploadTimeStart != null && uploadTimeEnd != null) {
+        final uploadTime = record.uploadTime != null
+            ? DateTime.tryParse(record.uploadTime!)
+            : null;
+        if (uploadTime == null ||
+            uploadTime.isBefore(uploadTimeStart) ||
+            uploadTime.isAfter(uploadTimeEnd)) {
+          return false;
+        }
+      }
+
+      // Check FC type and FS type
+      if ((fcTypeSet != null && !fcTypeSet.contains(record.fc)) ||
+          (fsTypeSet != null && !fsTypeSet.contains(record.fs))) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+  }
+
   @override
   Future<List<SongInfo>> searchSongs(String query) async {
     final aliases = await _lxApiService.getAliasList();

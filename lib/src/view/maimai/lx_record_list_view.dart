@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 import 'package:rank_hub/src/model/mai_types.dart';
 import 'package:rank_hub/src/model/maimai/song_genre.dart';
@@ -37,21 +38,30 @@ class LxMaiRecordList extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            const Icon(Icons.error,
+                                size: 48, color: Colors.grey),
                             const Text(
                               'Failed to load records',
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               viewModel.errorMessage,
-                              style: const TextStyle(
-                                  fontSize: 14, color: Colors.red),
+                              style: const TextStyle(fontSize: 14),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 32),
                             ElevatedButton(
                               onPressed: () =>
                                   viewModel.fetchRecords(force: true),
-                              child: const Text('Retry'),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.refresh),
+                                  SizedBox(width: 8),
+                                  Text('Retry'),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -59,38 +69,64 @@ class LxMaiRecordList extends StatelessWidget {
                     );
                   }
 
-                  if (viewModel.filteredScores.isEmpty) {
+                  if (viewModel.getRecordsList().isEmpty) {
                     return const Center(
-                      child: Text(
-                        'No records found',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    );
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 48,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          '没有找到符合条件的记录',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          '请尝试更改过滤条件和搜索关键字',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ));
                   }
 
+                  final items = viewModel.getRecordsList();
+
                   return RefreshIndicator(
-                    edgeOffset: 176,
-                    onRefresh: () => viewModel.fetchRecords(force: true),
-                    child: GridView.builder(
-                      controller: viewModel.scrollController,
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        mainAxisExtent: 240,
-                        maxCrossAxisExtent: 600, // 每个项目的最大宽度
-                        crossAxisSpacing: 8, // 网格之间的横向间距
-                        mainAxisSpacing: 8, // 网格之间的纵向间距
-                        childAspectRatio: 1.8,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 176),
-                      itemCount: viewModel.filteredScores.length,
-                      itemBuilder: (context, index) {
-                        return LxMaiRecordCard(
-                          recordData: viewModel.filteredScores[index],
-                        );
-                      },
-                    ),
-                  );
+                      edgeOffset: 176,
+                      onRefresh: () => viewModel.fetchRecords(force: true),
+                      child: AnimationLimiter(
+                        child: ListView.builder(
+                          controller: viewModel.scrollController,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 176),
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            return AnimationConfiguration.staggeredList(
+                                position: index,
+                                child: SizedBox(
+                                    height: 240,
+                                    child: SlideAnimation(
+                                      delay: const Duration(milliseconds: 100),
+                                      duration: const Duration(milliseconds: 300),
+                                      verticalOffset: 100.0,
+                                      child: FadeInAnimation(
+                                        delay: const Duration(milliseconds: 100),
+                                        duration: const Duration(milliseconds: 300),
+                                        child: ScaleAnimation(child: LxMaiRecordCard(
+                                          recordData: items[index],
+                                        ),
+                                      ),
+                                    ))));
+                          },
+                        ),
+                      ));
                 },
               ),
               bottomNavigationBar: SafeArea(
@@ -131,7 +167,7 @@ class _RankFilterBar extends StatelessWidget {
                 child: BottomAppBar(
                     color: Theme.of(context)
                         .scaffoldBackgroundColor
-                        .withOpacity(0.9),
+                        .withOpacity(0.95),
                     surfaceTintColor: Colors.transparent,
                     child: OverflowBox(
                       maxHeight: 144,
@@ -160,7 +196,7 @@ class _RankFilterBar extends StatelessWidget {
                                   children: [
                                     TextButton(
                                         onPressed: viewModel.resetFilter,
-                                        child: Row(children: [
+                                        child: const Row(children: [
                                           Icon(Icons.refresh),
                                           SizedBox(
                                             width: 4,
@@ -173,18 +209,19 @@ class _RankFilterBar extends StatelessWidget {
                                       label: Row(
                                         children: [
                                           Text(viewModel.getLevelIndexText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
                                     ActionChip(
-                                      onPressed: viewModel.openGenreMultiSelectDialog,
+                                      onPressed:
+                                          viewModel.openGenreMultiSelectDialog,
                                       label: Row(
                                         children: [
                                           Text(viewModel.getGenreText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down),
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down),
                                         ],
                                       ),
                                     ),
@@ -194,8 +231,8 @@ class _RankFilterBar extends StatelessWidget {
                                       label: Row(
                                         children: [
                                           Text(viewModel.getVersionText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
@@ -205,8 +242,8 @@ class _RankFilterBar extends StatelessWidget {
                                       label: Row(
                                         children: [
                                           Text(viewModel.getDateRangeText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
@@ -217,8 +254,8 @@ class _RankFilterBar extends StatelessWidget {
                                         children: [
                                           Text(viewModel
                                               .getLevelValueRangeText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
@@ -228,8 +265,8 @@ class _RankFilterBar extends StatelessWidget {
                                       label: Row(
                                         children: [
                                           Text(viewModel.getFCTypeText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
@@ -239,18 +276,19 @@ class _RankFilterBar extends StatelessWidget {
                                       label: Row(
                                         children: [
                                           Text(viewModel.getFSTypeText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
                                     ActionChip(
-                                      onPressed: viewModel.openSongTypeMultiSelectDialog,
+                                      onPressed: viewModel
+                                          .openSongTypeMultiSelectDialog,
                                       label: Row(
                                         children: [
                                           Text(viewModel.getSongTypeText()),
-                                          SizedBox(width: 8),
-                                          Icon(Icons.arrow_drop_down)
+                                          const SizedBox(width: 8),
+                                          const Icon(Icons.arrow_drop_down)
                                         ],
                                       ),
                                     ),
@@ -295,7 +333,7 @@ class _LevelValueRangeSliderDialogState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Text(
                   '当前范围: ${_currentRange.start.toStringAsFixed(1)} - ${_currentRange.end.toStringAsFixed(1)}'),
               RangeSlider(
@@ -594,8 +632,6 @@ class _VersionMultiSelectDialogState extends State<VersionMultiSelectDialog> {
   }
 }
 
-
-
 class GenreMultiSelectDialog extends StatefulWidget {
   final List<SongGenre> initialSelected;
   final List<SongGenre> genres;
@@ -607,8 +643,7 @@ class GenreMultiSelectDialog extends StatefulWidget {
   });
 
   @override
-  State<GenreMultiSelectDialog> createState() =>
-      _GenreMultiSelectDialogState();
+  State<GenreMultiSelectDialog> createState() => _GenreMultiSelectDialogState();
 }
 
 class _GenreMultiSelectDialogState extends State<GenreMultiSelectDialog> {

@@ -1,17 +1,22 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
+import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:marquee/marquee.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rank_hub/src/model/maimai/song_info.dart';
-import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/view/maimai/lx_level_view.dart';
 import 'package:rank_hub/src/widget/difficulty_card/mai_difficulty_card.dart';
 import 'package:rank_hub/src/widget/song_info_list/mai_song_info_list.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SongDetailScreen extends StatefulWidget {
   const SongDetailScreen({super.key, required this.song});
@@ -121,6 +126,114 @@ class _SongDetailScreenState extends State<SongDetailScreen>
     });
   }
 
+  Future<void> shareSong() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+    ShareResult? result;
+    if (Platform.isAndroid) {
+      result = await Share.share(
+          '我正在查看 ${widget.song.title} 的乐曲信息，访问 https://maimai.lxns.net/songs?game=maimai&song_id=${widget.song.id} 或复制本条消息并打开 RankHub 查看',
+          subject: '${widget.song.title} - 乐曲信息');
+    } else if (Platform.isIOS) {
+      result = await Share.shareUri(Uri.parse(
+          'https://maimai.lxns.net/songs?game=maimai&song_id=${widget.song.id}'));
+    }
+    if (result == null || !context.mounted) return;
+
+    Navigator.pop(context);
+
+    if (result.status == ShareResultStatus.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分享成功'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+    if (result.status == ShareResultStatus.unavailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分享失败'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    if (result.status == ShareResultStatus.dismissed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分享已取消'),
+        ),
+      );
+    }
+  }
+
+  Future<void> shareCover() async {
+    HapticFeedback.mediumImpact();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    Dio dio = Dio();
+    Directory tempDir = await getTemporaryDirectory();
+    if(!File('${tempDir.path}/${widget.song.id}.png').existsSync()) {
+      try {
+        await dio.download(
+          'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png',
+          '${tempDir.path}/${widget.song.id}.png',
+        );
+      } catch (e) {
+        _showSnackbar('发生错误: $e');
+        Navigator.pop(context);
+        return;
+      }
+    }
+
+    ShareResult result = await Share.shareXFiles(
+        [XFile('${tempDir.path}/${widget.song.id}.png')],
+        subject: '${widget.song.title} - 曲绘');
+    if (!context.mounted) return;
+
+    Navigator.pop(context);
+
+    if (result.status == ShareResultStatus.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分享成功'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+    if (result.status == ShareResultStatus.unavailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分享失败'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    if (result.status == ShareResultStatus.dismissed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分享已取消'),
+        ),
+      );
+    }
+  }
+
   void _playPauseAudio() async {
     if (_isPlaying) {
       await _audioPlayer.pause();
@@ -157,7 +270,7 @@ class _SongDetailScreenState extends State<SongDetailScreen>
       SnackBar(
         content: Text(
           message,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 2),
@@ -184,70 +297,104 @@ class _SongDetailScreenState extends State<SongDetailScreen>
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              primary: true,
-              titleSpacing: 0,
-              stretch: true,
-              forceElevated: true,
-              centerTitle: false,
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              surfaceTintColor: Colors.transparent,
-              title: Opacity(
-                  opacity: _titleOpacity,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(10),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(4), // Rounded corners
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png',
-                        width: 32,
-                        height: 32,
-                        fit: BoxFit.cover,
-                        fadeInDuration: const Duration(
-                            milliseconds: 500), // Fade-in duration
-                        placeholder: (context, url) => Transform.scale(
-                          scale: 0.4,
-                          child: const CircularProgressIndicator(),
+                primary: true,
+                titleSpacing: 0,
+                stretch: true,
+                forceElevated: true,
+                centerTitle: false,
+                backgroundColor: Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withValues(alpha: 0.95),
+                surfaceTintColor: Colors.transparent,
+                title: Opacity(
+                    opacity: _titleOpacity,
+                    child: ListTile(
+                      visualDensity: VisualDensity.compact,
+                      isThreeLine: false,
+                      contentPadding: const EdgeInsets.all(10),
+                      leading: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(4), // Rounded corners
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png',
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.cover,
+                          fadeInDuration: const Duration(
+                              milliseconds: 500), // Fade-in duration
+                          placeholder: (context, url) => Transform.scale(
+                            scale: 0.4,
+                            child: const CircularProgressIndicator(),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              const Icon(Icons.image_not_supported),
                         ),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.image_not_supported),
+                      ),
+                      title: Text(
+                        widget.song.title,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.fade,
+                      ),
+                      subtitle: Text(
+                        widget.song.artist,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.fade,
+                      ),
+                    )),
+                actions: [
+                  IconButton(
+                    onPressed: shareSong,
+                    icon: const Icon(Icons.share),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                expandedHeight: 300.0,
+                pinned: true,
+                flexibleSpace: Stack(fit: StackFit.expand, children: [
+                  ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                      child: Container(
+                        color: Colors.transparent,
                       ),
                     ),
-                    title: Text(
-                      widget.song.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.fade,
+                  ),
+                  FlexibleSpaceBar(
+                    stretchModes: const [StretchMode.blurBackground],
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        GestureDetector(
+                            onLongPress: shareCover,
+                            onTap: () {
+                              showImageViewer(
+                                  context,
+                                  doubleTapZoomable: true,
+                                  swipeDismissible: true,
+                                  useSafeArea: true,
+                                  CachedNetworkImageProvider(
+                                      'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png'));
+                            },
+                            child: Opacity(
+                              opacity: 0.5,
+                              child: CachedNetworkImage(
+                                imageUrl:
+                                    'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png',
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator()),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.image_not_supported),
+                              ),
+                            )),
+                        buildExtentedContent(),
+                      ],
                     ),
-                    subtitle: Text(
-                      widget.song.artist,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  )),
-              expandedHeight: 300.0,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                stretchModes: const [StretchMode.blurBackground],
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Opacity(
-                      opacity: 0.5,
-                      child: CachedNetworkImage(
-                        imageUrl:
-                            'https://assets2.lxns.net/maimai/jacket/${widget.song.id}.png',
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            const Center(child: CircularProgressIndicator()),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.image_not_supported),
-                      ),
-                    ),
-                    buildExtentedContent(),
-                  ],
-                ),
-              ),
-            ),
+                  ),
+                ])),
             SliverPersistentHeader(
               pinned: true,
               delegate: _SliverTabDelegate(
@@ -269,7 +416,7 @@ class _SongDetailScreenState extends State<SongDetailScreen>
           children: [
             MaiSongInfoList(song: widget.song, version: _version),
             SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 children: [
                   const SizedBox(height: 32),
@@ -472,16 +619,14 @@ class _SliverTabDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Material(
-      color: (Theme.of(context).scaffoldBackgroundColor).withOpacity(0.6),
-      child: ClipRect(
-        clipBehavior: Clip.antiAlias,
+    return ClipRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: _tabBar,
-        ),
-      ),
-    );
+            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            child: Material(
+              color: (Theme.of(context).scaffoldBackgroundColor)
+                  .withValues(alpha: 0.95),
+              child: _tabBar,
+            )));
   }
 
   @override

@@ -96,7 +96,7 @@ class _MainPageState extends State<MainPage> {
               filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
               child: NavigationBar(
                 backgroundColor:
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+                    Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.95),
                 destinations: _navItems,
                 selectedIndex: _selectedIndex,
                 onDestinationSelected: _onNavItemTapped,
@@ -110,9 +110,9 @@ class _MainPageState extends State<MainPage> {
                   opacity: _selectedIndex == entry.key ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: AnimatedScale(
-                    scale: _selectedIndex == entry.key ? 1.0 : 0.99,
+                    scale: _selectedIndex == entry.key ? 1.0 : 0.995,
                     duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOutExpo,
+                    curve: Curves.easeInOut,
                     child: IgnorePointer(
                         ignoring: _selectedIndex != entry.key,
                         child: entry.value),

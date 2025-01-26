@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
-abstract class DataSourceProvider<R, P, S> {
+abstract class DataSourceProvider<R, P, S, F> {
   Widget buildOverviewCard();
 
   Widget buildRecordCard(R recordData);
@@ -44,6 +44,8 @@ abstract class DataSourceProvider<R, P, S> {
   Future<P> addPlayer(String? token);
 
   Future<void> deletePlayer();
+
+  Future<List<R>> filterRecords(F filterData);
 
   Future<dynamic>? updateRecord() {
     return null;

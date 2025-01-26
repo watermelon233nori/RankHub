@@ -45,7 +45,6 @@ class _MaiPlayerCardState extends State<MaiPlayerCard> {
                 clipBehavior: Clip.hardEdge,
                 child: Stack(
                   children: [
-                    // 背景容器，显示牌面图和渐变效果
                     Positioned.fill(
                       child: ShaderMask(
                         shaderCallback: (bounds) => LinearGradient(
@@ -75,7 +74,7 @@ class _MaiPlayerCardState extends State<MaiPlayerCard> {
                     ListTile(
                       contentPadding: const EdgeInsets.all(8.0),
                       leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(4),
                         child: CachedNetworkImage(
                           imageUrl:
                               'https://assets.lxns.net/maimai/icon/${player.icon?.id}.png',

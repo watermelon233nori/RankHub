@@ -59,7 +59,7 @@ class _LxMaiLevelViewState extends State<LxMaiLevelView> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor:
-            Theme.of(context).scaffoldBackgroundColor.withOpacity(0.8),
+            Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.8),
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
         title: Column(

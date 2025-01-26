@@ -22,7 +22,7 @@ class WikiPage extends StatelessWidget {
               extendBodyBehindAppBar: true,
               appBar: AppBar(
                 backgroundColor:
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
                 surfaceTintColor: Colors.transparent,
                 centerTitle: false,
                 flexibleSpace: ClipRRect(
@@ -43,11 +43,18 @@ class WikiPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(1),
+                    child: Container(
+                      color: Colors.grey.withOpacity(0.1),
+                      height: 1,
+                    )),
                 actions: [
                   IconButton(
                     onPressed: () {},
                     icon: const Icon(Icons.more_vert),
                   ),
+                  SizedBox(width: 8),
                 ],
               ),
               body: viewModel.isLoading && viewModel.songs.isEmpty
@@ -74,7 +81,7 @@ class WikiPage extends StatelessWidget {
                           ),
                         )
                       : RefreshIndicator(
-                        edgeOffset: 128,
+                          edgeOffset: 128,
                           onRefresh: () => viewModel.fetchSongs(force: true),
                           child: LxMaiSongList(
                             provider: LxMaiProvider(context: context),
@@ -84,7 +91,7 @@ class WikiPage extends StatelessWidget {
                         ),
               floatingActionButton: SafeArea(
                   child: FloatingActionButton(
-                    heroTag: "lslvfb",
+                heroTag: "lslvfb",
                 onPressed: null,
                 tooltip: '曲绘识别',
                 elevation: viewModel.isVisible ? 0.0 : null,
@@ -128,7 +135,7 @@ class _SongFliterBar extends StatelessWidget {
             child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: BottomAppBar(
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
             elevation: isElevated ? null : 0.0,
             child: Row(
               children: <Widget>[
