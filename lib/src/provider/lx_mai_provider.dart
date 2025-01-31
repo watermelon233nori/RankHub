@@ -185,8 +185,8 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
   }
 
   @override
-  Future<List<SongScore>> getRecords({bool forceRefresh = false}) {
-    return lxApiService.getRecordList(forceRefresh: forceRefresh);
+  Future<List<SongScore>> getRecords({bool forceRefresh = false, String? uuid}) {
+    return lxApiService.getRecordList(forceRefresh: forceRefresh, uuid: uuid);
   }
 
   @override

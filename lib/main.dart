@@ -4,7 +4,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:rank_hub/src/model/maimai/collection.dart' as mai;
 import 'package:rank_hub/src/model/maimai/game_data.dart' as mai;
-import 'package:rank_hub/src/model/maimai/mai_cover_feature.dart';
 import 'package:rank_hub/src/model/maimai/player_data.dart' as mai;
 import 'package:rank_hub/src/model/maimai/song_alias.dart' as mai;
 import 'package:rank_hub/src/model/maimai/song_difficulties.dart' as mai;
@@ -70,5 +69,4 @@ Future<void> initHive() async {
   Hive.registerAdapter(mai.GameDataAdapter());
   Hive.registerAdapter(mai.PlayerDataAdapter());
   Hive.registerAdapter(mai.CollectionAdapter());
-  Hive.registerAdapter(MaiCoverFeatureAdapter());
 }

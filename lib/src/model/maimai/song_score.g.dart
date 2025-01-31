@@ -30,13 +30,14 @@ class SongScoreAdapter extends TypeAdapter<SongScore> {
       type: fields[10] as String,
       playTime: fields[11] as String?,
       uploadTime: fields[12] as String?,
+      lastPlayedTime: fields[13] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, SongScore obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -62,7 +63,9 @@ class SongScoreAdapter extends TypeAdapter<SongScore> {
       ..writeByte(11)
       ..write(obj.playTime)
       ..writeByte(12)
-      ..write(obj.uploadTime);
+      ..write(obj.uploadTime)
+      ..writeByte(13)
+      ..write(obj.lastPlayedTime);
   }
 
   @override

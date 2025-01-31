@@ -46,11 +46,11 @@ class LxApiService {
   String get _currentPlayerBoxName => 'scoreBox_$_currentUuid';
 
   // 获取当前玩家的 Record 列表
-  Future<List<SongScore>> getRecordList({bool forceRefresh = false}) async {
-    final scoreBox = await Hive.openBox<SongScore>(_currentPlayerBoxName);
+  Future<List<SongScore>> getRecordList({bool forceRefresh = false, String? uuid}) async {
+    final scoreBox = await Hive.openBox<SongScore>(uuid != null? 'scoreBox_$uuid' : _currentPlayerBoxName);
     final playerDataBox = await Hive.openBox<PlayerData>('playerData');
     final cacheInfoBox = await Hive.openBox<DateTime>('cacheInfo');
-    final lastCacheTime = cacheInfoBox.get('SongScoreCacheTime_$_currentUuid');
+    final lastCacheTime = cacheInfoBox.get(uuid != null? 'SongScoreCacheTime_$uuid' : 'SongScoreCacheTime_$_currentUuid');
 
     if (!forceRefresh &&
         LxCommonUtils.isCacheValid(lastCacheTime, scoreCacheDuration)) {
@@ -141,6 +141,15 @@ class LxApiService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  static Future<List<SongScore>> getRecentRecords(String friendCode) async {
+    final result = await LxCommonUtils.fetchMeow0Data('/maimai/player/$friendCode/recents');
+    final data = result['data'] ?? [];
+
+    List<SongScore> recents = data.map<SongScore>((json) => SongScore.fromLxJson(json)).toList();
+
+    return recents;
   }
 
   Future<void> saveToken(String uuid, String token) async {

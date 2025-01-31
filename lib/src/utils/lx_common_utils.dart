@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 
 class LxCommonUtils {
   static const baseUrl = 'https://maimai.lxns.net/api/v0';
+  static const meow0Url = 'https://lx-api.meow0.fun';
 
   static final Dio _dio = Dio();
 
@@ -29,6 +30,26 @@ class LxCommonUtils {
         baseUrl + endpoint,
         queryParameters: queryParameters,
         options: Options(headers: headers),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to fetch data');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  static Future<dynamic> fetchMeow0Data(
+    String endpoint, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      final response = await _dio.get(
+        meow0Url + endpoint,
+        queryParameters: queryParameters,
       );
 
       if (response.statusCode == 200) {

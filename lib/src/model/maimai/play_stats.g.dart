@@ -1,41 +1,32 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'mai_cover_key_point.dart';
+part of 'play_stats.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class MaiCoverKeyPointAdapter extends TypeAdapter<MaiCoverKeyPoint> {
+class PlayStatsAdapter extends TypeAdapter<PlayStats> {
   @override
-  final int typeId = 31;
+  final int typeId = 70;
 
   @override
-  MaiCoverKeyPoint read(BinaryReader reader) {
+  PlayStats read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return MaiCoverKeyPoint(
-      x: fields[0] as double,
-      y: fields[1] as double,
-      size: fields[2] as double,
-      angle: fields[3] as double,
+    return PlayStats(
+      stats: (fields[0] as Map).cast<DateTime, int>(),
     );
   }
 
   @override
-  void write(BinaryWriter writer, MaiCoverKeyPoint obj) {
+  void write(BinaryWriter writer, PlayStats obj) {
     writer
-      ..writeByte(4)
-      ..writeByte(0)
-      ..write(obj.x)
       ..writeByte(1)
-      ..write(obj.y)
-      ..writeByte(2)
-      ..write(obj.size)
-      ..writeByte(3)
-      ..write(obj.angle);
+      ..writeByte(0)
+      ..write(obj.stats);
   }
 
   @override
@@ -44,7 +35,7 @@ class MaiCoverKeyPointAdapter extends TypeAdapter<MaiCoverKeyPoint> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MaiCoverKeyPointAdapter &&
+      other is PlayStatsAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

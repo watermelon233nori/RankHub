@@ -43,6 +43,9 @@ class SongScore {
   @HiveField(12)
   final String? uploadTime;
 
+  @HiveField(13)
+  final String? lastPlayedTime;
+
   SongScore({
     required this.id,
     this.songName,
@@ -57,6 +60,7 @@ class SongScore {
     required this.type,
     this.playTime,
     this.uploadTime,
+    this.lastPlayedTime,
   });
 
   factory SongScore.fromLxJson(Map<String, dynamic> json) {
@@ -74,6 +78,7 @@ class SongScore {
       type: json['type'],
       playTime: json['play_time'],
       uploadTime: json['upload_time'],
+      lastPlayedTime: json['last_played_time'],
     );
   }
 }

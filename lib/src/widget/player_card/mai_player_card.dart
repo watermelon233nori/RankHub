@@ -1,7 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart'; // 引入玩家数据模型
+import 'package:rank_hub/src/model/maimai/player_data.dart';
+import 'package:rank_hub/src/view/maimai/lx_player_detail_view.dart'; // 引入玩家数据模型
 
 class MaiPlayerCard extends StatefulWidget {
   const MaiPlayerCard({super.key});
@@ -41,7 +42,13 @@ class _MaiPlayerCardState extends State<MaiPlayerCard> {
             itemCount: players.length,
             itemBuilder: (context, index) {
               final player = players[index];
-              return Card(
+              return GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return LxPlayerDetailView(player: player);
+                    }));
+                  },
+                child: Card(
                 clipBehavior: Clip.hardEdge,
                 child: Stack(
                   children: [
@@ -95,7 +102,7 @@ class _MaiPlayerCardState extends State<MaiPlayerCard> {
                     ),
                   ],
                 ),
-              );
+              ));
             },
           );
         },
