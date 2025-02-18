@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rank_hub/src/pages/add_lx_mai_screen.dart';
+import 'package:rank_hub/src/pages/add_moe_md_screen.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 
 class AddPlayerScreen extends StatefulWidget {
@@ -62,7 +63,36 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
               title: Text('落雪咖啡屋'),
               subtitle: Text('maimai.lxns.net'),
               trailing: Icon(Icons.arrow_forward_ios_rounded),
-            )
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AddMoeMdScreen(provider: LxMaiProvider(context: context)),
+                ),
+              );
+              },
+              leading: CachedNetworkImage(
+                imageUrl: 'https://musedash.moe/img/icons/android-chrome-512x512.png',
+                width: 36,
+                height: 36,
+                fit: BoxFit.cover,
+                fadeInDuration:
+                    const Duration(milliseconds: 500), // Fade-in duration
+                placeholder: (context, url) => Transform.scale(
+                  scale: 0.4,
+                  child: const CircularProgressIndicator(),
+                ),
+                errorWidget: (context, url, error) => const Icon(
+                  Icons.image_not_supported,
+                  size: 16,
+                ),
+              ),
+              title: Text('MuseDash.moe'),
+              subtitle: Text('musedash.moe'),
+              trailing: Icon(Icons.arrow_forward_ios_rounded),
+            ),
           ],
         ),
       ),

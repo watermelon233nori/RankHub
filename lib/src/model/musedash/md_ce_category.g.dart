@@ -1,32 +1,35 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'play_stats.dart';
+part of 'md_ce_category.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class PlayStatsAdapter extends TypeAdapter<PlayStats> {
+class MdCECategoryAdapter extends TypeAdapter<MdCECategory> {
   @override
-  final int typeId = 70;
+  final int typeId = 35;
 
   @override
-  PlayStats read(BinaryReader reader) {
+  MdCECategory read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return PlayStats(
-      stats: (fields[0] as Map).cast<DateTime, int>(),
+    return MdCECategory(
+      category: fields[0] as String,
+      names: fields[1] as MdCENames,
     );
   }
 
   @override
-  void write(BinaryWriter writer, PlayStats obj) {
+  void write(BinaryWriter writer, MdCECategory obj) {
     writer
-      ..writeByte(1)
+      ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.stats);
+      ..write(obj.category)
+      ..writeByte(1)
+      ..write(obj.names);
   }
 
   @override
@@ -35,7 +38,7 @@ class PlayStatsAdapter extends TypeAdapter<PlayStats> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PlayStatsAdapter &&
+      other is MdCECategoryAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

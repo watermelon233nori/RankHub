@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rank_hub/src/model/maimai/player_data.dart';
@@ -69,7 +70,7 @@ class _PlayerSwitchPageState extends State<PlayerSwitchPage> {
                       value: player.uuid,
                       onChanged: (value) {
                         playerManager.switchActivePlayer(value!);
-                        Navigator.pop(context);
+                        CupertinoSheetRoute.popSheet(context);
                       },
                       contentPadding: const EdgeInsets.all(8.0),
                       title: Text(player.name), // 玩家姓名

@@ -8,7 +8,7 @@ import 'package:rank_hub/src/services/lx_api_services.dart';
 class LxMaiPlayHeatMap extends StatefulWidget {
   final PlayerData playerData;
 
-  const LxMaiPlayHeatMap({Key? key, required this.playerData}) : super(key: key);
+  const LxMaiPlayHeatMap({super.key, required this.playerData});
 
   @override
   _LxMaiPlayHeatMapState createState() => _LxMaiPlayHeatMapState();
@@ -18,113 +18,191 @@ class _LxMaiPlayHeatMapState extends State<LxMaiPlayHeatMap> {
   late Box<Map<dynamic, dynamic>> heatmapBox;
   late Box<DateTime> lastUpdateBox;
 
+  int totalPlayCount = 0;
+
   @override
   void initState() {
     super.initState();
-    _initHive();
+    _initHive().then((_) {
+      _updateTotalPlayCount();
+    });
   }
 
   Future<void> _initHive() async {
-    await Hive.initFlutter();
     heatmapBox = await Hive.openBox<Map<dynamic, dynamic>>('playStatsData');
+    lastUpdateBox = await Hive.openBox<DateTime>('lastUpdate');
     setState(() {}); // 触发 UI 更新
   }
 
+  Future<void> _updateTotalPlayCount() async {
+    Map<DateTime, int> processedData = await _loadAndProcessData();
+
+    int newTotalPlayCount =
+        processedData.values.fold(0, (sum, count) => sum + count);
+
+    setState(() {
+      totalPlayCount = newTotalPlayCount;
+    });
+  }
+
   Future<Map<DateTime, int>> _loadAndProcessData() async {
-    // 读取 Hive 现有数据
-    Map<DateTime, int> existingData = {};
+    Map<DateTime, List<DateTime>> existingData = {};
     if (heatmapBox.isNotEmpty) {
-      existingData = heatmapBox.get(widget.playerData.uuid)?.map(
-            (key, value) => MapEntry(DateTime.parse(key), value),
-          ) ?? {};
+      existingData = (heatmapBox.get(widget.playerData.uuid))?.map(
+              (key, value) =>
+                  MapEntry(DateTime.parse(key), List<DateTime>.from(value))) ??
+          {};
     }
 
-    DateTime? lastUpdate = lastUpdateBox.get('HeatMapLastUpdate_${widget.playerData.uuid}');
+    DateTime? lastUpdate =
+        lastUpdateBox.get('HeatMapLastUpdate_${widget.playerData.uuid}');
     if (lastUpdate != null && lastUpdate.day == DateTime.now().day) {
-      return existingData;
+      return _convertToDailyCount(existingData);
     }
 
+    List<SongScore> records = await LxApiService.getRecentRecords(
+        widget.playerData.friendCode.toString());
+    if (records.isEmpty) return _convertToDailyCount(existingData);
 
-    // 获取数据
-    List<SongScore> records = await LxApiService.getRecentRecords(widget.playerData.friendCode.toString());
-    if (records.isEmpty) return existingData;
-
-    // 计算最晚日期（如果有数据）
     DateTime? latestDate;
     if (existingData.isNotEmpty) {
       latestDate = existingData.keys.reduce((a, b) => a.isAfter(b) ? a : b);
-      existingData.remove(latestDate); // 先删除该日期的数据
     }
 
-    // 统计新数据
-    Map<DateTime, int> newData = {};
+    Map<DateTime, List<DateTime>> newData = {};
     for (var record in records) {
       if (record.playTime == null) continue;
-      DateTime date = DateTime.parse(record.playTime!).toLocal();
-      DateTime key = DateTime(date.year, date.month, date.day); // 仅保留日期
 
-      // 只统计比 latestDate 更新的数据
-      if (latestDate == null || key.isAfter(latestDate) || key == latestDate) {
-        newData.update(key, (count) => count + 1, ifAbsent: () => 1);
+      DateTime dateTime = DateTime.parse(record.playTime!).toLocal();
+      DateTime date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+      if (latestDate == null ||
+          date.isAfter(latestDate) ||
+          date == latestDate) {
+        newData.update(date, (list) => list..add(dateTime),
+            ifAbsent: () => [dateTime]);
       }
     }
 
-    // 合并数据并存入 Hive
-    existingData.addAll(newData);
+    // 合并数据
+    newData.forEach((date, times) {
+      existingData.update(date, (list) => list..addAll(times),
+          ifAbsent: () => times);
+    });
+
     await heatmapBox.put(
       widget.playerData.uuid,
       existingData.map((key, value) => MapEntry(key.toIso8601String(), value)),
     );
 
-    return existingData;
+    await lastUpdateBox.put(
+        'HeatMapLastUpdate_${widget.playerData.uuid}', DateTime.now());
+
+    return _convertToDailyCount(existingData);
+  }
+
+  Map<DateTime, int> _convertToDailyCount(Map<DateTime, List<DateTime>> data) {
+    return data.map((date, times) => MapEntry(date, times.length));
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<DateTime, int>>(
-      future: _loadAndProcessData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+    return Container(
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text("加载中...", style: TextStyle(fontSize: 16)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '游玩统计',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$totalPlayCount 首曲目',
+                        style: TextStyle(fontSize: 24),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                          '截至 ${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day}',
+                          style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ),
               ],
             ),
-          );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-          Icon(Icons.error, size: 48),
-          SizedBox(height: 8),
-          Text("加载失败，请重试", style: TextStyle(fontSize: 16)),
-          SizedBox(height: 8),
-          Text(snapshot.error.toString(), style: TextStyle(fontSize: 12, color: Colors.red), textAlign: TextAlign.center),
-              ],
-            ),
-          );
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
-            child: Text("暂无记录", style: TextStyle(fontSize: 16)),
-          );
-        }
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: FutureBuilder<Map<DateTime, int>>(
+              future: _loadAndProcessData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text("加载中...", style: TextStyle(fontSize: 16)),
+                      ],
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.error, size: 48),
+                        const SizedBox(height: 8),
+                        const Text("加载失败，请重试", style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text(snapshot.error.toString(),
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.red),
+                            textAlign: TextAlign.center),
+                      ],
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text("暂无记录", style: TextStyle(fontSize: 16)),
+                  );
+                }
 
-        return HeatMap(
-          defaultColor: Theme.of(context).highlightColor.withOpacity(0.1),
-          startDate: DateTime(2025),
-          endDate: DateTime(2026),
-          datasets: snapshot.data!,
-          colorMode: ColorMode.opacity,
-          showText: false,
-          scrollable: true,
-          colorsets: {1: Colors.indigo},
-        );
-      },
+                return HeatMap(
+                  defaultColor: Theme.of(context).highlightColor
+                    ..withValues(alpha: 0.1),
+                  datasets: snapshot.data!,
+                  colorMode: ColorMode.opacity,
+                  scrollable: true,
+                  colorsets: const {1: Colors.indigo},
+                  onClick: (value) {
+                    if (snapshot.data![value] == null) return;
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          "日期: ${value.year}-${value.month}-${value.day} \n游玩次数: ${snapshot.data![value]}"),
+                      duration: const Duration(seconds: 2),
+                    ));
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

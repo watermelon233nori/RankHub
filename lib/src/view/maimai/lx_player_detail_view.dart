@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rank_hub/src/model/maimai/player_data.dart';
+import 'package:rank_hub/src/utils/common.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_play_heatmap.dart';
 
 class LxPlayerDetailView extends StatefulWidget {
@@ -50,10 +52,21 @@ class _LxPlayerDetailViewState extends State<LxPlayerDetailView> {
             ListTile(
               title: Text(widget.player.friendCode.toString()),
               subtitle: const Text('好友码'),
+              trailing: IconButton(
+                icon: const Icon(Icons.copy),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: widget.player.friendCode.toString()));
+                  HapticFeedback.lightImpact();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('好友码已复制')),
+                  );
+                },
+              ),
             ),
             ListTile(
-              title: Text(widget.player.uploadTime),
+              title: Text(Common.formatDateTime(widget.player.uploadTime, format: 'yyyy-MM-dd HH:mm:ss')),
               subtitle: const Text('上次同步时间'),
+              trailing: Text(Common.getTimeAgo(widget.player.uploadTime)),
             ),
             SizedBox(height: 24),
             Divider(),
@@ -131,40 +144,6 @@ class _LxPlayerDetailViewState extends State<LxPlayerDetailView> {
               ],
             ),
             SizedBox(height: 32),
-            Padding(
-              padding: EdgeInsets.all(24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '游玩统计',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '0 首曲目',
-                          style: TextStyle(fontSize: 24),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                            '${DateTime.now().year}/${DateTime.now().month}/${DateTime.now().day}',
-                            style: const TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
             LxMaiPlayHeatMap(playerData: widget.player),
             SizedBox(height: 32),
           ],

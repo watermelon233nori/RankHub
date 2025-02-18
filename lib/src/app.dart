@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rank_hub/src/pages/add_player_screen.dart';
 import 'package:rank_hub/src/pages/main_page.dart';
+import 'package:statusbarz/statusbarz.dart';
 
 import 'settings/settings_controller.dart';
 
@@ -24,49 +25,48 @@ class MyApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: settingsController,
       builder: (BuildContext context, Widget? child) {
-        return MaterialApp(
-          initialRoute: '/',
-          
-          routes: {
-            "/": (context) => MainPage(),
-            "add_player_data": (context) => AddPlayerScreen(),
-          },
-          
-          // Providing a restorationScopeId allows the Navigator built by the
-          // MaterialApp to restore the navigation stack when a user leaves and
-          // returns to the app after it has been killed while running in the
-          // background.
-          restorationScopeId: 'app',
-          debugShowCheckedModeBanner: false,
+        return StatusbarzCapturer(
+            child: MaterialApp(
+                initialRoute: '/',
+                routes: {
+                  "/": (context) => MainPage(),
+                  "add_player_data": (context) => AddPlayerScreen(),
+                },
 
-          // Provide the generated AppLocalizations to the MaterialApp. This
-          // allows descendant Widgets to display the correct translations
-          // depending on the user's locale.
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en', ''), // English, no country code
-          ],
+                navigatorObservers: [Statusbarz.instance.observer],
 
-          // Use AppLocalizations to configure the correct application title
-          // depending on the user's locale.
-          //
-          // The appTitle is defined in .arb files found in the localization
-          // directory.
-          onGenerateTitle: (BuildContext context) =>
-              AppLocalizations.of(context)!.appTitle,
+                // Providing a restorationScopeId allows the Navigator built by the
+                // MaterialApp to restore the navigation stack when a user leaves and
+                // returns to the app after it has been killed while running in the
+                // background.
+                restorationScopeId: 'app',
+                debugShowCheckedModeBanner: false,
 
-          // Define a light and dark color theme. Then, read the user's
-          // preferred ThemeMode (light, dark, or system default) from the
-          // SettingsController to display the correct theme.
-          theme: ThemeData(),
-          darkTheme: ThemeData.dark(),
-          themeMode: settingsController.themeMode,
-        );
+                // Provide the generated AppLocalizations to the MaterialApp. This
+                // allows descendant Widgets to display the correct translations
+                // depending on the user's locale.
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en', ''), // English, no country code
+                ],
+                onGenerateTitle: (BuildContext context) =>
+                    AppLocalizations.of(context)!.appTitle,
+                theme: ThemeData(
+                  pageTransitionsTheme: const PageTransitionsTheme(
+                    builders: {
+                      TargetPlatform.android:
+                          FadeForwardsPageTransitionsBuilder(),
+                      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                    },
+                  ),
+                ),
+                darkTheme: ThemeData.dark(),
+                themeMode: ThemeMode.dark));
       },
     );
   }

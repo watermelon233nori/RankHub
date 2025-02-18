@@ -44,6 +44,7 @@ dependencies:
   image: ^4.3.0
   image_gallery_saver_plus: ^3.0.5
   #image_picker: ^1.1.2
+  intl: ^0.19.0
   jwt_decoder: ^2.0.1
   marquee: ^2.3.0
   modal_bottom_sheet: ^3.0.0
@@ -57,6 +58,8 @@ dependencies:
   shared_preferences: ^2.3.3
   smooth_page_indicator: ^1.2.0+3
   #socks5_proxy: ^2.0.0
+  statusbarz: ^1.0.14
+  timeago: ^3.7.0
   tutorial_coach_mark: ^1.2.12
   url_launcher: ^6.3.1
   uuid: ^4.5.1

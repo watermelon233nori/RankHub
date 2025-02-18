@@ -69,7 +69,7 @@ class _MaiPlayerCardState extends State<MaiPlayerCard> {
                             borderRadius: BorderRadius.circular(15),
                             image: DecorationImage(
                               image: NetworkImage(
-                                'https://assets.lxns.net/maimai/plate/${player.namePlate?.id}.png',
+                                'https://assets2.lxns.net/maimai/plate/${player.namePlate?.id}.png',
                               ),
                               fit: BoxFit.cover,
                             ),
@@ -84,7 +84,7 @@ class _MaiPlayerCardState extends State<MaiPlayerCard> {
                         borderRadius: BorderRadius.circular(4),
                         child: CachedNetworkImage(
                           imageUrl:
-                              'https://assets.lxns.net/maimai/icon/${player.icon?.id}.png',
+                              'https://assets2.lxns.net/maimai/icon/${player.icon?.id}.png',
                           width: 56,
                           height: 56,
                           fit: BoxFit.cover,
