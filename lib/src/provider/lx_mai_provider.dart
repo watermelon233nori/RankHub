@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rank_hub/src/model/mai_song_filter_data.dart';
 import 'package:rank_hub/src/model/mai_types.dart';
 import 'package:rank_hub/src/model/maimai/player_data.dart';
@@ -9,8 +9,10 @@ import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
 import 'package:rank_hub/src/model/maimai/song_info.dart';
 import 'package:rank_hub/src/model/maimai/song_score.dart';
 import 'package:rank_hub/src/pages/add_lx_mai_screen.dart';
-import 'package:rank_hub/src/view/maimai/lx_rank_page_view.dart';
-import 'package:rank_hub/src/view/maimai/lx_wiki_page.dart';
+import 'package:rank_hub/src/pages/lx_sync_page.dart';
+import 'package:rank_hub/src/view/maimai/lx_b50_view.dart';
+import 'package:rank_hub/src/view/maimai/lx_record_list_view.dart';
+import 'package:rank_hub/src/view/maimai/lx_wiki_view.dart';
 import 'package:rank_hub/src/view/maimai/song_detail_screen.dart';
 import 'package:rank_hub/src/provider/data_source_provider.dart';
 import 'package:rank_hub/src/view/maimai/lx_song_card.dart';
@@ -25,14 +27,9 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
 
   LxApiService get lxApiService => _lxApiService;
 
-  LxMaiProvider({required BuildContext context}) {
-    _playerManager = Provider.of<PlayerManager>(context, listen: false);
+  LxMaiProvider() {
+    _playerManager = ProviderContainer().read(playerManagerProvider.notifier);
     _lxApiService = LxApiService(_playerManager, this);
-
-    lxApiService.getAllPlayerUUID().then((players) => {
-          for (String playerUUID in players)
-            {_playerManager.addPlayer(playerUUID, getProviderName())}
-        });
   }
   @override
   Future<PlayerData> addPlayer(String? token) async {
@@ -79,7 +76,7 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
 
   @override
   Widget buildAddPlayerScreen() {
-    return AddLxMaiScreen(provider: this);
+    return const AddLxMaiScreen();
   }
 
   @override
@@ -115,8 +112,7 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
 
   @override
   Widget buildRankedRecordList() {
-    // TODO: implement buildRankedRecordList
-    throw UnimplementedError();
+    return LxB50View();
   }
 
   @override
@@ -126,7 +122,7 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
 
   @override
   Widget buildRecordList() {
-    return const MaiRankPage();
+    return const LxMaiRecordList();
   }
 
   @override
@@ -141,7 +137,7 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
 
   @override
   Widget buildSongList() {
-    return const WikiPage();
+    return const LxWikiView();
   }
 
   @override
@@ -185,7 +181,8 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
   }
 
   @override
-  Future<List<SongScore>> getRecords({bool forceRefresh = false, String? uuid}) {
+  Future<List<SongScore>> getRecords(
+      {bool forceRefresh = false, String? uuid}) {
     return lxApiService.getRecordList(forceRefresh: forceRefresh, uuid: uuid);
   }
 
@@ -316,5 +313,96 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
 
       return matches || aliasMatches;
     }).toList();
+  }
+
+  @override
+  List<Widget> buildRecordPageAppBarActions(BuildContext context) {
+    return [
+      IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+      const SizedBox(width: 4),
+      IconButton(
+          //onPressed: () {ProxyServer().startProxyServer();},
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    fullscreenDialog: true,
+                    builder: (_) {
+                      return const LxSyncPage();
+                    }));
+          },
+          icon: const Icon(Icons.cloud_sync)),
+      const SizedBox(width: 8),
+    ];
+  }
+
+  @override
+  String getRankedRecordsTitle() {
+    return 'B50';
+  }
+
+  @override
+  Widget buildPlayerListCard(BuildContext context, PlayerData playerData) {
+    return GestureDetector(
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return buildPlayerDetailScreen(playerData);
+          }));
+        },
+        child: Card(
+          clipBehavior: Clip.hardEdge,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(
+                    begin: Alignment.center,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withOpacity(0.7),
+                      Colors.transparent,
+                    ],
+                    tileMode: TileMode.clamp,
+                  ).createShader(bounds),
+                  blendMode: BlendMode.srcOver,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      image: DecorationImage(
+                        image: NetworkImage(
+                          'https://assets2.lxns.net/maimai/plate/${playerData.namePlate?.id}.png',
+                        ),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // 玩家信息 (头像和文字)
+              ListTile(
+                contentPadding: const EdgeInsets.all(8.0),
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: CachedNetworkImage(
+                    imageUrl:
+                        'https://assets2.lxns.net/maimai/icon/${playerData.icon?.id}.png',
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                    fadeInDuration: const Duration(milliseconds: 500),
+                    placeholder: (context, url) => Transform.scale(
+                      scale: 0.4,
+                      child: const CircularProgressIndicator(),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.image_not_supported),
+                  ),
+                ),
+                title: Text(playerData.name), // 玩家姓名
+                subtitle: const Text('舞萌 DX'),
+              ),
+            ],
+          ),
+        ));
   }
 }

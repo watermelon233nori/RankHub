@@ -15,7 +15,7 @@ import 'package:rank_hub/src/model/maimai/song_info.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/view/maimai/lx_level_view.dart';
 import 'package:rank_hub/src/widget/difficulty_card/mai_difficulty_card.dart';
-import 'package:rank_hub/src/widget/song_info_list/mai_song_info_list.dart';
+import 'package:rank_hub/src/view/maimai/mai_song_info_list.dart';
 import 'package:share_plus/share_plus.dart';
 
 class SongDetailScreen extends StatefulWidget {

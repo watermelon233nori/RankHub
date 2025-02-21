@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:rank_hub/src/model/maimai/collection.dart' as mai;
 import 'package:rank_hub/src/model/maimai/game_data.dart' as mai;
 import 'package:rank_hub/src/model/maimai/player_data.dart' as mai;
@@ -13,9 +13,6 @@ import 'package:rank_hub/src/model/maimai/song_info.dart' as mai;
 import 'package:rank_hub/src/model/maimai/song_notes.dart' as mai;
 import 'package:rank_hub/src/model/maimai/song_score.dart' as mai;
 import 'package:rank_hub/src/model/maimai/song_version.dart' as mai;
-import 'package:rank_hub/src/provider/data_source_manager.dart';
-import 'package:rank_hub/src/provider/lx_mai_provider.dart';
-import 'package:rank_hub/src/provider/player_manager.dart';
 
 import 'src/app.dart';
 import 'src/settings/settings_controller.dart';
@@ -38,16 +35,7 @@ void main() async {
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider<PlayerManager>(
-          create: (context) => PlayerManager(),
-        ),
-        ChangeNotifierProvider(
-            create: (context) => DataSourceManager(initialDataSources: [
-                  LxMaiProvider(context: context),
-                ])),
-      ],
+    ProviderScope(
       child: MyApp(settingsController: settingsController),
     ),
   );

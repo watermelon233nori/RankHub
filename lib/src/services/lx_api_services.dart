@@ -29,7 +29,7 @@ class LxApiService {
 
   // 获取当前玩家的 UUID
   String get _currentUuid {
-    final uuid = _playerManager.activePlayerId;
+    final uuid = _playerManager.getCurrentPlayerId();
     if (uuid == null) throw Exception('当前未选择玩家');
     return uuid;
   }
@@ -186,7 +186,7 @@ class LxApiService {
       await playerDataBox.put(uuid, newPlayerData);
       await saveToken(uuid, token);
 
-      _playerManager.addPlayer(uuid, _lxMaiProvider.getProviderName());
+      _playerManager.addPlayer(uuid, newPlayerData.name, _lxMaiProvider.getProviderName());
 
       return newPlayerData;
     } catch (e) {

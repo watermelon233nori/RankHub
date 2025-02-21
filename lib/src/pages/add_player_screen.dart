@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rank_hub/src/pages/add_lx_mai_screen.dart';
 import 'package:rank_hub/src/pages/add_moe_md_screen.dart';
-import 'package:rank_hub/src/provider/lx_mai_provider.dart';
+import 'package:rank_hub/src/provider/moe_md_provider.dart';
 
 class AddPlayerScreen extends StatefulWidget {
   const AddPlayerScreen({super.key});
@@ -17,22 +17,22 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
+            const Center(
               child: Text(
                 '添加玩家数据到 RankHub',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
-            Center(
+            const Center(
               child: Text('将你的游玩数据集中一处，随时查看'),
             ),
-            SizedBox(height: 64),
-            Text('支持的来源'),
-            SizedBox(
+            const SizedBox(height: 64),
+            const Text('支持的来源'),
+            const SizedBox(
               height: 8,
             ),
             ListTile(
@@ -40,7 +40,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                 Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AddLxMaiScreen(provider: LxMaiProvider(context: context)),
+                  builder: (context) => const AddLxMaiScreen(),
                 ),
               );
               },
@@ -60,16 +60,16 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                   size: 16,
                 ),
               ),
-              title: Text('落雪咖啡屋'),
-              subtitle: Text('maimai.lxns.net'),
-              trailing: Icon(Icons.arrow_forward_ios_rounded),
+              title: const Text('落雪咖啡屋'),
+              subtitle: const Text('maimai.lxns.net'),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded),
             ),
             ListTile(
               onTap: () {
                 Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => AddMoeMdScreen(provider: LxMaiProvider(context: context)),
+                  builder: (context) => AddMoeMdScreen(provider: MoeMdProvider()),
                 ),
               );
               },
@@ -89,9 +89,9 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                   size: 16,
                 ),
               ),
-              title: Text('MuseDash.moe'),
-              subtitle: Text('musedash.moe'),
-              trailing: Icon(Icons.arrow_forward_ios_rounded),
+              title: const Text('MuseDash.moe'),
+              subtitle: const Text('musedash.moe'),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded),
             ),
           ],
         ),

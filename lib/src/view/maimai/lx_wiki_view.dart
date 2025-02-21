@@ -1,62 +1,25 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
-import 'package:rank_hub/src/view/maimai/lx_song_list.dart';
+import 'package:rank_hub/src/view/maimai/lx_song_card.dart';
 import 'package:rank_hub/src/viewmodel/maimai/lx_wiki_page_vm.dart';
 
-class WikiPage extends StatelessWidget {
-  const WikiPage({super.key});
+class LxWikiView extends StatelessWidget {
+  const LxWikiView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (ctx) => LxMaiWikiPageViewModel(
-          lxMaiProvider: LxMaiProvider(context: ctx), context)
+          lxMaiProvider: LxMaiProvider(), context)
         ..fetchSongs(),
       child: Consumer<LxMaiWikiPageViewModel>(
         builder: (context, viewModel, child) {
           return Scaffold(
               extendBody: true,
-              extendBodyBehindAppBar: true,
-              appBar: AppBar(
-                backgroundColor:
-                    Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
-                surfaceTintColor: Colors.transparent,
-                centerTitle: false,
-                flexibleSpace: ClipRRect(
-                    child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                        child: Container(color: Colors.transparent))),
-                title: TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text("舞萌 DX"),
-                      SizedBox(width: 4),
-                      Icon(Icons.arrow_drop_down),
-                    ],
-                  ),
-                ),
-                bottom: PreferredSize(
-                    preferredSize: const Size.fromHeight(1),
-                    child: Container(
-                      color: Colors.grey.withOpacity(0.1),
-                      height: 1,
-                    )),
-                actions: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.more_vert),
-                  ),
-                  SizedBox(width: 8),
-                ],
-              ),
               body: viewModel.isLoading && viewModel.songs.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : viewModel.hasError
@@ -83,11 +46,25 @@ class WikiPage extends StatelessWidget {
                       : RefreshIndicator(
                           edgeOffset: 128,
                           onRefresh: () => viewModel.fetchSongs(force: true),
-                          child: LxMaiSongList(
-                            provider: LxMaiProvider(context: context),
+                          child: AnimationLimiter(
+                              child: ListView.builder(
                             controller: viewModel.scrollController,
-                            songs: viewModel.filteredSongs,
-                          ),
+                            itemCount: viewModel.songs.length,
+                            itemBuilder: (context, index) {
+                              return AnimationConfiguration.staggeredList(
+                                position: index,
+                                duration: const Duration(milliseconds: 375),
+                                child: SlideAnimation(
+                                  verticalOffset: 50.0,
+                                  child: FadeInAnimation(
+                                    child: LxMaiSongCard(
+                                        songData: viewModel.songs[index],
+                                        provider: viewModel.lxMaiProvider),
+                                  ),
+                                ),
+                              );
+                            },
+                          )),
                         ),
               floatingActionButton: SafeArea(
                   child: FloatingActionButton(

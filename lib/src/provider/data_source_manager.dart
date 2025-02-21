@@ -1,69 +1,101 @@
-import 'package:flutter/foundation.dart';
 import 'package:rank_hub/src/provider/data_source_provider.dart';
+import 'package:rank_hub/src/provider/lx_mai_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class DataSourceManager with ChangeNotifier {
-  DataSourceManager({List<DataSourceProvider>? initialDataSources}) {
-    // 如果有初始数据源，注册并设置默认活动数据源
-    if (initialDataSources != null) {
-      for (var provider in initialDataSources) {
-        registerDataSource(provider, setActiveIfNone: true);
-      }
-    }
+part 'data_source_manager.g.dart';
+
+@riverpod
+class DataSourceManager extends _$DataSourceManager {
+  static const _currentProviderKey = 'currentProvider';
+
+  @override
+  Future<({Map<String, DataSourceProvider> sources, String? activeSource})>
+      build() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedActiveSource = prefs.getString(_currentProviderKey);
+
+    return (
+      sources: {"LxMai": LxMaiProvider()},
+      activeSource: savedActiveSource
+    );
   }
 
-  final Map<String, DataSourceProvider> _dataSources = {};
-  DataSourceProvider? _activeDataSource;
-
-  // 获取当前活动数据源
-  DataSourceProvider? get activeDataSource => _activeDataSource;
-
-  // 获取所有数据源
-  List<DataSourceProvider> get allDataSources => _dataSources.values.toList();
-
-  // 注册数据源
   void registerDataSource(DataSourceProvider provider,
       {bool setActiveIfNone = false}) {
-    if (_dataSources.containsKey(provider.getProviderName())) {
-      return; // 避免重复注册
+    final currentState = state.asData?.value;
+    if (currentState == null) return;
+
+    if (currentState.sources.containsKey(provider.getProviderName())) {
+      return;
     }
 
-    _dataSources[provider.getProviderName()] = provider;
+    final updatedActiveSource = currentState.activeSource ??
+        (setActiveIfNone ? provider.getProviderName() : null);
 
-    // 如果没有活动数据源，则将其设置为活动数据源
-    if (_activeDataSource == null || setActiveIfNone) {
-      _activeDataSource = provider;
+    state = AsyncValue.data((
+      sources: {
+        ...currentState.sources,
+        provider.getProviderName(): provider,
+      },
+      activeSource: updatedActiveSource,
+    ));
+
+    if (updatedActiveSource != null) {
+      _saveActiveSource(updatedActiveSource);
     }
-
-    notifyListeners();
   }
 
-  // 删除数据源
   void unregisterDataSource(String providerName) {
-    _dataSources.remove(providerName);
-
-    // 如果当前活动数据源被删除，选择下一个数据源或清空
-    if (_activeDataSource?.getProviderName() == providerName) {
-      _activeDataSource =
-          _dataSources.values.isNotEmpty ? _dataSources.values.first : null;
+    final currentState = state.asData?.value;
+    if (currentState == null || !currentState.sources.containsKey(providerName)) {
+      return;
     }
 
-    notifyListeners();
+    final newSources = {...currentState.sources}..remove(providerName);
+    final newActiveSource = currentState.activeSource == providerName
+        ? (newSources.isNotEmpty ? newSources.keys.first : null)
+        : currentState.activeSource;
+
+    state =
+        AsyncValue.data((sources: newSources, activeSource: newActiveSource));
+
+    if (newActiveSource != null) {
+      _saveActiveSource(newActiveSource);
+    } else {
+      _removeActiveSource();
+    }
   }
 
-  // 设置当前活动数据源
   void setActiveDataSource(String providerName) {
-    if (_dataSources.containsKey(providerName)) {
-      _activeDataSource = _dataSources[providerName];
-      notifyListeners();
+    final currentState = state.asData?.value;
+    if (currentState == null || !currentState.sources.containsKey(providerName)) {
+      return;
     }
+
+    state = AsyncValue.data(
+        (sources: currentState.sources, activeSource: providerName));
+
+    _saveActiveSource(providerName);
   }
 
-  // 检查是否已注册某个数据源
   bool isRegistered(String providerName) {
-    return _dataSources.containsKey(providerName);
+    final currentState = state.asData?.value;
+    return currentState?.sources.containsKey(providerName) ?? false;
   }
 
   DataSourceProvider? getDataSource(String providerName) {
-    return _dataSources[providerName];
+    final currentState = state.asData?.value;
+    return currentState?.sources[providerName];
+  }
+  
+  Future<void> _saveActiveSource(String providerName) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_currentProviderKey, providerName);
+  }
+
+  Future<void> _removeActiveSource() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_currentProviderKey);
   }
 }

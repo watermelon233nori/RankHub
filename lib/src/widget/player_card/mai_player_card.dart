@@ -17,8 +17,7 @@ class _MaiPlayerCardState extends State<MaiPlayerCard> {
   @override
   void initState() {
     super.initState();
-    // 使用 LxApiServices 的 getAllPlayerData 获取玩家数据
-    _playerDataFuture = LxMaiProvider(context: context).lxApiService.getAllPlayerData();
+    _playerDataFuture = LxMaiProvider().lxApiService.getAllPlayerData();
   }
 
   @override

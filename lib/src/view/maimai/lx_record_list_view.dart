@@ -18,7 +18,7 @@ class LxMaiRecordList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (ctx) => RecordListViewModel(LxMaiProvider(context: ctx), context)
+      create: (ctx) => RecordListViewModel(LxMaiProvider(), context)
         ..fetchRecords(),
       child: Consumer<RecordListViewModel>(
         builder: (context, viewModel, child) {

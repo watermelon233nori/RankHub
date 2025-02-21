@@ -35,7 +35,7 @@ class _MaiDifficultyCardState extends State<MaiDifficultyCard> {
 
   Future<void> getSocre() async {
     try {
-      var a = await LxMaiProvider(context: context).lxApiService.getRecordById(
+      var a = await LxMaiProvider().lxApiService.getRecordById(
           '${widget.songId}_${widget.songDifficulty.type}_${widget.songDifficulty.difficulty}');
       setState(() {
         songScore = a;

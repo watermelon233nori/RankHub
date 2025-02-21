@@ -1,30 +1,36 @@
-import 'package:hive/hive.dart';
 import 'package:rank_hub/src/abstract/data_repository.dart';
 import 'package:rank_hub/src/model/musedash/md_album.dart';
 import 'package:rank_hub/src/model/musedash/md_music.dart';
 
 class MdAlbumRepository extends DataRepository<MdAlbum> {
-  final Box<MdAlbum> albumBox;
+  MdAlbumRepository(super.box);
 
-  MdAlbumRepository(this.albumBox) : super(albumBox);
 
   List<MdMusic> getAllMusic() {
-    return albumBox.values.expand<MdMusic>((album) => album.musicList).toList();
+    return box.values.expand<MdMusic>((album) => album.musicList).toList();
+  }
+
+  MdMusic? getMusicByUid(String uid) {
+    return box.values.expand<MdMusic>((album) => album.musicList).where((music) => music.uid == uid).toList().firstOrNull;
+  }
+
+  List<MdMusic> searchMusicByName(String name) {
+    return box.values.expand<MdMusic>((album) => album.musicList).where((music) => music.name.contains(name)).toList();
   }
 
   List<MdAlbum> getAllAlbums() {
-    return albumBox.values.toList();
+    return box.values.toList();
   }
 
   List<MdAlbum> getAlbumsByTag(String tag) {
-    return albumBox.values.where((album) => album.tag == tag).toList();
+    return box.values.where((album) => album.tag == tag).toList();
   }
 
   MdAlbum? getAlbumById(String id) {
-    return albumBox.get(id);
+    return box.get(id);
   }
 
   List<MdAlbum> getAlbumListWithoutMusic() {
-    return albumBox.values.map((album) => MdAlbum(jsonKey: album.jsonKey, tag: album.tag, title: album.title, localized: album.localized, musicList: [])).toList();
+    return box.values.map((album) => MdAlbum(jsonKey: album.jsonKey, tag: album.tag, title: album.title, localized: album.localized, musicList: [])).toList();
   }
 }

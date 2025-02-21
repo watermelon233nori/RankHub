@@ -4,13 +4,28 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
+import 'package:rank_hub/src/model/maimai/player_data.dart';
+import 'package:rank_hub/src/model/maimai/song_score.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
-import 'package:rank_hub/src/viewmodel/maimai/lx_rank_page_vm.dart';
 
 class LxB50ExportView extends StatelessWidget {
-  final MaiRankViewModel viewModel;
+  final List<SongScore> b35Records;
+  final List<SongScore> b15Records;
+  final PlayerData playerData;
+  final int playerRating;
+  final int currentVerRating;
+  final int pastVerRating;
+  final Function(int, Widget) getShaderMaskByRating;
 
-  LxB50ExportView({super.key, required this.viewModel});
+  LxB50ExportView(
+      {super.key,
+      required this.b35Records,
+      required this.b15Records,
+      required this.playerData,
+      required this.playerRating,
+      required this.currentVerRating,
+      required this.pastVerRating,
+      required this.getShaderMaskByRating});
 
   final GlobalKey combinedKey = GlobalKey();
 
@@ -44,8 +59,8 @@ class LxB50ExportView extends StatelessWidget {
     const int b15RowCount = 5; // Number of columns for B15
     const int b35RowCount = 5; // Number of columns for B35
 
-    final b15Height = (viewModel.b15Records.length / b15RowCount).ceil() * 240;
-    final b35Height = (viewModel.b35Records.length / b35RowCount).ceil() * 240;
+    final b15Height = (b15Records.length / b15RowCount).ceil() * 240;
+    final b35Height = (b35Records.length / b35RowCount).ceil() * 240;
 
     final totalHeight = b15Height + b35Height + 1000; // Add padding for labels
 
@@ -54,7 +69,7 @@ class LxB50ExportView extends StatelessWidget {
           title: const Text('导出 B50 成绩图'),
           actions: [
             IconButton(
-              icon: Icon(Icons.save),
+              icon: const Icon(Icons.save),
               onPressed: _generateAndSaveImage,
             ),
           ],
@@ -62,7 +77,7 @@ class LxB50ExportView extends StatelessWidget {
         body: RepaintBoundary(
           key: combinedKey,
           child: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
                     'assets/images/maimai_bud.jpg'), // Background image
@@ -77,11 +92,11 @@ class LxB50ExportView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 72),
+                      const SizedBox(height: 72),
                       Row(
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: 32),
+                            padding: const EdgeInsets.only(left: 32),
                             child: SizedBox(
                                 width: 1000,
                                 height: 160,
@@ -109,7 +124,7 @@ class LxB50ExportView extends StatelessWidget {
                                                   BorderRadius.circular(15),
                                               image: DecorationImage(
                                                 image: NetworkImage(
-                                                  'https://assets.lxns.net/maimai/plate/${viewModel.playerData.namePlate?.id}.png',
+                                                  'https://assets.lxns.net/maimai/plate/${playerData.namePlate?.id}.png',
                                                 ),
                                                 fit: BoxFit.cover,
                                               ),
@@ -119,15 +134,17 @@ class LxB50ExportView extends StatelessWidget {
                                       ),
                                       // 玩家信息 (头像和文字)
                                       Padding(
-                                          padding: EdgeInsets.only(left: 16),
+                                          padding:
+                                              const EdgeInsets.only(left: 16),
                                           child: ListTile(
-                                            contentPadding: EdgeInsets.all(16),
+                                            contentPadding:
+                                                const EdgeInsets.all(16),
                                             leading: ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: CachedNetworkImage(
                                                 imageUrl:
-                                                    'https://assets.lxns.net/maimai/icon/${viewModel.playerData.icon?.id}.png',
+                                                    'https://assets.lxns.net/maimai/icon/${playerData.icon?.id}.png',
                                                 fit: BoxFit.cover,
                                                 fadeInDuration: const Duration(
                                                     milliseconds: 500),
@@ -144,8 +161,8 @@ class LxB50ExportView extends StatelessWidget {
                                               ),
                                             ),
                                             title: Text(
-                                              viewModel.playerData.name,
-                                              style: TextStyle(
+                                              playerData.name,
+                                              style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 48),
                                             ), // 玩家姓名
@@ -159,40 +176,38 @@ class LxB50ExportView extends StatelessWidget {
                                   ),
                                 )),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Padding(
-                              padding: EdgeInsets.only(right: 32),
+                              padding: const EdgeInsets.only(right: 32),
                               child: SizedBox(
                                   width: 400,
                                   height: 160,
                                   child: Card(
                                     child: Column(
                                       children: [
-                                        SizedBox(height: 32),
+                                        const SizedBox(height: 32),
                                         Row(
                                           children: [
-                                            SizedBox(width: 32),
+                                            const SizedBox(width: 32),
                                             Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(
+                                                const Text(
                                                   "当前 RATING",
                                                   style: TextStyle(
                                                       fontSize: 24,
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
-                                                SizedBox(height: 16),
+                                                const SizedBox(height: 16),
                                                 SizedBox(
                                                   height: 40, // 明确的高度
-                                                  child: viewModel
-                                                      .getShaderMaskByRating(
-                                                    viewModel.playerRating,
+                                                  child: getShaderMaskByRating(
+                                                    playerRating,
                                                     Text(
-                                                      viewModel.playerRating
-                                                          .toString(),
-                                                      style: TextStyle(
+                                                      playerRating.toString(),
+                                                      style: const TextStyle(
                                                           fontSize: 24,
                                                           fontWeight:
                                                               FontWeight.bold),
@@ -201,21 +216,21 @@ class LxB50ExportView extends StatelessWidget {
                                                 ),
                                               ],
                                             ),
-                                            Spacer(),
+                                            const Spacer(),
                                             Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                    "当期版本 Rating: ${viewModel.currentVerRating}"),
-                                                SizedBox(
+                                                    "当期版本 Rating: $currentVerRating"),
+                                                const SizedBox(
                                                     height:
                                                         16), // 替换 Spacer，避免无约束布局
                                                 Text(
-                                                    "往期版本 Rating: ${viewModel.pastVerRating}"),
+                                                    "往期版本 Rating: $pastVerRating"),
                                               ],
                                             ),
-                                            SizedBox(width: 16)
+                                            const SizedBox(width: 16)
                                           ],
                                         )
                                       ],
@@ -223,7 +238,7 @@ class LxB50ExportView extends StatelessWidget {
                                   )))
                         ],
                       ),
-                      SizedBox(height: 128),
+                      const SizedBox(height: 128),
                       Center(
                         child: Container(
                           decoration: BoxDecoration(
@@ -232,9 +247,9 @@ class LxB50ExportView extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
-                          child: Text(
+                          child: const Text(
                             "  当期版本成绩 B15  ",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
@@ -255,16 +270,16 @@ class LxB50ExportView extends StatelessWidget {
                             ),
                             physics: const NeverScrollableScrollPhysics(),
                             padding: const EdgeInsets.all(16),
-                            itemCount: viewModel.b15Records.length,
+                            itemCount: b15Records.length,
                             itemBuilder: (context, index) {
                               return LxMaiRecordCard(
-                                recordData: viewModel.b15Records[index],
+                                recordData: b15Records[index],
                               );
                             },
                           )),
                       // B35 Grid
 
-                      SizedBox(height: 72),
+                      const SizedBox(height: 72),
                       Center(
                         child: Container(
                           decoration: BoxDecoration(
@@ -273,9 +288,9 @@ class LxB50ExportView extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
-                          child: Text(
+                          child: const Text(
                             "  往期版本成绩 B35  ",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
@@ -295,15 +310,15 @@ class LxB50ExportView extends StatelessWidget {
                           ),
                           physics: const NeverScrollableScrollPhysics(),
                           padding: const EdgeInsets.all(16),
-                          itemCount: viewModel.b35Records.length,
+                          itemCount: b35Records.length,
                           itemBuilder: (context, index) {
                             return LxMaiRecordCard(
-                              recordData: viewModel.b35Records[index],
+                              recordData: b35Records[index],
                             );
                           },
                         ),
                       ),
-                      SizedBox(height: 72),
+                      const SizedBox(height: 72),
                       Center(
                         child: Container(
                           decoration: BoxDecoration(
@@ -312,9 +327,9 @@ class LxB50ExportView extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 2),
-                          child: Text(
+                          child: const Text(
                             "  本图使用 RankHub App 生成  ",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontSize: 48,
                               fontWeight: FontWeight.bold,

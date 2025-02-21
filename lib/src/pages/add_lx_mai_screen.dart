@@ -4,9 +4,7 @@ import 'package:rank_hub/src/model/maimai/player_data.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 
 class AddLxMaiScreen extends StatefulWidget {
-  final LxMaiProvider provider;
-
-  const AddLxMaiScreen({super.key, required this.provider});
+  const AddLxMaiScreen({super.key});
 
   @override
   State<AddLxMaiScreen> createState() => _AddLxMaiScreenState();
@@ -15,6 +13,7 @@ class AddLxMaiScreen extends StatefulWidget {
 class _AddLxMaiScreenState extends State<AddLxMaiScreen> {
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _textEditingController = TextEditingController();
+  final LxMaiProvider _provider = LxMaiProvider();
 
   bool _isLoading = false; // 是否正在加载
   bool _isSuccess = false; // 是否添加成功
@@ -28,7 +27,7 @@ class _AddLxMaiScreenState extends State<AddLxMaiScreen> {
     });
     
     try {
-      final player = await widget.provider.addPlayer(_textEditingController.text);
+      final player = await _provider.addPlayer(_textEditingController.text);
       setState(() {
         _playerData = player;
         _isSuccess = true;
@@ -158,7 +157,7 @@ class _AddLxMaiScreenState extends State<AddLxMaiScreen> {
                         // 底部说明文字
                         Center(
                           child: Text(
-                            '你的凭据将安全地保存在本地，仅用于向 ${widget.provider.getProviderLoacation()} 验证身份，不会上传至其他服务器',
+                            '你的凭据将安全地保存在本地，仅用于向 ${_provider.getProviderLoacation()} 验证身份，不会上传至其他服务器',
                             textAlign: TextAlign.center,
                           ),
                         ),

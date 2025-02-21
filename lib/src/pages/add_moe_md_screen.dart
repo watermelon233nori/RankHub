@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart';
-import 'package:rank_hub/src/provider/lx_mai_provider.dart';
+import 'package:rank_hub/src/model/musedash/md_player_info.dart';
+import 'package:rank_hub/src/provider/moe_md_provider.dart';
 
 class AddMoeMdScreen extends StatefulWidget {
-  final LxMaiProvider provider;
+  final MoeMdProvider provider;
 
   const AddMoeMdScreen({super.key, required this.provider});
 
@@ -18,7 +18,7 @@ class _AddMoeMdScreenState extends State<AddMoeMdScreen> {
 
   bool _isLoading = false;
   bool _isSuccess = false;
-  PlayerData? _playerData;
+  MdPlayerInfo? _playerData;
 
   Future<void> _addPlayer() async {
     setState(() => _isLoading = true);
@@ -90,7 +90,7 @@ class _AddMoeMdScreenState extends State<AddMoeMdScreen> {
                       duration: const Duration(milliseconds: 300),
                       child: _isSuccess
                           ? Text(
-                              '玩家数据已添加：${_playerData?.name ?? ''}',
+                              '玩家数据已添加：${_playerData?.nickname ?? ''}',
                               key: const ValueKey('successText'),
                               style: const TextStyle(
                                   fontSize: 24, fontWeight: FontWeight.bold),

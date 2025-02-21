@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 
 abstract class DataSourceProvider<R, P, S, F> {
+  bool isActive = false;
+
   Widget buildOverviewCard();
 
   Widget buildRecordCard(R recordData);
@@ -23,7 +25,11 @@ abstract class DataSourceProvider<R, P, S, F> {
   
   Widget buildProviderIcon();
 
+  Widget buildPlayerListCard(BuildContext context, P playerData);
+
   String getProviderName();
+
+  String getRankedRecordsTitle();
 
   String getProviderLoacation();
 
@@ -57,5 +63,13 @@ abstract class DataSourceProvider<R, P, S, F> {
 
   Future<LinkedHashMap<DateTime, num>>? getRecordTrend(Duration? duration) {
     return null;
+  }
+
+  List<Widget> buildRecordPageAppBarActions(BuildContext context) {
+    return [];
+  }
+
+  String getDefaultRecordTitle() {
+    return '所有成绩';
   }
 }
