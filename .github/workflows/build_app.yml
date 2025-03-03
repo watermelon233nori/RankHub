@@ -56,6 +56,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up Flutter (3.27.4)
+        uses: subosito/flutter-action@v2.14.0
+        with:
+          channel: stable
+          flutter-version: 3.27.4
+
       - uses: cedvdb/action-flutter-build-android@v1
         with:
           keystore-base64: ${{ secrets.ANDROID_RELEASE_KEY }}
