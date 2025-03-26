@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 
 class AddLxMaiScreen extends StatefulWidget {

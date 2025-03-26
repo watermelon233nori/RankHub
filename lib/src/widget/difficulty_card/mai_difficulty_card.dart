@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_difficulty.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 

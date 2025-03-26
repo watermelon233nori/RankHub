@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rank_hub/src/model/musedash/md_player_info.dart';
 import 'package:rank_hub/src/provider/moe_md_provider.dart';
 
@@ -69,10 +68,10 @@ class _AddMoeMdScreenState extends State<AddMoeMdScreen> {
         child: Column(
           children: [
             // 头部 Banner
-            SizedBox(
+            const SizedBox(
               width: double.infinity,
-              child: CachedNetworkImage(
-                imageUrl: 'https://pixiv.nl/123569540.jpg',
+              child: Image(
+                image: AssetImage("assets/images/musedash_bg.jpg"),
                 fit: BoxFit.cover,
               ),
             ),

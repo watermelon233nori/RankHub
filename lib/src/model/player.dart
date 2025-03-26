@@ -6,13 +6,19 @@ part 'player.g.dart';
 @HiveType(typeId: 39)
 class Player extends HiveObject {
   @HiveField(0)
-  final String name;
+  String name;
 
   @HiveField(1)
-  final String provider;
+  String provider;
 
   @HiveField(2)
-  final String uuid;
+  String uuid;
 
-  Player({required this.name, required this.provider, required this.uuid});
+  @HiveField(3)
+  String? avatarUrl;
+
+  @HiveField(4)
+  String? backgroundUrl;
+
+  Player({required this.name, required this.provider, required this.uuid, this.avatarUrl, this.backgroundUrl});
 }

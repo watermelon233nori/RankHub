@@ -2,8 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rank_hub/src/model/maimai/song_info.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_info.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/utils/common.dart';
 import 'package:rank_hub/src/view/maimai/song_detail_screen.dart';
@@ -27,13 +27,13 @@ class LxMaiRecordCard extends RecordCard<SongScore> {
       case 0:
         return Colors.green; // BASIC
       case 1:
-        return const Color.fromARGB(255, 215, 161, 0); // ADVANCED
+        return const Color.fromARGB(255, 215, 160, 0); // ADVANCED
       case 2:
         return Colors.red; // EXPERT
       case 3:
         return Colors.purple; // MASTER
       case 4:
-        return const Color.fromARGB(255, 236, 130, 255); // Re:MASTER
+        return const Color.fromARGB(255, 235, 130, 255); // Re:MASTER
       default:
         return Colors.grey; // Default color
     }

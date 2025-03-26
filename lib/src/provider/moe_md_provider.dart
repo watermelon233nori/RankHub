@@ -4,7 +4,7 @@ import 'package:rank_hub/src/model/musedash/md_music.dart';
 import 'package:rank_hub/src/model/musedash/md_player_info.dart';
 import 'package:rank_hub/src/model/musedash/md_player_record.dart';
 import 'package:rank_hub/src/pages/add_moe_md_screen.dart';
-import 'package:rank_hub/src/provider/data_source_provider.dart';
+import 'package:rank_hub/src/core/abstract/data_source_provider.dart';
 
 class MoeMdProvider
     extends DataSourceProvider<MdPlayerRecord, MdPlayerInfo, MdMusic, dynamic> {
@@ -105,7 +105,7 @@ class MoeMdProvider
   }
 
   @override
-  Future<MdPlayerInfo> getPlayerDetail() {
+  Future<MdPlayerInfo?> getPlayerDetail(String id) {
     // TODO: implement getPlayerDetail
     throw UnimplementedError();
   }

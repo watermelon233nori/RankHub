@@ -1,8 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:rank_hub/src/pages/add_player_screen.dart';
-import 'package:rank_hub/src/widget/player_card/mai_player_card.dart';
+import 'package:rank_hub/src/view/data_source_list_view.dart';
+import 'package:rank_hub/src/view/player_list_view.dart';
 
 class DataSrcPage extends StatefulWidget {
   const DataSrcPage({super.key});
@@ -11,69 +12,82 @@ class DataSrcPage extends StatefulWidget {
   State<DataSrcPage> createState() => _DataSrcPageState();
 }
 
-class _DataSrcPageState extends State<DataSrcPage> {
+class _DataSrcPageState extends State<DataSrcPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  final _fabKey = GlobalKey<ExpandableFabState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CupertinoScaffold(
-        body: Builder(builder: (cupertinoScaffoldContext) => DefaultTabController(
-            length: 2,
-            child: SafeArea(top: false, child: Scaffold(
-              appBar: AppBar(
-                centerTitle: false,
-                title: Text('数据源'),
-                automaticallyImplyLeading: false,
-                actions: [IconButton(onPressed: () {}, icon: Icon(Icons.sync))],
-                bottom: const TabBar(tabs: <Widget>[
-                  Tab(
-                    text: '玩家数据',
-                  ),
-                  Tab(
-                    text: '游戏数据',
-                  ),
-                ]),
-              ),
-              floatingActionButton:FloatingActionButton(
-                onPressed: () {
-                  CupertinoScaffold.showCupertinoModalBottomSheet(
-                    animationCurve: Curves.easeOutCirc,
-                    previousRouteAnimationCurve: Curves.easeOutCirc,
-                      context: cupertinoScaffoldContext,
-                      builder: (context) => AddPlayerScreen());
-                },
-                child: Icon(Icons.add),
-              ),
-              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-              body: TabBarView(
-                children: [
-                  MaiPlayerCard(),
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: ListView(
-                      children: [
-                        ListTile(
-                          leading: CachedNetworkImage(
-                            imageUrl: 'https://maimai.lxns.net/favicon.webp',
-                            width: 36,
-                            height: 36,
-                            fit: BoxFit.cover,
-                            fadeInDuration: const Duration(
-                                milliseconds: 500), // Fade-in duration
-                            placeholder: (context, url) => Transform.scale(
-                              scale: 0.4,
-                              child: const CircularProgressIndicator(),
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.image_not_supported),
-                          ),
-                          title: Text('落雪咖啡屋'),
-                          subtitle: Text('maimai.lxns.net'),
-                          trailing: Switch(value: true, onChanged: (_) {}),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            )))));
+    return SafeArea(
+        child: Scaffold(
+      appBar: AppBar(
+        centerTitle: false,
+        title: const Text('数据源'),
+        automaticallyImplyLeading: false,
+        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.sync))],
+        bottom: TabBar(controller: _tabController, tabs: const <Widget>[
+          Tab(
+            text: '玩家数据',
+          ),
+          Tab(
+            text: '游戏数据',
+          ),
+        ]),
+      ),
+      floatingActionButton: ExpandableFab(
+        key: _fabKey,
+        overlayStyle: const ExpandableFabOverlayStyle(
+            color: Color.fromRGBO(0, 0, 0, 0.6)),
+        type: ExpandableFabType.up,
+        childrenAnimation: ExpandableFabAnimation.none,
+        distance: 72,
+        openButtonBuilder: RotateFloatingActionButtonBuilder(
+          child: const Icon(Icons.add),
+          fabSize: ExpandableFabSize.regular,
+        ),
+        children: [
+          FloatingActionButton.extended(
+            heroTag: null,
+            icon: const Icon(Icons.cloud),
+            label: const Text("添加数据源"),
+            onPressed: () {},
+          ),
+          FloatingActionButton.extended(
+            heroTag: null,
+            icon: const Icon(Icons.person),
+            label: const Text("添加玩家"),
+            onPressed: () {
+              final state = _fabKey.currentState;
+              if (state != null) {
+                state.toggle();
+              }
+              showCupertinoSheet(
+                  context: context,
+                  pageBuilder: (context) => const AddPlayerScreen());
+            },
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: ExpandableFab.location,
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: const PlayerListView()),
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: const DataSourceListView()),
+        ],
+      ),
+    ));
   }
 }

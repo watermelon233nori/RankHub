@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 
 void main() {
   group('LxApiService', () {

@@ -112,7 +112,7 @@ class _SongFliterBar extends StatelessWidget {
             child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: BottomAppBar(
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
+            color: Theme.of(context).scaffoldBackgroundColor.withAlpha(242),
             elevation: isElevated ? null : 0.0,
             child: Row(
               children: <Widget>[

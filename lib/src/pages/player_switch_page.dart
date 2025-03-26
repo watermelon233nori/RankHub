@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rank_hub/src/provider/player_manager.dart';
@@ -11,11 +12,31 @@ class PlayerSwitchPage extends ConsumerWidget {
     final playerNotifier = ref.read(playerManagerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(),
+      primary: true,
       body: Container(
         padding: const EdgeInsets.all(16),
-        child: ListView(
+        child: Column(
           children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    CupertinoSheetRoute.popSheet(context);
+                  },
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () {
+                    // Navigator.of(context).pushNamed('/add_player');
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 8,
+            ),
             const Center(
               child: Text(
                 '选择玩家',
@@ -28,9 +49,10 @@ class PlayerSwitchPage extends ConsumerWidget {
             const Center(
               child: Text('选择你想要查看的玩家'),
             ),
-            const SizedBox(height: 64),
+            const SizedBox(height: 8),
             playerManager.when(
-              data: (_) => ListView(
+              data: (_) => Expanded(
+                  child: ListView(
                 children: playerNotifier.getAllPlayers().map((player) {
                   return RadioListTile<String>(
                     title: Text(player.name),
@@ -43,7 +65,7 @@ class PlayerSwitchPage extends ConsumerWidget {
                     },
                   );
                 }).toList(),
-              ),
+              )),
               loading: () => Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text("加载错误: \$e")),
             ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 
 class LxMaiPlayHeatMap extends StatefulWidget {

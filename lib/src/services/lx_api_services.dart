@@ -1,11 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as fss;
 import 'package:hive/hive.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart';
-import 'package:rank_hub/src/model/maimai/song_info.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
-import 'package:rank_hub/src/model/maimai/song_alias.dart';
-import 'package:rank_hub/src/model/maimai/song_genre.dart';
-import 'package:rank_hub/src/model/maimai/song_version.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_info.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_alias.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_genre.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_version.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/utils/lx_common_utils.dart';
 import 'package:rank_hub/src/provider/player_manager.dart';
@@ -28,7 +28,7 @@ class LxApiService {
   LxApiService(this._playerManager, this._lxMaiProvider);
 
   // 获取当前玩家的 UUID
-  String get _currentUuid {
+  Future<String> _currentUuid() async {
     final uuid = _playerManager.getCurrentPlayerId();
     if (uuid == null) throw Exception('当前未选择玩家');
     return uuid;
@@ -46,11 +46,15 @@ class LxApiService {
   String get _currentPlayerBoxName => 'scoreBox_$_currentUuid';
 
   // 获取当前玩家的 Record 列表
-  Future<List<SongScore>> getRecordList({bool forceRefresh = false, String? uuid}) async {
-    final scoreBox = await Hive.openBox<SongScore>(uuid != null? 'scoreBox_$uuid' : _currentPlayerBoxName);
+  Future<List<SongScore>> getRecordList(
+      {bool forceRefresh = false, String? uuid}) async {
+    final scoreBox = await Hive.openBox<SongScore>(
+        uuid != null ? 'scoreBox_$uuid' : _currentPlayerBoxName);
     final playerDataBox = await Hive.openBox<PlayerData>('playerData');
     final cacheInfoBox = await Hive.openBox<DateTime>('cacheInfo');
-    final lastCacheTime = cacheInfoBox.get(uuid != null? 'SongScoreCacheTime_$uuid' : 'SongScoreCacheTime_$_currentUuid');
+    final lastCacheTime = cacheInfoBox.get(uuid != null
+        ? 'SongScoreCacheTime_$uuid'
+        : 'SongScoreCacheTime_$_currentUuid');
 
     if (!forceRefresh &&
         LxCommonUtils.isCacheValid(lastCacheTime, scoreCacheDuration)) {
@@ -67,7 +71,7 @@ class LxApiService {
 
       final playerData = PlayerData.fromLxJson(data['data'], _currentUuid);
       await playerDataBox.put(_currentUuid, playerData);
-    } catch(e) {
+    } catch (e) {
       rethrow;
     }
 
@@ -144,10 +148,12 @@ class LxApiService {
   }
 
   static Future<List<SongScore>> getRecentRecords(String friendCode) async {
-    final result = await LxCommonUtils.fetchMeow0Data('/maimai/player/$friendCode/recents');
+    final result = await LxCommonUtils.fetchMeow0Data(
+        '/maimai/player/$friendCode/recents');
     final data = result['data'] ?? [];
 
-    List<SongScore> recents = data.map<SongScore>((json) => SongScore.fromLxJson(json)).toList();
+    List<SongScore> recents =
+        data.map<SongScore>((json) => SongScore.fromLxJson(json)).toList();
 
     return recents;
   }
@@ -186,7 +192,12 @@ class LxApiService {
       await playerDataBox.put(uuid, newPlayerData);
       await saveToken(uuid, token);
 
-      _playerManager.addPlayer(uuid, newPlayerData.name, _lxMaiProvider.getProviderName());
+      _playerManager.addPlayer(
+          uuid, newPlayerData.name, _lxMaiProvider.getProviderName(),
+          avatarUrl:
+              "https://assets2.lxns.net/maimai/icon/${newPlayerData.icon?.id}.png",
+          backgroundUrl:
+              "https://assets2.lxns.net/maimai/plate/${newPlayerData.namePlate?.id}.png");
 
       return newPlayerData;
     } catch (e) {
@@ -194,9 +205,9 @@ class LxApiService {
     }
   }
 
-  Future<PlayerData> getPlayerData() async {
+  Future<PlayerData?> getPlayerData({String? id}) async {
     final playerDataBox = await Hive.openBox<PlayerData>('playerData');
-    return playerDataBox.get(_currentUuid)!;
+    return playerDataBox.get(id ?? _currentUuid);
   }
 
   Future<List<PlayerData>> getAllPlayerData() async {
@@ -301,8 +312,7 @@ class LxApiService {
       }
     }
 
-    currentVersionRecords
-        .sort((a, b) => b.dxRating!.compareTo(a.dxRating!));
+    currentVersionRecords.sort((a, b) => b.dxRating!.compareTo(a.dxRating!));
     return currentVersionRecords;
   }
 
@@ -322,8 +332,7 @@ class LxApiService {
       }
     }
 
-    pastVersionRecords
-        .sort((a, b) => b.dxRating!.compareTo(a.dxRating!));
+    pastVersionRecords.sort((a, b) => b.dxRating!.compareTo(a.dxRating!));
     return pastVersionRecords;
   }
 

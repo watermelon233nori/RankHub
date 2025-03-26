@@ -2,19 +2,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rank_hub/src/model/mai_song_filter_data.dart';
-import 'package:rank_hub/src/model/mai_types.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart';
-import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
-import 'package:rank_hub/src/model/maimai/song_info.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/mai_song_filter_data.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/mai_types.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_difficulty.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_info.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/pages/add_lx_mai_screen.dart';
 import 'package:rank_hub/src/pages/lx_sync_page.dart';
 import 'package:rank_hub/src/view/maimai/lx_b50_view.dart';
 import 'package:rank_hub/src/view/maimai/lx_record_list_view.dart';
 import 'package:rank_hub/src/view/maimai/lx_wiki_view.dart';
 import 'package:rank_hub/src/view/maimai/song_detail_screen.dart';
-import 'package:rank_hub/src/provider/data_source_provider.dart';
+import 'package:rank_hub/src/core/abstract/data_source_provider.dart';
 import 'package:rank_hub/src/view/maimai/lx_song_card.dart';
 import 'package:rank_hub/src/provider/player_manager.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
@@ -152,9 +152,8 @@ class LxMaiProvider extends DataSourceProvider<SongScore, PlayerData, SongInfo,
   }
 
   @override
-  Future<PlayerData> getPlayerDetail() {
-    // TODO: implement getPlayerDetail
-    throw UnimplementedError();
+  Future<PlayerData?> getPlayerDetail(String id) async {
+    return (await lxApiService.getPlayerData(id: id));
   }
 
   @override

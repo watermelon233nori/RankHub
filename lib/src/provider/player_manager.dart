@@ -1,102 +1,125 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:rank_hub/src/model/player.dart';
 import 'package:rank_hub/src/provider/data_source_manager.dart';
-import 'package:rank_hub/src/provider/data_source_provider.dart';
+import 'package:rank_hub/src/core/abstract/data_source_provider.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'player_manager.g.dart';
 
 @riverpod
+Future<SharedPreferences> sharedPreferences(Ref ref) async {
+  return SharedPreferences.getInstance();
+}
+
+@riverpod
+Future<Box<Player>> playerBox(Ref ref) async {
+  return Hive.openBox<Player>("playerBox");
+}
+
+@riverpod
 class PlayerManager extends _$PlayerManager {
-  String? _activePlayerId;
-
-  late Box<Player> _playerBox;
-
-  static const _currentPlayerKey = 'currentPlayer';
-
   @override
-  Future<(List<Player> players, String? activePlayerId)> build() async {
-    final prefs = await SharedPreferences.getInstance();
-    _playerBox = await Hive.openBox<Player>("playerBox");
-    _activePlayerId = prefs.getString(_currentPlayerKey);
+  Future<({List<Player> players, String? activePlayerId})> build() async {
+    final prefs = await ref.watch(sharedPreferencesProvider.future);
+    final playerBox = await ref.watch(playerBoxProvider.future);
 
-    return (_playerBox.values.toList(), _activePlayerId);
+    final activePlayerId = prefs.getString('currentPlayer');
+
+    return (
+      players: playerBox.values.toList(),
+      activePlayerId: activePlayerId,
+    );
   }
 
-  // 添加玩家并绑定数据源
-  Future<void> addPlayer(String playerId, String playerName, String dataSourceName) async {
-    if (_playerBox.containsKey(playerId)) {
-      return; // 避免重复添加
-    }
-    _playerBox.put(playerId, Player(name: playerName, provider: dataSourceName, uuid: playerId));
+  Future<void> addPlayer(
+    String playerId,
+    String playerName,
+    String dataSourceName, {
+    String? avatarUrl,
+    String? backgroundUrl,
+  }) async {
+    final playerBox = await ref.read(playerBoxProvider.future);
+    if (playerBox.containsKey(playerId)) return;
 
-    // 如果是第一个玩家，设置为活动玩家
-    if (_activePlayerId == null) {
-      await switchActivePlayer(playerId);
-    }
+    playerBox.put(
+      playerId,
+      Player(
+        name: playerName,
+        provider: dataSourceName,
+        uuid: playerId,
+        avatarUrl: avatarUrl,
+        backgroundUrl: backgroundUrl,
+      ),
+    );
 
-    state = AsyncData((_playerBox.values.toList(), _activePlayerId)); // 触发 UI 更新
+    final activePlayerId = state.value?.activePlayerId ?? playerId;
+    await _updateState(playerBox, activePlayerId);
   }
 
-  // 删除玩家
   Future<void> removePlayer(String playerId) async {
-    if (!_playerBox.containsKey(playerId)) {
-      return;
+    final playerBox = await ref.read(playerBoxProvider.future);
+    if (!playerBox.containsKey(playerId)) return;
+
+    playerBox.delete(playerId);
+
+    final prefs = await ref.read(sharedPreferencesProvider.future);
+    String? newActivePlayerId = state.value?.activePlayerId == playerId
+        ? null
+        : state.value?.activePlayerId;
+
+    if (newActivePlayerId == null && playerBox.isNotEmpty) {
+      newActivePlayerId = playerBox.keys.first as String;
     }
 
-    _playerBox.delete(playerId);
-
-    if (_activePlayerId == playerId) {
-      _activePlayerId = null;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_currentPlayerKey);
-
-      if (_playerBox.isNotEmpty) {
-        await switchActivePlayer(_playerBox.keys.first);
-      }
-    }
-
-    state = AsyncData((_playerBox.values.toList(), _activePlayerId));
+    await prefs.setString('currentPlayer', newActivePlayerId ?? '');
+    await _updateState(playerBox, newActivePlayerId);
   }
 
-  // 切换活动玩家
   Future<void> switchActivePlayer(String playerId) async {
-    if (_activePlayerId == playerId || !_playerBox.containsKey(playerId)) {
-      return;
-    }
-    _activePlayerId = playerId;
+    final playerBox = await ref.read(playerBoxProvider.future);
+    if (!playerBox.containsKey(playerId)) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_currentPlayerKey, playerId);
+    final prefs = await ref.read(sharedPreferencesProvider.future);
+    await prefs.setString('currentPlayer', playerId);
 
-    state = AsyncData((_playerBox.values.toList(), _activePlayerId));
+    await _updateState(playerBox, playerId);
   }
 
   String? getDataSourceName({String? playerId}) {
-    return _playerBox.get(playerId ?? _activePlayerId)?.provider;
+    final playerBox = ref.read(playerBoxProvider).value;
+    return playerBox?.get(playerId ?? state.value?.activePlayerId)?.provider;
   }
 
   Future<DataSourceProvider?> getDataSource({String? playerId}) async {
     final dataSource = await ref.watch(dataSourceManagerProvider.future);
-
     return dataSource.sources[getDataSourceName(playerId: playerId)];
   }
 
   String? getPlayerName({String? playerId}) {
-    return _playerBox.get(playerId ?? _activePlayerId)?.name;
+    final playerBox = ref.read(playerBoxProvider).value;
+    return playerBox?.get(playerId ?? state.value?.activePlayerId)?.name;
   }
 
   List<Player> getAllPlayers() {
-    return _playerBox.values.toList();
+    final playerBox = ref.read(playerBoxProvider).value;
+    return playerBox?.values.toList() ?? [];
   }
 
   List<String> getAllPlayersId() {
-    return _playerBox.keys.toList() as List<String>;
+    final playerBox = ref.read(playerBoxProvider).value;
+    return playerBox?.keys.map((e) => e as String).toList() ?? [];
   }
 
   String? getCurrentPlayerId() {
-    return _activePlayerId;
+    return state.value?.activePlayerId;
+  }
+
+  Future<void> _updateState(Box<Player> playerBox, String? activePlayerId) async {
+    state = AsyncData((
+      players: playerBox.values.toList(),
+      activePlayerId: activePlayerId,
+    ));
   }
 }

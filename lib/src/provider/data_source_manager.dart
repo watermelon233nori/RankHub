@@ -1,4 +1,4 @@
-import 'package:rank_hub/src/provider/data_source_provider.dart';
+import 'package:rank_hub/src/core/abstract/data_source_provider.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';

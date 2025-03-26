@@ -1,8 +1,8 @@
 import 'package:animated_digit/animated_digit.dart';
 import 'package:flutter/material.dart';
 import 'package:mvvm_plus/mvvm_plus.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/view/maimai/lx_b50_export_view.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
@@ -73,7 +73,7 @@ class LxB50View extends ViewWidget<LxB50ViewViewModel> {
                             context,
                             MaterialPageRoute(
                                 fullscreenDialog: true,
-                                builder: (context) => LxB50ExportView(
+                                builder: (context) => LxMaiB50ExportView(
                                       b35Records: viewModel.b35Records,
                                       b15Records: viewModel.b15Records,
                                       playerData: viewModel.playerData,
@@ -81,8 +81,6 @@ class LxB50View extends ViewWidget<LxB50ViewViewModel> {
                                       currentVerRating:
                                           viewModel.currentVerRating,
                                       pastVerRating: viewModel.pastVerRating,
-                                      getShaderMaskByRating:
-                                          viewModel.getShaderMaskByRating,
                                     )),
                           );
                         },
@@ -217,7 +215,7 @@ class LxB50ViewViewModel extends ViewModel {
 
   Future<void> getPlayerData() async {
     playerData =
-        await LxMaiProvider().lxApiService.getPlayerData();
+        (await LxMaiProvider().lxApiService.getPlayerData())!;
   }
 
   Future<void> initB50() async {
@@ -247,7 +245,7 @@ class LxB50ViewViewModel extends ViewModel {
 
   Future<void> getPlayerRating() async {
     playerRating =
-        (await LxMaiProvider().lxApiService.getPlayerData())
+        (await LxMaiProvider().lxApiService.getPlayerData())!
             .rating;
 
     _requestRebuild();

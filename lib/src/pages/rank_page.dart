@@ -18,8 +18,8 @@ class RankPage extends ConsumerWidget {
 
     return playerManager.when(
         data: (value) {
-          if (value.$2 == null ||
-              pm.getDataSourceName(playerId: value.$2) == null) {
+          if (value.activePlayerId == null ||
+              pm.getDataSourceName(playerId: value.activePlayerId) == null) {
             return const Scaffold(
               body: Center(
                 child: Text('没有数据'),
@@ -28,7 +28,7 @@ class RankPage extends ConsumerWidget {
           }
 
           final dataSourceProvider = dsm.getDataSource(
-            pm.getDataSourceName(playerId: value.$2)!,
+            pm.getDataSourceName(playerId: value.activePlayerId)!,
           );
 
           if (dataSourceProvider == null) {
@@ -79,7 +79,7 @@ class RankPage extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "${pm.getPlayerName(playerId: value.$2)} (${dataSourceProvider.getProviderGameName()})",
+                          "${pm.getPlayerName(playerId: value.activePlayerId)} (${dataSourceProvider.getProviderGameName()})",
                         ),
                         const SizedBox(width: 4),
                         const Icon(Icons.arrow_drop_down),

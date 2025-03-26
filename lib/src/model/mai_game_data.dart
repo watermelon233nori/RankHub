@@ -1,6 +1,6 @@
-import 'package:rank_hub/src/model/maimai/song_genre.dart';
-import 'package:rank_hub/src/model/maimai/song_info.dart';
-import 'package:rank_hub/src/model/maimai/song_version.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_genre.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_info.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_version.dart';
 
 class MaiGameData {
   final List<SongInfo> songs;

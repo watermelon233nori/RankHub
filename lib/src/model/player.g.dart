@@ -20,19 +20,25 @@ class PlayerAdapter extends TypeAdapter<Player> {
       name: fields[0] as String,
       provider: fields[1] as String,
       uuid: fields[2] as String,
+      avatarUrl: fields[3] as String?,
+      backgroundUrl: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Player obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
       ..write(obj.provider)
       ..writeByte(2)
-      ..write(obj.uuid);
+      ..write(obj.uuid)
+      ..writeByte(3)
+      ..write(obj.avatarUrl)
+      ..writeByte(4)
+      ..write(obj.backgroundUrl);
   }
 
   @override

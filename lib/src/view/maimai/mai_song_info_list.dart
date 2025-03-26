@@ -1,8 +1,8 @@
 import 'package:admonitions/admonitions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rank_hub/src/model/maimai/song_alias.dart';
-import 'package:rank_hub/src/model/maimai/song_info.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_alias.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_info.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 
 class MaiSongInfoList extends StatefulWidget {

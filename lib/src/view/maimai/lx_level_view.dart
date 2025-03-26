@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:rank_hub/src/model/maimai/song_difficulty.dart';
-import 'package:rank_hub/src/model/maimai/song_notes.dart';
-import 'package:rank_hub/src/widget/mai_calculate.dart';
-import 'package:rank_hub/src/widget/mai_note_table.dart';
-import 'package:rank_hub/src/widget/mai_rating_table.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_difficulty.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_notes.dart';
+import 'package:rank_hub/src/features/lx_mai/presentation/mai_calculate.dart';
+import 'package:rank_hub/src/features/lx_mai/presentation/mai_note_table.dart';
+import 'package:rank_hub/src/features/lx_mai/presentation/mai_rating_table.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LxMaiLevelView extends StatefulWidget {

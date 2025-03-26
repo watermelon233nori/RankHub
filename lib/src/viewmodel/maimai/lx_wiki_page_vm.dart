@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:rank_hub/src/model/maimai/song_alias.dart';
-import 'package:rank_hub/src/model/maimai/song_info.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_alias.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_info.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 
 class LxMaiWikiPageViewModel extends ChangeNotifier {

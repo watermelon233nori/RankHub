@@ -1,4 +1,4 @@
-import 'package:rank_hub/src/abstract/data_repository.dart';
+import 'package:rank_hub/src/core/abstract/data_repository.dart';
 import 'package:rank_hub/src/model/musedash/md_album.dart';
 import 'package:rank_hub/src/model/musedash/md_music.dart';
 

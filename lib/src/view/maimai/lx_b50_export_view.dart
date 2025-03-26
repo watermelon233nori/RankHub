@@ -4,38 +4,36 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
-import 'package:rank_hub/src/model/maimai/player_data.dart';
-import 'package:rank_hub/src/model/maimai/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
+import 'package:rank_hub/src/features/lx_mai/domain/lx_mai_service.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
 
-class LxB50ExportView extends StatelessWidget {
+class LxMaiB50ExportView extends StatelessWidget {
   final List<SongScore> b35Records;
   final List<SongScore> b15Records;
   final PlayerData playerData;
   final int playerRating;
   final int currentVerRating;
   final int pastVerRating;
-  final Function(int, Widget) getShaderMaskByRating;
 
-  LxB50ExportView(
+  LxMaiB50ExportView(
       {super.key,
       required this.b35Records,
       required this.b15Records,
       required this.playerData,
       required this.playerRating,
       required this.currentVerRating,
-      required this.pastVerRating,
-      required this.getShaderMaskByRating});
+      required this.pastVerRating});
 
   final GlobalKey combinedKey = GlobalKey();
 
   Future<void> _saveToGallery(Uint8List pngBytes) async {
-    final result = await ImageGallerySaverPlus.saveImage(
+    await ImageGallerySaverPlus.saveImage(
       Uint8List.fromList(pngBytes),
       quality: 100,
       name: "B15_B35_Scores",
     );
-    print("Image saved to gallery: $result");
   }
 
   Future<void> _generateAndSaveImage() async {
@@ -203,7 +201,7 @@ class LxB50ExportView extends StatelessWidget {
                                                 const SizedBox(height: 16),
                                                 SizedBox(
                                                   height: 40, // 明确的高度
-                                                  child: getShaderMaskByRating(
+                                                  child: LxMaiService().getShaderMaskByRating(
                                                     playerRating,
                                                     Text(
                                                       playerRating.toString(),
