@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum LevelIndex {
   basic(0, 'BASIC'),         // BASIC
   advanced(1, 'ADVANCED'),   // ADVANCED
@@ -111,6 +113,33 @@ enum SongType {
     return SongType.values.firstWhere(
       (e) => e.value == value,
       orElse: () => throw ArgumentError('Invalid value for SongType: $value'),
+    );
+  }
+}
+
+enum TrophyColor {
+  normal("normal", 'Normal', Colors.grey),
+  bronze("bronze", 'Bronze', Colors.brown),
+  silver("silver", 'Silver', Colors.blueGrey),
+  gold("gold", 'Gold', Colors.amber),
+  rainbow("rainbow", 'Rainbow', Colors.purple);
+
+  final String value;
+  final String label;
+  final Color color;
+  const TrophyColor(this.value, this.label, this.color);
+
+  static TrophyColor? fromValue(String value) {
+    return TrophyColor.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => throw ArgumentError('Invalid value for trophyColor: $value'),
+    );
+  }
+
+  static TrophyColor? fromLabel(String label) {
+    return TrophyColor.values.firstWhere(
+      (e) => e.label == label,
+      orElse: () => throw ArgumentError('Invalid label for trophyColor: $label'),
     );
   }
 }

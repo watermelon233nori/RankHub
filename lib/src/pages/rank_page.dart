@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rank_hub/src/pages/player_switch_page.dart';
 import 'package:rank_hub/src/provider/data_source_manager.dart';
-import 'package:rank_hub/src/provider/player_manager.dart';
+import 'package:rank_hub/src/core/player_manager.dart';
 
 class RankPage extends ConsumerWidget {
   const RankPage({super.key});

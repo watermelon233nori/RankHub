@@ -1,8 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:rank_hub/src/model/player.dart';
 import 'package:rank_hub/src/provider/data_source_manager.dart';
 import 'package:rank_hub/src/core/abstract/data_source_provider.dart';
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -100,6 +100,11 @@ class PlayerManager extends _$PlayerManager {
   String? getPlayerName({String? playerId}) {
     final playerBox = ref.read(playerBoxProvider).value;
     return playerBox?.get(playerId ?? state.value?.activePlayerId)?.name;
+  }
+
+  Future<Player?> getPlayerById(String playerId) async {
+    final playerBox = await ref.read(playerBoxProvider.future);
+    return playerBox.get(playerId);
   }
 
   List<Player> getAllPlayers() {

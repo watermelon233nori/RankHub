@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rank_hub/src/provider/data_source_manager.dart';
-import 'package:rank_hub/src/provider/player_manager.dart';
+import 'package:rank_hub/src/core/player_manager.dart';
 import 'package:rank_hub/src/utils/common.dart';
 
 class PlayerListView extends ConsumerWidget {

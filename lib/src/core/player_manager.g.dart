@@ -40,7 +40,7 @@ final playerBoxProvider = AutoDisposeFutureProvider<Box<Player>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PlayerBoxRef = AutoDisposeFutureProviderRef<Box<Player>>;
-String _$playerManagerHash() => r'1e650a7bdc2c206db034e260ccd9957abc4a6a07';
+String _$playerManagerHash() => r'4fc5ccb9488b567ebd25682e949019a6e230d4e3';
 
 /// See also [PlayerManager].
 @ProviderFor(PlayerManager)

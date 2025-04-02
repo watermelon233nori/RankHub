@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rank_hub/src/shared/widgets/hideable_bottom_bar.dart';
 
-class LxMaiRecordView extends ConsumerStatefulWidget {
-  const LxMaiRecordView({super.key, required this.listView, required this.filterViewBuilder});
+class FilterableListView extends ConsumerStatefulWidget {
+  const FilterableListView(
+      {super.key,
+      required this.filterViewBuilder,
+      required this.listViewBuilder});
 
-  final Widget listView;
-  final HideableBottomBar Function(bool) filterViewBuilder;
+  final Widget Function(bool) filterViewBuilder;
+  final Widget Function(ScrollController) listViewBuilder;
 
   @override
-  ConsumerState<LxMaiRecordView> createState() => _LxMaiRecordViewState();
+  ConsumerState<FilterableListView> createState() => _LxMaiRecordViewState();
 }
 
-class _LxMaiRecordViewState extends ConsumerState<LxMaiRecordView> {
+class _LxMaiRecordViewState extends ConsumerState<FilterableListView> {
   final scrollController = ScrollController();
   bool visible = true;
 
@@ -39,7 +41,7 @@ class _LxMaiRecordViewState extends ConsumerState<LxMaiRecordView> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: widget.listView,
+      body: widget.listViewBuilder(scrollController),
       bottomNavigationBar: SafeArea(child: widget.filterViewBuilder(visible)),
     );
   }

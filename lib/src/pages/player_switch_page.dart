@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:rank_hub/src/provider/player_manager.dart';
+import 'package:rank_hub/src/core/player_manager.dart';
 
 class PlayerSwitchPage extends ConsumerWidget {
   const PlayerSwitchPage({super.key});

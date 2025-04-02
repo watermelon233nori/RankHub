@@ -1,12 +1,11 @@
 import 'package:animated_digit/animated_digit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mvvm_plus/mvvm_plus.dart';
 import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
 import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/features/lx_mai/domain/lx_mai_provider.dart';
 import 'package:rank_hub/src/features/lx_mai/domain/lx_mai_service.dart';
-import 'package:rank_hub/src/provider/lx_mai_provider.dart';
+import 'package:rank_hub/src/shared/widgets/error_view.dart';
 import 'package:rank_hub/src/view/maimai/lx_b50_export_view.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
 
@@ -152,8 +151,9 @@ class LxMaiB50View extends ConsumerWidget {
             ],
           ),
         ),
-      AsyncValue(:final error?) => Center(
-          child: Text("无法加载数据\n$e"),
+      AsyncValue(:final error?) => ErrorView(
+          errorMessage: error.toString(),
+          onRetry: () => ref.refresh(getB15RecordsProvider(uuid).future),
         ),
       _ => const CircularProgressIndicator(),
     };

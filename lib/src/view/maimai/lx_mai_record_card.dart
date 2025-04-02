@@ -7,7 +7,7 @@ import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/utils/common.dart';
 import 'package:rank_hub/src/view/maimai/song_detail_screen.dart';
-import 'package:rank_hub/src/widget/record_card.dart';
+import 'package:rank_hub/src/shared/framework/record_card.dart';
 
 class LxMaiRecordCard extends RecordCard<SongScore> {
   LxMaiRecordCard({super.key, required super.recordData});

@@ -8,7 +8,7 @@ import 'package:rank_hub/src/features/lx_mai/data/model/song_genre.dart';
 import 'package:rank_hub/src/features/lx_mai/data/model/song_version.dart';
 import 'package:rank_hub/src/provider/lx_mai_provider.dart';
 import 'package:rank_hub/src/utils/lx_common_utils.dart';
-import 'package:rank_hub/src/provider/player_manager.dart';
+import 'package:rank_hub/src/core/player_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class LxApiService {

@@ -14,7 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:rank_hub/src/features/lx_mai/data/model/song_info.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/view/maimai/lx_level_view.dart';
-import 'package:rank_hub/src/widget/difficulty_card/mai_difficulty_card.dart';
+import 'package:rank_hub/src/features/lx_mai/presentation/mai_difficulty_card.dart';
 import 'package:rank_hub/src/view/maimai/mai_song_info_list.dart';
 import 'package:share_plus/share_plus.dart';
 

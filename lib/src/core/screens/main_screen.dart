@@ -7,32 +7,23 @@ import 'package:rank_hub/src/pages/rank_page.dart';
 import 'package:rank_hub/src/pages/wiki_page.dart';
 import 'package:rank_hub/src/view/settings_view.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainPageState extends State<MainPage> {
-  //static const _channel = MethodChannel('fun.meow0.rankhub.network');
+class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   late final PageController _pageController;
-
-  //Future<void> startTunnel() async {
-  //  await _channel.invokeMethod('startTunnel');
-  //}
-
-  //Future<void> stopTunnel() async {
-  //  await _channel.invokeMethod('stopTunnel');
-  //}
 
   // 底部导航项列表
   final List<NavigationDestination> _navItems = const [
     NavigationDestination(
         icon: Icon(Icons.home_outlined),
         selectedIcon: Icon(Icons.home),
-        label: '概览'),
+        label: '主页'),
     NavigationDestination(
         icon: Icon(Icons.insert_chart_outlined),
         selectedIcon: Icon(Icons.insert_chart),
@@ -40,7 +31,7 @@ class _MainPageState extends State<MainPage> {
     NavigationDestination(
         icon: Icon(Icons.book_outlined),
         selectedIcon: Icon(Icons.book),
-        label: '百科'),
+        label: '资料库'),
     NavigationDestination(
         icon: Icon(Icons.cloud_outlined),
         selectedIcon: Icon(Icons.cloud),

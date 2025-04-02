@@ -16,7 +16,7 @@ import 'package:rank_hub/src/view/maimai/lx_wiki_view.dart';
 import 'package:rank_hub/src/view/maimai/song_detail_screen.dart';
 import 'package:rank_hub/src/core/abstract/data_source_provider.dart';
 import 'package:rank_hub/src/view/maimai/lx_song_card.dart';
-import 'package:rank_hub/src/provider/player_manager.dart';
+import 'package:rank_hub/src/core/player_manager.dart';
 import 'package:rank_hub/src/services/lx_api_services.dart';
 import 'package:rank_hub/src/view/maimai/lx_mai_record_card.dart';
 

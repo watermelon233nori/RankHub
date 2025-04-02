@@ -12,4 +12,8 @@ abstract class ModeStrategy {
   String getDataSourceLocation();
 
   Map<String, Widget> getRecordViews(String uuid);
+
+  Map<String, Widget> getLibraryViews(String uuid);
+
+  Map<Icon, Function> getRecordScreenActions();
 }

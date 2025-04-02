@@ -1,28 +1,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rank_hub/src/features/lx_mai/data/model/mai_types.dart';
 import 'package:rank_hub/src/features/lx_mai/data/model/player_data.dart';
 import 'package:rank_hub/src/utils/common.dart';
 import 'package:rank_hub/src/features/lx_mai/presentation/lx_mai_play_heatmap.dart';
 
-class LxPlayerDetailView extends StatefulWidget {
-  const LxPlayerDetailView({super.key, required this.player});
+class LxMaiPlayerDetailView extends StatefulWidget {
+  const LxMaiPlayerDetailView({super.key, required this.player});
 
   final PlayerData player;
 
   @override
-  State<LxPlayerDetailView> createState() => _LxPlayerDetailViewState();
+  State<LxMaiPlayerDetailView> createState() => _LxMaiPlayerDetailViewState();
 }
 
-class _LxPlayerDetailViewState extends State<LxPlayerDetailView> {
-  final Map<String, Color> _trophyColors = {
-    'Normal': Colors.grey,
-    'Bronze': Colors.brown,
-    'Silver': Colors.blueGrey,
-    'Gold': Colors.amber,
-    'Rainbow': Colors.purple,
-  };
-
+class _LxMaiPlayerDetailViewState extends State<LxMaiPlayerDetailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +38,9 @@ class _LxPlayerDetailViewState extends State<LxPlayerDetailView> {
               title: Text(widget.player.name),
               subtitle: Text(widget.player.trophy?.name ?? '未知',
                   style: TextStyle(
-                    color:
-                        _trophyColors[widget.player.trophy?.color ?? 'Normal']!,
+                    color: TrophyColor.fromLabel(
+                            widget.player.trophy?.color ?? 'Normal')!
+                        .color,
                   )),
             ),
             ListTile(
@@ -55,7 +49,8 @@ class _LxPlayerDetailViewState extends State<LxPlayerDetailView> {
               trailing: IconButton(
                 icon: const Icon(Icons.copy),
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(text: widget.player.friendCode.toString()));
+                  Clipboard.setData(
+                      ClipboardData(text: widget.player.friendCode.toString()));
                   HapticFeedback.lightImpact();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('好友码已复制')),
@@ -64,7 +59,8 @@ class _LxPlayerDetailViewState extends State<LxPlayerDetailView> {
               ),
             ),
             ListTile(
-              title: Text(Common.formatDateTime(widget.player.uploadTime, format: 'yyyy-MM-dd HH:mm:ss')),
+              title: Text(Common.formatDateTime(widget.player.uploadTime,
+                  format: 'yyyy-MM-dd HH:mm:ss')),
               subtitle: const Text('上次同步时间'),
               trailing: Text(Common.getTimeAgo(widget.player.uploadTime)),
             ),
