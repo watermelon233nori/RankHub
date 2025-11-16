@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/account_service.dart';
-import 'package:rank_hub/services/providers/diving_fish_credential_provider.dart';
 import 'package:rank_hub/modules/maimai_lxns/services/lxns_credential_provider.dart';
 import 'package:rank_hub/services/platform_login_manager.dart';
 
@@ -33,7 +32,6 @@ class AccountController extends GetxController {
     PlatformLoginManager.instance.initialize();
 
     // 注册凭据提供者
-    _accountService.registerProvider(DivingFishCredentialProvider());
     _accountService.registerProvider(LxnsCredentialProvider());
 
     // 加载账号列表
