@@ -5,10 +5,10 @@ import 'package:rank_hub/models/game.dart';
 import 'package:rank_hub/models/sync_task.dart';
 import 'package:rank_hub/services/credential_provider.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
-import 'package:rank_hub/modules/maimai_lxns/services/lxns_login_handler.dart';
-import 'package:rank_hub/modules/maimai_lxns/services/lxns_credential_provider.dart';
-import 'package:rank_hub/modules/maimai_lxns/services/maimai_api_service.dart';
-import 'package:rank_hub/modules/maimai_lxns/maimai_dx_game.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_login_handler.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
+import 'package:rank_hub/modules/lxns/services/maimai_api_service.dart';
+import 'package:rank_hub/modules/lxns/maimai_dx_game.dart';
 
 /// 落雪咖啡屋平台（LXNS）
 /// 提供舞萌DX数据查询服务

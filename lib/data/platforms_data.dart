@@ -1,6 +1,6 @@
 import 'package:rank_hub/models/platform.dart';
 import 'package:rank_hub/models/account/account.dart' show Platform;
-import 'package:rank_hub/modules/maimai_lxns/lxns_platform.dart';
+import 'package:rank_hub/modules/lxns/lxns_platform.dart';
 
 /// 平台注册中心
 /// 管理所有可用的平台

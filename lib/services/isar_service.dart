@@ -1,5 +1,5 @@
 import 'package:rank_hub/services/base_isar_service.dart';
-import 'package:rank_hub/modules/maimai_lxns/services/maimai_isar_service.dart';
+import 'package:rank_hub/modules/lxns/services/maimai_isar_service.dart';
 import 'package:rank_hub/services/account_isar_service.dart';
 
 /// Isar 数据库服务统一入口

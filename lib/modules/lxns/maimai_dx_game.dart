@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rank_hub/models/game.dart';
-import 'package:rank_hub/modules/maimai_lxns/songs_tab.dart';
-import 'package:rank_hub/modules/maimai_lxns/collections_tab.dart';
+import 'package:rank_hub/modules/lxns/songs_tab.dart';
+import 'package:rank_hub/modules/lxns/collections_tab.dart';
 
 /// 舞萌DX 游戏
 class MaimaiDXGame extends BaseGame {
@@ -9,7 +9,7 @@ class MaimaiDXGame extends BaseGame {
     : super(
         id: 'maimai_dx',
         name: '舞萌DX',
-        description: '街机音乐游戏 maimai DeLUXE',
+        description: '街机音乐游戏 舞萌DX',
         icon: Icons.music_note_outlined,
         iconUrl: 'https://maimai.lxns.net/favicon.webp',
         color: Colors.pink,

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
-import 'package:rank_hub/modules/maimai_lxns/services/lxns_login_handler.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_login_handler.dart';
 
 /// 平台登录管理器
 /// 统一管理各平台的登录处理器

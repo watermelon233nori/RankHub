@@ -6,17 +6,19 @@
 > 
 > 成绩更新这块感谢开源科技也有望整上了。
 
-RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支持多平台账号管理、数据同步、成绩查询和其他功能。幻想打造一个聚合音游平台。
+RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支持多平台账号管理、数据同步、成绩查询和其他功能。
+
+幻想打造一个聚合音游平台。
 
 ## 项目概述
 
 ### 核心功能
-- 🎮 **多平台支持**：支持落雪咖啡屋（LXNS）等多个音游数据平台
-- 🎯 **多游戏支持**：支持舞萌DX、中二节奏等多款音游
-- 👤 **账号管理**：多账号绑定、OAuth2/API Key 认证
-- 🔄 **数据同步**：智能数据同步，支持全量和增量同步
-- 📊 **数据展示**：Wiki、Rank、个人页面等多维度数据展示
-- 💾 **本地存储**：基于 Isar 的高性能本地数据库
+- **多平台支持**：支持落雪咖啡屋（LXNS）等多个音游数据平台
+- **多游戏支持**：支持舞萌DX、中二节奏等多款音游
+- **账号管理**：多账号绑定、OAuth2/API Key 认证
+- **数据同步**：智能数据同步，支持全量和增量同步
+- **数据展示**：Wiki、Rank、个人页面等多维度数据展示
+- **本地存储**：基于 Isar 的高性能本地数据库
 
 ### 技术栈
 - **框架**：Flutter 3.10+ / Dart 3.10+
@@ -279,7 +281,7 @@ lib/
 │   └── account/                 # 账号模型
 │       └── account.dart
 ├── modules/                     # 游戏模块（插件化）
-│   ├── maimai_lxns/             # 舞萌DX模块
+│   ├── lxns/                    # 落雪查分器平台
 │   │   ├── lxns_platform.dart   # LXNS平台实现
 │   │   ├── maimai_dx_game.dart  # 舞萌DX游戏实现
 │   │   ├── services/            # 模块专属服务
@@ -288,7 +290,7 @@ lib/
 │   │   │   ├── maimai_api_service.dart
 │   │   │   └── maimai_isar_service.dart
 │   │   └── widgets/             # 模块专属组件
-│   └── chuni_lxns/              # 中二节奏模块
+│   └── diving_fish/             # 水鱼查分器平台
 ├── pages/                       # 页面
 │   ├── main_page.dart           # 主页面（TabBar）
 │   ├── wiki.dart                # Wiki 页面
@@ -595,21 +597,6 @@ class MaimaiApiService {
     return PlayerScore.fromJson(response.data);
   }
 }
-```
-
-
-## 测试
-
-### 单元测试
-
-```bash
-flutter test
-```
-
-### 集成测试
-
-```bash
-flutter drive --target=test_driver/app.dart
 ```
 
 
