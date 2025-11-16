@@ -6,11 +6,12 @@ part of 'lx_mai_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$lxMaiRepositoryHash() => r'4dc220183e78099a05094349fda3089cb2e0a17e';
+String _$lxMaiRepositoryHash() => r'76819d60cffa09db85b0676a2b2feaa2124963fb';
 
 /// See also [lxMaiRepository].
 @ProviderFor(lxMaiRepository)
-final lxMaiRepositoryProvider = AutoDisposeProvider<LxMaiRepository>.internal(
+final lxMaiRepositoryProvider =
+    AutoDisposeFutureProvider<LxMaiRepository>.internal(
   lxMaiRepository,
   name: r'lxMaiRepositoryProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -22,8 +23,8 @@ final lxMaiRepositoryProvider = AutoDisposeProvider<LxMaiRepository>.internal(
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef LxMaiRepositoryRef = AutoDisposeProviderRef<LxMaiRepository>;
-String _$filteredRecordsHash() => r'93dd872bd3903ae175f3006c6f072485bb81e9a0';
+typedef LxMaiRepositoryRef = AutoDisposeFutureProviderRef<LxMaiRepository>;
+String _$filteredRecordsHash() => r'0773806742ed184177dc3c72d5626b303930afa3';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -194,7 +195,7 @@ class _FilteredRecordsProviderElement
       (origin as FilteredRecordsProvider).filterData;
 }
 
-String _$getB15RecordsHash() => r'aa2d9088d6113c69eababd3fabf507df575728a5';
+String _$getB15RecordsHash() => r'ca13014a2008373b1cba101cec5934b64b1eeead';
 
 /// See also [getB15Records].
 @ProviderFor(getB15Records)
@@ -325,7 +326,7 @@ class _GetB15RecordsProviderElement
   String get uuid => (origin as GetB15RecordsProvider).uuid;
 }
 
-String _$getB35RecordsHash() => r'eaaa3e76b684ba3ff73ad80cb6c043ccd7928f5f';
+String _$getB35RecordsHash() => r'975193a13c8f39a962c2ffbb8d169fed10f0c380';
 
 /// See also [getB35Records].
 @ProviderFor(getB35Records)
@@ -456,7 +457,7 @@ class _GetB35RecordsProviderElement
   String get uuid => (origin as GetB35RecordsProvider).uuid;
 }
 
-String _$getB50DataHash() => r'97774fbf4cb654b73f93bfd7a0f98c05fb079e71';
+String _$getB50DataHash() => r'30a2931e51527776be54f789f9648e44c5af1cdb';
 
 /// See also [getB50Data].
 @ProviderFor(getB50Data)
@@ -628,6 +629,136 @@ class _GetB50DataProviderElement extends AutoDisposeFutureProviderElement<
 
   @override
   String get uuid => (origin as GetB50DataProvider).uuid;
+}
+
+String _$playerDataHash() => r'892c334449f1ad45c781b0bd197350c0f4489fe9';
+
+/// See also [playerData].
+@ProviderFor(playerData)
+const playerDataProvider = PlayerDataFamily();
+
+/// See also [playerData].
+class PlayerDataFamily extends Family<AsyncValue<PlayerData>> {
+  /// See also [playerData].
+  const PlayerDataFamily();
+
+  /// See also [playerData].
+  PlayerDataProvider call(
+    String uuid,
+  ) {
+    return PlayerDataProvider(
+      uuid,
+    );
+  }
+
+  @override
+  PlayerDataProvider getProviderOverride(
+    covariant PlayerDataProvider provider,
+  ) {
+    return call(
+      provider.uuid,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'playerDataProvider';
+}
+
+/// See also [playerData].
+class PlayerDataProvider extends AutoDisposeFutureProvider<PlayerData> {
+  /// See also [playerData].
+  PlayerDataProvider(
+    String uuid,
+  ) : this._internal(
+          (ref) => playerData(
+            ref as PlayerDataRef,
+            uuid,
+          ),
+          from: playerDataProvider,
+          name: r'playerDataProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$playerDataHash,
+          dependencies: PlayerDataFamily._dependencies,
+          allTransitiveDependencies:
+              PlayerDataFamily._allTransitiveDependencies,
+          uuid: uuid,
+        );
+
+  PlayerDataProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.uuid,
+  }) : super.internal();
+
+  final String uuid;
+
+  @override
+  Override overrideWith(
+    FutureOr<PlayerData> Function(PlayerDataRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: PlayerDataProvider._internal(
+        (ref) => create(ref as PlayerDataRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        uuid: uuid,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<PlayerData> createElement() {
+    return _PlayerDataProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PlayerDataProvider && other.uuid == uuid;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, uuid.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin PlayerDataRef on AutoDisposeFutureProviderRef<PlayerData> {
+  /// The parameter `uuid` of this provider.
+  String get uuid;
+}
+
+class _PlayerDataProviderElement
+    extends AutoDisposeFutureProviderElement<PlayerData> with PlayerDataRef {
+  _PlayerDataProviderElement(super.provider);
+
+  @override
+  String get uuid => (origin as PlayerDataProvider).uuid;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

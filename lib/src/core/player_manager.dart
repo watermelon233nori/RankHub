@@ -25,7 +25,17 @@ class PlayerManager extends _$PlayerManager {
     final prefs = await ref.watch(sharedPreferencesProvider.future);
     final playerBox = await ref.watch(playerBoxProvider.future);
 
-    final activePlayerId = prefs.getString('currentPlayer');
+    var activePlayerId = prefs.getString('currentPlayer');
+
+    if (activePlayerId != null && !playerBox.containsKey(activePlayerId)) {
+      await prefs.remove('currentPlayer');
+    }
+    if (activePlayerId == null && playerBox.isNotEmpty) {
+      activePlayerId = playerBox.keys.first as String;
+      await prefs.setString('currentPlayer', activePlayerId);
+    }
+
+    print('Active Player ID: $activePlayerId');
 
     return (
       players: playerBox.values.toList(),

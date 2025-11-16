@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rank_hub/src/pages/data_src_page.dart';
-import 'package:rank_hub/src/pages/rank_page.dart';
-import 'package:rank_hub/src/pages/wiki_page.dart';
+import 'package:rank_hub/src/core/screens/library_screen.dart';
+import 'package:rank_hub/src/core/screens/record_screen.dart';
+import 'package:rank_hub/src/core/screens/data_src_screen.dart';
 import 'package:rank_hub/src/view/settings_view.dart';
 
 class MainScreen extends StatefulWidget {
@@ -65,12 +65,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 页面列表
     final List<Widget> pages = [
       const Center(child: Text("还没想好这部分要怎么写")),
-      const RankPage(),
-      const WikiPage(),
-      const DataSrcPage(),
+      const RecordScreen(),
+      const LibraryScreen(),
+      const DataSrcScreen(),
       SettingsPage(),
     ];
 

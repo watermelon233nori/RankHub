@@ -39,7 +39,6 @@ class _LxMaiRecordFilterBarState extends ConsumerState<LxMaiRecordFilterBar> {
   @override
   Widget build(BuildContext context) {
     final filterData = ref.watch(lxMaiFilterProvider);
-    final repository = ref.watch(lxMaiRepositoryProvider);
 
     void openDateRangePickerDialog() {
       showCalendarDatePicker2Dialog(
@@ -137,6 +136,7 @@ class _LxMaiRecordFilterBarState extends ConsumerState<LxMaiRecordFilterBar> {
     }
 
     Future<void> openVersionMultiSelectDialog() async {
+      final repository = await ref.read(lxMaiRepositoryProvider.future);
       final List<SongVersion> versions = await repository.getSongVersion();
       List<SongVersion> list =
           filterData.version == null ? [] : filterData.version!;
@@ -157,6 +157,7 @@ class _LxMaiRecordFilterBarState extends ConsumerState<LxMaiRecordFilterBar> {
     }
 
     Future<void> openGenreMultiSelectDialog() async {
+      final repository = await ref.read(lxMaiRepositoryProvider.future);
       final List<SongGenre> genres = await repository.getSongGenre();
       List<SongGenre> list = filterData.genre == null ? [] : filterData.genre!;
       showDialog<List<SongGenre>>(
@@ -255,6 +256,7 @@ class _LxMaiRecordFilterBarState extends ConsumerState<LxMaiRecordFilterBar> {
 
     return HideableBottomBar(
         visible: widget.visible,
+        height: 128,
         child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(

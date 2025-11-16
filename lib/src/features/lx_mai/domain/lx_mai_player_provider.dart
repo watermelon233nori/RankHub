@@ -8,7 +8,7 @@ part 'lx_mai_player_provider.g.dart';
 class LxMaiPlayer extends _$LxMaiPlayer {
   @override
   Future<List<PlayerData>> build() async {
-    final repo = ref.watch(lxMaiRepositoryProvider);
+    final repo = await ref.watch(lxMaiRepositoryProvider.future);
     return await repo.getPlayerDataList();
   }
 }

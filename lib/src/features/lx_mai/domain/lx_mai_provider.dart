@@ -11,9 +11,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'lx_mai_provider.g.dart';
 
 @riverpod
-LxMaiRepository lxMaiRepository(Ref ref) {
+Future<LxMaiRepository> lxMaiRepository(Ref ref) async {
+  final lxLocal = await LxMaiLocal.init();
+
   return LxMaiRepository(
-    LxMaiLocal(),
+    lxLocal,
     LxMaiRemote(),
   );
 }
@@ -21,7 +23,7 @@ LxMaiRepository lxMaiRepository(Ref ref) {
 @riverpod
 Future<List<SongScore>> filteredRecords(
     Ref ref, List<SongScore> records, MaiSongFilterData filterData) async {
-  final repository = ref.watch(lxMaiRepositoryProvider);
+  final repository = await ref.watch(lxMaiRepositoryProvider.future);
   final songs = await repository.getSongList();
 
   return LxMaiService().filterRecords(songs, records, filterData);
@@ -29,7 +31,7 @@ Future<List<SongScore>> filteredRecords(
 
 @riverpod
 Future<List<SongScore>> getB15Records(Ref ref, String uuid) async {
-  final repository = ref.watch(lxMaiRepositoryProvider);
+  final repository = await ref.watch(lxMaiRepositoryProvider.future);
   final records = await repository.getRecordList(uuid);
   final versions = await repository.getSongVersion();
 
@@ -46,7 +48,7 @@ Future<List<SongScore>> getB15Records(Ref ref, String uuid) async {
 
 @riverpod
 Future<List<SongScore>> getB35Records(Ref ref, String uuid) async {
-  final repository = ref.watch(lxMaiRepositoryProvider);
+  final repository = await ref.watch(lxMaiRepositoryProvider.future);
   final records = await repository.getRecordList(uuid);
   final versions = await repository.getSongVersion();
 
@@ -70,7 +72,7 @@ Future<
       int b15Rating,
       int b35Rating,
     })> getB50Data(Ref ref, String uuid) async {
-  final repository = ref.watch(lxMaiRepositoryProvider);
+  final repository = await ref.watch(lxMaiRepositoryProvider.future);
   final player = await repository.getPlayerData(uuid);
   final b15Records = await ref.watch(getB15RecordsProvider(uuid).future);
   final b35Records = await ref.watch(getB35RecordsProvider(uuid).future);
@@ -84,4 +86,10 @@ Future<
     b15Rating: b15Rating,
     b35Rating: b35Rating
   );
+}
+
+@riverpod
+Future<PlayerData> playerData(Ref ref, String uuid) async {
+  final repository = await ref.watch(lxMaiRepositoryProvider.future);
+  return await repository.getPlayerData(uuid);
 }

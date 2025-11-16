@@ -61,7 +61,7 @@ class LxMaiSongSearchKeyword extends _$LxMaiSongSearchKeyword {
 Future<List<SongScore>> filteredRecordList(Ref ref, String uuid) async {
   final filterData = ref.watch(lxMaiFilterProvider);
   final searchKeyword = ref.watch(lxMaiRecordSearchKeywordProvider);
-  final repository = ref.read(lxMaiRepositoryProvider);
+  final repository = await ref.read(lxMaiRepositoryProvider.future);
 
   final records = await repository.getRecordList(uuid);
   final songs = await repository.getSongList();
@@ -80,7 +80,7 @@ Future<List<SongScore>> filteredRecordList(Ref ref, String uuid) async {
 @riverpod
 Future<List<SongInfo>> filteredSongList(Ref ref) async {
   final searchKeyword = ref.watch(lxMaiSongSearchKeywordProvider);
-  final repository = ref.read(lxMaiRepositoryProvider);
+  final repository = await ref.read(lxMaiRepositoryProvider.future);
 
   final songs = await repository.getSongList();
   final aliases = await repository.getSongAlias();

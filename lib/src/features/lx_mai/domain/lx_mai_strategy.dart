@@ -41,7 +41,7 @@ class LxMaiStrategy implements ModeStrategy {
   }
 
   @override
-  Map<String, Widget> getLibraryViews(String uuid) {
+  Map<String, Widget> getLibraryViews() {
     return {"所有歌曲": const LxMaiSongView(), "姓名框": Container()};
   }
   
@@ -51,5 +51,10 @@ class LxMaiStrategy implements ModeStrategy {
       const Icon(Icons.add): () {},
       const Icon(Icons.cloud_sync): () {},
     };
+  }
+
+  @override
+  Widget getPlayerDetailView(String uuid) {
+    return LxMaiRecordView(uuid: uuid);
   }
 }

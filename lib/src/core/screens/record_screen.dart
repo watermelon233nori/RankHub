@@ -16,7 +16,8 @@ class RecordScreen extends ConsumerWidget {
     final playerStrategyMixin = ref.watch(playerStrategyMixinProvider(null));
 
     return switch (playerStrategyMixin) {
-      AsyncData(:final valueOrNull?) => _buildRecordScreen(context, valueOrNull),
+      AsyncData(:final valueOrNull?) =>
+        _buildRecordScreen(context, valueOrNull),
       AsyncError(:final error, :final stackTrace) => ErrorView(
           errorMessage: error.toString(), errorDetails: stackTrace.toString()),
       _ => const LoadingView(),
@@ -36,7 +37,8 @@ class RecordScreen extends ConsumerWidget {
         extendBody: true,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+          backgroundColor:
+              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
           surfaceTintColor: Colors.transparent,
           centerTitle: false,
           automaticallyImplyLeading: false,
@@ -47,7 +49,8 @@ class RecordScreen extends ConsumerWidget {
             ),
           ),
           bottom: TabBar(
-            tabs: recordViews.keys.map((title) => Tab(text: title)).toList(),
+            tabs:
+                recordViews.keys.map<Tab>((title) => Tab(text: title)).toList(),
           ),
           title: TextButton(
             onPressed: () {
@@ -56,7 +59,8 @@ class RecordScreen extends ConsumerWidget {
                 pageBuilder: (context) => const PlayerSwitchPage(),
               );
             },
-            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16)),
+            style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -72,7 +76,8 @@ class RecordScreen extends ConsumerWidget {
               child: Wrap(
                 spacing: 8,
                 children: recordActions.entries
-                    .map((entry) => IconButton(icon: entry.key, onPressed: entry.value))
+                    .map<Widget>((entry) =>
+                        IconButton(icon: entry.key, onPressed: entry.value))
                     .toList(),
               ),
             ),

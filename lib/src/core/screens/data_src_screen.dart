@@ -2,17 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:rank_hub/src/pages/add_player_screen.dart';
-import 'package:rank_hub/src/view/data_source_list_view.dart';
-import 'package:rank_hub/src/view/player_list_view.dart';
+import 'package:rank_hub/src/core/views/data_source_list_view.dart';
+import 'package:rank_hub/src/core/views/player_list_view.dart';
 
-class DataSrcPage extends StatefulWidget {
-  const DataSrcPage({super.key});
+class DataSrcScreen extends StatefulWidget {
+  const DataSrcScreen({super.key});
 
   @override
-  State<DataSrcPage> createState() => _DataSrcPageState();
+  State<DataSrcScreen> createState() => _DataSrcScreenState();
 }
 
-class _DataSrcPageState extends State<DataSrcPage>
+class _DataSrcScreenState extends State<DataSrcScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 

@@ -8,21 +8,44 @@ import 'package:rank_hub/src/features/lx_mai/data/model/song_score.dart';
 import 'package:rank_hub/src/features/lx_mai/data/model/song_version.dart';
 
 class LxMaiLocal {
-  final Box<PlayerData> playerDataBox = Hive.box<PlayerData>('LxMaiPlayerData');
-  final Box<List<SongScore>> scoreBox = Hive.box<List<SongScore>>('LxMaiRecords');
-  final Box<SongInfo> songBox = Hive.box<SongInfo>('LxMaiCnSongs');
-  final Box<SongGenre> genreBox = Hive.box<SongGenre>('LxMaiCnGenres');
-  final Box<SongVersion> versionBox = Hive.box<SongVersion>('LxMaiCnVersions');
-  final Box<SongAlias> aliasBox = Hive.box<SongAlias>('LxMaiCnAliases');
+  late final Box<PlayerData> playerDataBox;
+  late final Box<List<SongScore>> scoreBox;
+  late final Box<SongInfo> songBox;
+  late final Box<SongGenre> genreBox;
+  late final Box<SongVersion> versionBox;
+  late final Box<SongAlias> aliasBox;
+
+  LxMaiLocal._();
+
+  static Future<LxMaiLocal> init() async {
+    final local = LxMaiLocal._();
+
+    local.playerDataBox = await _openBox<PlayerData>('LxMaiPlayerData');
+    local.scoreBox = await _openBox<List<SongScore>>('LxMaiRecords');
+    local.songBox = await _openBox<SongInfo>('LxMaiCnSongs');
+    local.genreBox = await _openBox<SongGenre>('LxMaiCnGenres');
+    local.versionBox = await _openBox<SongVersion>('LxMaiCnVersions');
+    local.aliasBox = await _openBox<SongAlias>('LxMaiCnAliases');
+
+    return local;
+  }
+
+  static Future<Box<T>> _openBox<T>(String name) async {
+    if (Hive.isBoxOpen(name)) {
+      return Hive.box<T>(name);
+    } else {
+      return await Hive.openBox<T>(name);
+    }
+  }
 
   Future<String> getPlayerToken(String uuid) async {
-  final secureStorage = SecureStorageServices();
-  String? token = await secureStorage.read(key: 'playerToken_$uuid');
-  if (token == null) {
-    throw Exception('玩家 Token 不存在');
+    final secureStorage = SecureStorageServices();
+    String? token = await secureStorage.read(key: 'token_$uuid');
+    if (token == null) {
+      throw Exception('玩家 Token 不存在');
+    }
+    return token;
   }
-  return token;
-}
 
   Future<void> savePlayerData(PlayerData playerData, String uuid) async {
     await playerDataBox.put(uuid, playerData);

@@ -7,7 +7,7 @@ part of 'lx_mai_filter.dart';
 // **************************************************************************
 
 String _$filteredRecordListHash() =>
-    r'772da5b9b15daacbf76dac7068d7e12b5814e25a';
+    r'43a0f2bbfe722ca49a9b709b9e6ed0bccb88728a';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -160,7 +160,7 @@ class _FilteredRecordListProviderElement
   String get uuid => (origin as FilteredRecordListProvider).uuid;
 }
 
-String _$filteredSongListHash() => r'dbec6c375361ed0547c8fee73d6c1bf8b6d99c11';
+String _$filteredSongListHash() => r'57308891f7ab8fa764a01fed8ab0e2add595dc86';
 
 /// See also [filteredSongList].
 @ProviderFor(filteredSongList)

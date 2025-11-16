@@ -6,7 +6,7 @@ part of 'lx_mai_player_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$lxMaiPlayerHash() => r'e1e0b56b8b84b4f4c3d991077bfeb50356b1d133';
+String _$lxMaiPlayerHash() => r'550222347870cc2280fdf52c48257e063391a119';
 
 /// See also [LxMaiPlayer].
 @ProviderFor(LxMaiPlayer)

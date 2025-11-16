@@ -48,8 +48,9 @@ class LxMaiRecordList extends ConsumerWidget {
               },
             ),
           )),
-      AsyncValue(:final error?) => ErrorView(
+      AsyncValue(:final error?, :final stackTrace) => ErrorView(
           errorMessage: error.toString(),
+          errorDetails: stackTrace.toString(),
           onRetry: () => ref.refresh(filteredRecordListProvider(uuid).future),
         ),
       _ => const LoadingView(),
