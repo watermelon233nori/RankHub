@@ -1,7 +1,9 @@
 # RankHub - 音游数据管理平台
 
 > 2025.11.17
+> 
 > 重构终于完事了，但原有的功能还没搬完。
+> 
 > 成绩更新这块感谢开源科技也有望整上了。
 
 RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支持多平台账号管理、数据同步、成绩查询和其他功能。幻想打造一个聚合音游平台。
@@ -158,7 +160,7 @@ class MaimaiDXGame extends IGame {
   List<GameContentView> buildRankViews(BuildContext context) {
     return [
       GameContentView(
-        label: 'B50排行',
+        label: 'B50分表',
         builder: (ctx) => B50RankWidget(),
       ),
     ];
@@ -186,9 +188,9 @@ class MaimaiDXGame extends IGame {
 **凭据提供者**：`CredentialProvider`（位于 `lib/services/credential_provider.dart`）
 
 **支持的凭据类型**：
-- **API Key**：静态密钥，不过期（如落雪咖啡屋）
+- **API Key**：静态密钥，不过期（如落雪查分器的个人API密钥）
 - **OAuth2**：动态令牌，支持刷新
-- **用户名密码**：传统认证方式
+- **用户名密码**：传统认证方式（如水鱼查分器）
 
 **凭据刷新流程**：
 1. 调用 `getCredential()` 获取凭据
@@ -209,7 +211,7 @@ class MaimaiDXGame extends IGame {
 **OAuth2 登录流程**（以 LXNS 为例）：
 1. 生成 PKCE code_verifier 和 code_challenge
 2. 打开 WebView，跳转到平台授权页面
-3. 用户授权后，捕获 callback URL 中的 authorization_code
+3. 用户授权后，拿到 authorization_code
 4. 使用 code 换取 access_token 和 refresh_token
 5. 保存凭据到账号对象
 
