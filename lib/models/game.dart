@@ -99,6 +99,10 @@ abstract class IGame {
 
   /// 构建游戏的错误状态视图（可选）
   Widget? buildErrorView(BuildContext context, String error) => null;
+
+  /// 构建玩家信息卡片（可选）
+  /// 如果游戏支持玩家信息展示，返回玩家卡片 Widget
+  Widget? buildPlayerInfoCard(BuildContext context) => null;
 }
 
 /// 基础游戏实现类 - 提供默认实现
@@ -301,4 +305,7 @@ class BaseGame implements IGame {
       ),
     );
   }
+
+  @override
+  Widget? buildPlayerInfoCard(BuildContext context) => null;
 }

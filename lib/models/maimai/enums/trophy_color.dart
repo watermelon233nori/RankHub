@@ -1,10 +1,10 @@
 /// 称号颜色
 enum TrophyColor {
-  normal('normal', '普通'),
-  bronze('bronze', '铜'),
-  silver('silver', '银'),
-  gold('gold', '金'),
-  rainbow('rainbow', '虹');
+  normal('Normal', '普通'),
+  bronze('Bronze', '铜'),
+  silver('Silver', '银'),
+  gold('Gold', '金'),
+  rainbow('Rainbow', '虹');
 
   const TrophyColor(this.value, this.label);
 

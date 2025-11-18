@@ -19,8 +19,8 @@ class _AccountManagePageState extends State<AccountManagePage> {
   @override
   void initState() {
     super.initState();
-    // 确保 controller 只初始化一次
-    controller = Get.put(AccountController(), permanent: true);
+    // 获取已注册的 controller
+    controller = Get.find<AccountController>();
   }
 
   @override
@@ -77,18 +77,19 @@ class _AccountManagePageState extends State<AccountManagePage> {
 
   /// 显示绑定账号对话框
   void _showBindAccountDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => _PlatformSelectionDialog(controller: controller),
+      isScrollControlled: true,
+      builder: (context) => _PlatformSelectionSheet(controller: controller),
     );
   }
 }
 
-/// 平台选择对话框
-class _PlatformSelectionDialog extends StatelessWidget {
+/// 平台选择底部弹出框
+class _PlatformSelectionSheet extends StatelessWidget {
   final AccountController controller;
 
-  const _PlatformSelectionDialog({required this.controller});
+  const _PlatformSelectionSheet({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -96,69 +97,105 @@ class _PlatformSelectionDialog extends StatelessWidget {
     final handlers = loginManager.getAllHandlers();
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AlertDialog(
-      title: const Text('选择平台'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: handlers.length,
-          itemBuilder: (context, index) {
-            final handler = handlers[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: handler.platformIconUrl != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: handler.platformIconUrl!,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Icon(
-                              handler.platformIcon,
-                              color: colorScheme.onPrimaryContainer,
-                            ),
-                            errorWidget: (context, url, error) => Icon(
-                              handler.platformIcon,
-                              color: colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                        )
-                      : Icon(
-                          handler.platformIcon,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                ),
-                title: Text(handler.platformName),
-                subtitle: Text(
-                  handler.platformDescription,
-                  style: const TextStyle(fontSize: 12),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await _handlePlatformLogin(context, handler);
-                },
-              ),
-            );
-          },
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('取消'),
-        ),
-      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 拖动指示器
+          Container(
+            width: 32,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // 标题
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Text(
+                  '选择平台',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // 平台列表
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: handlers.length,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemBuilder: (context, index) {
+                final handler = handlers[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: handler.platformIconUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: CachedNetworkImage(
+                                imageUrl: handler.platformIconUrl!,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Icon(
+                                  handler.platformIcon,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                                errorWidget: (context, url, error) => Icon(
+                                  handler.platformIcon,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            )
+                          : Icon(
+                              handler.platformIcon,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                    ),
+                    title: Text(handler.platformName),
+                    subtitle: Text(
+                      handler.platformDescription,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      await _handlePlatformLogin(context, handler);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+          // 底部安全区域
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
     );
   }
 
@@ -242,21 +279,6 @@ class _AccountCard extends StatelessWidget {
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          if (isCurrent) ...[
-                            const SizedBox(width: 8),
-                            Chip(
-                              label: const Text(
-                                '当前',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              labelStyle: const TextStyle(fontSize: 12),
-                              visualDensity: VisualDensity.compact,
-                              backgroundColor: colorScheme.primary,
-                              labelPadding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -278,26 +300,6 @@ class _AccountCard extends StatelessWidget {
                   ),
                 ),
                 // 状态开关
-                Switch(
-                  value: account.isActive,
-                  onChanged: (value) {
-                    controller.setAccountActive(account.id, value);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            // 操作按钮
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (!isCurrent)
-                  TextButton.icon(
-                    onPressed: () => controller.switchAccount(account),
-                    icon: const Icon(Icons.swap_horiz, size: 18),
-                    label: const Text('切换'),
-                  ),
-                const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: () => _showDeleteConfirmDialog(context, account),
                   icon: const Icon(Icons.delete_outline, size: 18),

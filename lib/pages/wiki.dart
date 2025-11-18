@@ -26,7 +26,7 @@ class WikiPage extends GetView<GameController> {
         appBar: AppBar(
           actionsPadding: const EdgeInsets.symmetric(horizontal: 8),
           titleSpacing: 24,
-          title: const Text('百科'),
+          title: const Text('资料库'),
           actions: [
             TextButton.icon(
               onPressed: _showGameSelector,

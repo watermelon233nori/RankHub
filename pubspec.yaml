@@ -2,7 +2,7 @@ name: rank_hub
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -38,28 +38,43 @@ dependencies:
     git:
       url: https://github.com/luis901101/getx_fork.git
       ref: old-4.7.0
-  
+
   # 本地数据库
   isar_community: ^3.3.0
   isar_community_flutter_libs: ^3.3.0
   path_provider: ^2.1.5
-  
+
   # 网络请求
   dio: ^5.7.0
-  
+
   # 缓存管理
   dio_cache_interceptor: ^3.5.0
   dio_cache_interceptor_file_store: ^1.2.3
-  
+
   # 图片缓存
   cached_network_image: ^3.4.1
-  
-  # WebView 用于 OAuth2 登录
+
+  # 数据表格
+  data_table_2: ^2.5.15
+
+  # 浏览器打开链接
+  url_launcher: ^6.3.1
   flutter_inappwebview: ^6.1.5
-  
+
+  # OAuth2 登录
+  flutter_web_auth: ^0.5.0
+
   # 用于生成 PKCE code_verifier 和 code_challenge
   crypto: ^3.0.6
   convert: ^3.1.1
+  
+  # 图片生成和保存
+  screenshot: ^3.0.0
+  image_gallery_saver: ^2.0.3
+  permission_handler: ^11.3.1
+  image: ^4.3.0
+  http: ^1.2.2
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
@@ -71,26 +86,25 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  
+
   # Isar 代码生成器
   isar_community_generator: ^3.3.0
   build_runner: any
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - icon-1024.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -117,3 +131,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Flutter Launcher Icons 配置
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "icon-1024.png"
+  # 可选：为 Android 自适应图标配置
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "icon-1024.png"
+  # 可选：移除 alpha 通道（某些平台需要）
+  remove_alpha_ios: true

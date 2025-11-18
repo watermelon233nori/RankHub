@@ -33,7 +33,6 @@ class Score {
   Id id;
 
   /// 曲目 ID
-  @Index()
   late int songId;
 
   /// 曲名（仅获取 Score 时返回）
@@ -73,6 +72,13 @@ class Score {
   /// 谱面类型
   @Enumerated(EnumType.name)
   late SongType type;
+
+  /// 复合索引：songId + levelIndex + type 唯一标识一条成绩
+  @Index(
+    composite: [CompositeIndex('levelIndex'), CompositeIndex('type')],
+    unique: true,
+  )
+  int get scoreKey => songId;
 
   /// 游玩的 UTC 时间，精确到分钟
   String? playTime;

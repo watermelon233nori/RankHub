@@ -67,7 +67,7 @@ class TrophyItem extends StatelessWidget {
           Chip(
             avatar: Icon(Icons.emoji_events, size: 18, color: textColor),
             label: Text(
-              collection.name,
+              collection.name + (collection.color ?? ''),
               style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
             ),
             backgroundColor: bgColor,
@@ -174,35 +174,40 @@ class CardItem extends StatelessWidget {
         ? 'https://assets2.lxns.net/maimai/plate/${collection.collectionId}.png'
         : 'https://assets2.lxns.net/maimai/frame/${collection.collectionId}.png';
 
+    // 姓名框: 720x116 (宽高比 ~6.2:1)
+    // 背景: 1080x452 (宽高比 ~2.4:1)
+    final aspectRatio = isPlate ? 720 / 116 : 1080 / 452;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 图片部分
-          CachedNetworkImage(
-            imageUrl: imageUrl,
-            width: double.infinity,
-            fit: BoxFit.contain,
-            placeholder: (context, url) => Container(
-              height: 150,
-              color: colorScheme.surfaceContainerHighest,
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-            errorWidget: (context, url, error) {
-              return Container(
-                height: 150,
+          // 图片部分 - 使用 AspectRatio 确保正确显示
+          AspectRatio(
+            aspectRatio: aspectRatio,
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
                 color: colorScheme.surfaceContainerHighest,
-                child: Center(
-                  child: Icon(
-                    isPlate ? Icons.style : Icons.crop_free,
-                    size: 48,
-                    color: colorScheme.onSurfaceVariant,
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+              errorWidget: (context, url, error) {
+                return Container(
+                  color: colorScheme.surfaceContainerHighest,
+                  child: Center(
+                    child: Icon(
+                      isPlate ? Icons.style : Icons.crop_free,
+                      size: 48,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           // 信息部分
           Padding(

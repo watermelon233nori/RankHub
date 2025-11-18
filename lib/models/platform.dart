@@ -97,6 +97,11 @@ abstract class IPlatform {
     bool isSelected,
     VoidCallback onTap,
   ) => null;
+
+  /// 构建平台的玩家信息卡片（可选）
+  /// 聚合所有游戏的玩家信息卡片
+  /// [account] 当前账号，用于获取对应的玩家数据
+  Widget? buildPlayerInfoCard(BuildContext context, Account account) => null;
 }
 
 /// 基础平台实现类 - 提供默认实现
@@ -175,4 +180,7 @@ abstract class BasePlatform implements IPlatform {
     bool isSelected,
     VoidCallback onTap,
   ) => null;
+
+  @override
+  Widget? buildPlayerInfoCard(BuildContext context, Account account) => null;
 }

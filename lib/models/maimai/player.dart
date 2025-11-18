@@ -136,4 +136,16 @@ class Player {
       'upload_time': uploadTime,
     };
   }
+
+  /// 段位图片 URL
+  String get courseRankImageUrl =>
+      'https://maimai.lxns.net/assets/maimai/course_rank/$courseRank.webp';
+
+  /// 阶级图片 URL
+  String get classRankImageUrl =>
+      'https://maimai.lxns.net/assets/maimai/class_rank/$classRank.webp';
+
+  /// 星星图标 URL
+  String get starIconUrl =>
+      'https://maimai.lxns.net/assets/maimai/icon_star.webp';
 }

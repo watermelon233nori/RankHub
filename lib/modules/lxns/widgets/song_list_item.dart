@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rank_hub/models/maimai/song.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
 import '../services/maimai_api_service.dart';
+import '../pages/song_detail_page.dart';
 
 /// 曲目列表项
 class SongListItem extends StatelessWidget {
@@ -171,7 +173,7 @@ class SongListItem extends StatelessWidget {
           color: colorScheme.onSurfaceVariant,
         ),
         onTap: () {
-          // TODO: 跳转到曲目详情页
+          Get.to(() => SongDetailPage(song: song));
         },
       ),
     );

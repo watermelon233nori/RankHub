@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:rank_hub/models/game.dart';
-import 'package:rank_hub/modules/lxns/songs_tab.dart';
-import 'package:rank_hub/modules/lxns/collections_tab.dart';
+import 'package:rank_hub/modules/lxns/maimai_lxns.dart';
+import 'package:rank_hub/modules/lxns/records_tab.dart';
+import 'package:rank_hub/modules/lxns/best50_tab.dart';
+import 'package:rank_hub/modules/lxns/widgets/player_info_card.dart';
+import 'package:rank_hub/models/maimai/player.dart';
+import 'package:rank_hub/controllers/account_controller.dart';
 
 /// 舞萌DX 游戏
 class MaimaiDXGame extends BaseGame {
@@ -38,31 +43,80 @@ class MaimaiDXGame extends BaseGame {
   List<GameContentView> buildRankViews(BuildContext context) {
     return [
       GameContentView(
-        label: '排行榜',
-        icon: Icons.leaderboard_outlined,
-        builder: (context) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.leaderboard_outlined, size: 80, color: color),
-              const SizedBox(height: 20),
-              Text(
-                '舞萌DX 排行榜',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '排行榜功能开发中...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
+        label: '全部成绩',
+        icon: Icons.poll,
+        builder: (context) => const RecordsTab(),
+      ),
+      GameContentView(
+        label: 'B50',
+        icon: Icons.flag,
+        builder: (context) => const Best50Tab(),
       ),
     ];
+  }
+
+  @override
+  Widget? buildPlayerInfoCard(BuildContext context) {
+    print('buildPlayerInfoCard called');
+    return FutureBuilder<Player?>(
+      future: _loadPlayerInfo(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Card(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: Text(
+                  '加载玩家信息失败: ${snapshot.error}',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            ),
+          );
+        }
+
+        final player = snapshot.data;
+        if (player == null) {
+          return const SizedBox.shrink();
+        }
+
+        return PlayerInfoCard(player: player);
+      },
+    );
+  }
+
+  Future<Player?> _loadPlayerInfo() async {
+    final accountController = Get.find<AccountController>();
+    final currentAccount = accountController.currentAccount;
+    final credentialProvider = LxnsCredentialProvider();
+
+    if (currentAccount == null) {
+      return null;
+    }
+
+    final account = await credentialProvider.getCredential(currentAccount);
+
+    final accessToken = account.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      return null;
+    }
+
+    try {
+      final apiService = MaimaiApiService.instance;
+      return await apiService.getPlayerInfo(accessToken: accessToken);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

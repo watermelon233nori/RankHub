@@ -5,4 +5,8 @@ class AppRoutes {
   static const mine = '/mine';
   static const detail = '/detail';
   static const dataSync = '/data-sync';
+  static const settings = '/settings';
+  static const themeSettings = '/theme-settings';
+  static const privacyPolicy = '/privacy-policy';
+  static const about = '/about';
 }

@@ -45,5 +45,22 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>需要访问相册以保存 B50 成绩图片</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问相册以保存 B50 成绩图片</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>city.kamitsubaki.rankhub</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>rankhub</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

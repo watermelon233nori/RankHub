@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 import '../controllers/account_controller.dart';
 import '../models/account/account.dart';
+import '../data/platforms_data.dart';
 import 'account_manage.dart';
 
 class MinePage extends StatelessWidget {
@@ -11,15 +12,20 @@ class MinePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final controller = Get.put(AccountController());
+    final controller = Get.find<AccountController>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('我的'),
         titleSpacing: 24,
         centerTitle: false,
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
-        actionsPadding: EdgeInsets.symmetric(horizontal: 8),
+        actions: [
+          IconButton(
+            onPressed: () => Get.toNamed(AppRoutes.settings),
+            icon: const Icon(Icons.settings),
+          ),
+        ],
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 8),
       ),
       body: ListView(
         children: [
@@ -100,8 +106,8 @@ class MinePage extends StatelessWidget {
                                           colorScheme.surfaceContainerHighest,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: colorScheme.outline.withOpacity(
-                                          0.3,
+                                        color: colorScheme.outline.withValues(
+                                          alpha: 0.3,
                                         ),
                                         width: 2,
                                       ),
@@ -233,68 +239,35 @@ class MinePage extends StatelessWidget {
               ),
             );
           }),
-          const SizedBox(height: 16),
-          const Divider(),
 
-          // 账号管理
-          ListTile(
-            leading: const Icon(Icons.account_circle),
-            title: const Text('账号管理'),
-            subtitle: Obx(() {
-              final count = controller.accounts.length;
-              return Text(count > 0 ? '已绑定 $count 个账号' : '暂无绑定账号');
-            }),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Get.to(() => const AccountManagePage()),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.sync),
-            title: const Text('数据同步'),
-            subtitle: const Text('同步曲目、收藏品等数据'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Get.toNamed(AppRoutes.dataSync),
-          ),
-          const Divider(),
+          // 玩家信息卡片
+          Obx(() {
+            final currentAccount = controller.currentAccount;
+            if (currentAccount == null) {
+              return const SizedBox.shrink();
+            }
 
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('个人资料'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Get.snackbar('提示', '功能开发中...');
-            },
-          ),
-          const Divider(),
+            // 使用平台注册表获取对应的平台实例
+            final platformRegistry = PlatformRegistry();
+            final platform = platformRegistry.getPlatformByType(
+              currentAccount.platform,
+            );
 
-          ListTile(
-            leading: const Icon(Icons.bar_chart),
-            title: const Text('我的成绩'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Get.snackbar('提示', '功能开发中...');
-            },
-          ),
-          const Divider(),
+            if (platform == null) {
+              return const SizedBox.shrink();
+            }
 
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('设置'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Get.snackbar('提示', '功能开发中...');
-            },
-          ),
-          const Divider(),
+            // 构建平台的玩家信息卡片
+            final playerCard = platform.buildPlayerInfoCard(
+              context,
+              currentAccount,
+            );
+            if (playerCard == null) {
+              return const SizedBox.shrink();
+            }
 
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('关于'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Get.snackbar('提示', '功能开发中...');
-            },
-          ),
+            return Column(children: [const SizedBox(height: 16), playerCard]);
+          }),
         ],
       ),
     );

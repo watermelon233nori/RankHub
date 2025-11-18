@@ -64,20 +64,21 @@ const ScoreSchema = CollectionSchema(
       type: IsarType.string,
       enumMap: _ScorerateEnumValueMap,
     ),
-    r'songId': PropertySchema(id: 11, name: r'songId', type: IsarType.long),
+    r'scoreKey': PropertySchema(id: 11, name: r'scoreKey', type: IsarType.long),
+    r'songId': PropertySchema(id: 12, name: r'songId', type: IsarType.long),
     r'songName': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'songName',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'type',
       type: IsarType.string,
       enumMap: _ScoretypeEnumValueMap,
     ),
     r'uploadTime': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'uploadTime',
       type: IsarType.string,
     ),
@@ -89,16 +90,26 @@ const ScoreSchema = CollectionSchema(
   deserializeProp: _scoreDeserializeProp,
   idName: r'id',
   indexes: {
-    r'songId': IndexSchema(
-      id: -4588889454650216128,
-      name: r'songId',
-      unique: false,
+    r'scoreKey_levelIndex_type': IndexSchema(
+      id: 6711425885913746226,
+      name: r'scoreKey_levelIndex_type',
+      unique: true,
       replace: false,
       properties: [
         IndexPropertySchema(
-          name: r'songId',
+          name: r'scoreKey',
           type: IndexType.value,
           caseSensitive: false,
+        ),
+        IndexPropertySchema(
+          name: r'levelIndex',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'type',
+          type: IndexType.hash,
+          caseSensitive: true,
         ),
       ],
     ),
@@ -178,10 +189,11 @@ void _scoreSerialize(
   writer.writeString(offsets[8], object.levelIndex.name);
   writer.writeString(offsets[9], object.playTime);
   writer.writeString(offsets[10], object.rate?.name);
-  writer.writeLong(offsets[11], object.songId);
-  writer.writeString(offsets[12], object.songName);
-  writer.writeString(offsets[13], object.type.name);
-  writer.writeString(offsets[14], object.uploadTime);
+  writer.writeLong(offsets[11], object.scoreKey);
+  writer.writeLong(offsets[12], object.songId);
+  writer.writeString(offsets[13], object.songName);
+  writer.writeString(offsets[14], object.type.name);
+  writer.writeString(offsets[15], object.uploadTime);
 }
 
 Score _scoreDeserialize(
@@ -205,12 +217,12 @@ Score _scoreDeserialize(
         LevelIndex.basic,
     playTime: reader.readStringOrNull(offsets[9]),
     rate: _ScorerateValueEnumMap[reader.readStringOrNull(offsets[10])],
-    songId: reader.readLongOrNull(offsets[11]) ?? 0,
-    songName: reader.readStringOrNull(offsets[12]) ?? '',
+    songId: reader.readLongOrNull(offsets[12]) ?? 0,
+    songName: reader.readStringOrNull(offsets[13]) ?? '',
     type:
-        _ScoretypeValueEnumMap[reader.readStringOrNull(offsets[13])] ??
+        _ScoretypeValueEnumMap[reader.readStringOrNull(offsets[14])] ??
         SongType.standard,
-    uploadTime: reader.readStringOrNull(offsets[14]),
+    uploadTime: reader.readStringOrNull(offsets[15]),
   );
   return object;
 }
@@ -247,14 +259,16 @@ P _scoreDeserializeProp<P>(
     case 10:
       return (_ScorerateValueEnumMap[reader.readStringOrNull(offset)]) as P;
     case 11:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readLong(offset)) as P;
     case 12:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 13:
+      return (reader.readStringOrNull(offset) ?? '') as P;
+    case 14:
       return (_ScoretypeValueEnumMap[reader.readStringOrNull(offset)] ??
               SongType.standard)
           as P;
-    case 14:
+    case 15:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -356,18 +370,159 @@ void _scoreAttach(IsarCollection<dynamic> col, Id id, Score object) {
   object.id = id;
 }
 
+extension ScoreByIndex on IsarCollection<Score> {
+  Future<Score?> getByScoreKeyLevelIndexType(
+    int scoreKey,
+    LevelIndex levelIndex,
+    SongType type,
+  ) {
+    return getByIndex(r'scoreKey_levelIndex_type', [
+      scoreKey,
+      levelIndex,
+      type,
+    ]);
+  }
+
+  Score? getByScoreKeyLevelIndexTypeSync(
+    int scoreKey,
+    LevelIndex levelIndex,
+    SongType type,
+  ) {
+    return getByIndexSync(r'scoreKey_levelIndex_type', [
+      scoreKey,
+      levelIndex,
+      type,
+    ]);
+  }
+
+  Future<bool> deleteByScoreKeyLevelIndexType(
+    int scoreKey,
+    LevelIndex levelIndex,
+    SongType type,
+  ) {
+    return deleteByIndex(r'scoreKey_levelIndex_type', [
+      scoreKey,
+      levelIndex,
+      type,
+    ]);
+  }
+
+  bool deleteByScoreKeyLevelIndexTypeSync(
+    int scoreKey,
+    LevelIndex levelIndex,
+    SongType type,
+  ) {
+    return deleteByIndexSync(r'scoreKey_levelIndex_type', [
+      scoreKey,
+      levelIndex,
+      type,
+    ]);
+  }
+
+  Future<List<Score?>> getAllByScoreKeyLevelIndexType(
+    List<int> scoreKeyValues,
+    List<LevelIndex> levelIndexValues,
+    List<SongType> typeValues,
+  ) {
+    final len = scoreKeyValues.length;
+    assert(
+      levelIndexValues.length == len && typeValues.length == len,
+      'All index values must have the same length',
+    );
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([scoreKeyValues[i], levelIndexValues[i], typeValues[i]]);
+    }
+
+    return getAllByIndex(r'scoreKey_levelIndex_type', values);
+  }
+
+  List<Score?> getAllByScoreKeyLevelIndexTypeSync(
+    List<int> scoreKeyValues,
+    List<LevelIndex> levelIndexValues,
+    List<SongType> typeValues,
+  ) {
+    final len = scoreKeyValues.length;
+    assert(
+      levelIndexValues.length == len && typeValues.length == len,
+      'All index values must have the same length',
+    );
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([scoreKeyValues[i], levelIndexValues[i], typeValues[i]]);
+    }
+
+    return getAllByIndexSync(r'scoreKey_levelIndex_type', values);
+  }
+
+  Future<int> deleteAllByScoreKeyLevelIndexType(
+    List<int> scoreKeyValues,
+    List<LevelIndex> levelIndexValues,
+    List<SongType> typeValues,
+  ) {
+    final len = scoreKeyValues.length;
+    assert(
+      levelIndexValues.length == len && typeValues.length == len,
+      'All index values must have the same length',
+    );
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([scoreKeyValues[i], levelIndexValues[i], typeValues[i]]);
+    }
+
+    return deleteAllByIndex(r'scoreKey_levelIndex_type', values);
+  }
+
+  int deleteAllByScoreKeyLevelIndexTypeSync(
+    List<int> scoreKeyValues,
+    List<LevelIndex> levelIndexValues,
+    List<SongType> typeValues,
+  ) {
+    final len = scoreKeyValues.length;
+    assert(
+      levelIndexValues.length == len && typeValues.length == len,
+      'All index values must have the same length',
+    );
+    final values = <List<dynamic>>[];
+    for (var i = 0; i < len; i++) {
+      values.add([scoreKeyValues[i], levelIndexValues[i], typeValues[i]]);
+    }
+
+    return deleteAllByIndexSync(r'scoreKey_levelIndex_type', values);
+  }
+
+  Future<Id> putByScoreKeyLevelIndexType(Score object) {
+    return putByIndex(r'scoreKey_levelIndex_type', object);
+  }
+
+  Id putByScoreKeyLevelIndexTypeSync(Score object, {bool saveLinks = true}) {
+    return putByIndexSync(
+      r'scoreKey_levelIndex_type',
+      object,
+      saveLinks: saveLinks,
+    );
+  }
+
+  Future<List<Id>> putAllByScoreKeyLevelIndexType(List<Score> objects) {
+    return putAllByIndex(r'scoreKey_levelIndex_type', objects);
+  }
+
+  List<Id> putAllByScoreKeyLevelIndexTypeSync(
+    List<Score> objects, {
+    bool saveLinks = true,
+  }) {
+    return putAllByIndexSync(
+      r'scoreKey_levelIndex_type',
+      objects,
+      saveLinks: saveLinks,
+    );
+  }
+}
+
 extension ScoreQueryWhereSort on QueryBuilder<Score, Score, QWhere> {
   QueryBuilder<Score, Score, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-
-  QueryBuilder<Score, Score, QAfterWhere> anySongId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'songId'),
-      );
     });
   }
 }
@@ -441,30 +596,35 @@ extension ScoreQueryWhere on QueryBuilder<Score, Score, QWhereClause> {
     });
   }
 
-  QueryBuilder<Score, Score, QAfterWhereClause> songIdEqualTo(int songId) {
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyEqualToAnyLevelIndexType(int scoreKey) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        IndexWhereClause.equalTo(indexName: r'songId', value: [songId]),
+        IndexWhereClause.equalTo(
+          indexName: r'scoreKey_levelIndex_type',
+          value: [scoreKey],
+        ),
       );
     });
   }
 
-  QueryBuilder<Score, Score, QAfterWhereClause> songIdNotEqualTo(int songId) {
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyNotEqualToAnyLevelIndexType(int scoreKey) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(
               IndexWhereClause.between(
-                indexName: r'songId',
+                indexName: r'scoreKey_levelIndex_type',
                 lower: [],
-                upper: [songId],
+                upper: [scoreKey],
                 includeUpper: false,
               ),
             )
             .addWhereClause(
               IndexWhereClause.between(
-                indexName: r'songId',
-                lower: [songId],
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey],
                 includeLower: false,
                 upper: [],
               ),
@@ -473,17 +633,17 @@ extension ScoreQueryWhere on QueryBuilder<Score, Score, QWhereClause> {
         return query
             .addWhereClause(
               IndexWhereClause.between(
-                indexName: r'songId',
-                lower: [songId],
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey],
                 includeLower: false,
                 upper: [],
               ),
             )
             .addWhereClause(
               IndexWhereClause.between(
-                indexName: r'songId',
+                indexName: r'scoreKey_levelIndex_type',
                 lower: [],
-                upper: [songId],
+                upper: [scoreKey],
                 includeUpper: false,
               ),
             );
@@ -491,15 +651,13 @@ extension ScoreQueryWhere on QueryBuilder<Score, Score, QWhereClause> {
     });
   }
 
-  QueryBuilder<Score, Score, QAfterWhereClause> songIdGreaterThan(
-    int songId, {
-    bool include = false,
-  }) {
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyGreaterThanAnyLevelIndexType(int scoreKey, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IndexWhereClause.between(
-          indexName: r'songId',
-          lower: [songId],
+          indexName: r'scoreKey_levelIndex_type',
+          lower: [scoreKey],
           includeLower: include,
           upper: [],
         ),
@@ -507,38 +665,157 @@ extension ScoreQueryWhere on QueryBuilder<Score, Score, QWhereClause> {
     });
   }
 
-  QueryBuilder<Score, Score, QAfterWhereClause> songIdLessThan(
-    int songId, {
-    bool include = false,
-  }) {
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyLessThanAnyLevelIndexType(int scoreKey, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IndexWhereClause.between(
-          indexName: r'songId',
+          indexName: r'scoreKey_levelIndex_type',
           lower: [],
-          upper: [songId],
+          upper: [scoreKey],
           includeUpper: include,
         ),
       );
     });
   }
 
-  QueryBuilder<Score, Score, QAfterWhereClause> songIdBetween(
-    int lowerSongId,
-    int upperSongId, {
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyBetweenAnyLevelIndexType(
+    int lowerScoreKey,
+    int upperScoreKey, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IndexWhereClause.between(
-          indexName: r'songId',
-          lower: [lowerSongId],
+          indexName: r'scoreKey_levelIndex_type',
+          lower: [lowerScoreKey],
           includeLower: includeLower,
-          upper: [upperSongId],
+          upper: [upperScoreKey],
           includeUpper: includeUpper,
         ),
       );
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyLevelIndexEqualToAnyType(int scoreKey, LevelIndex levelIndex) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'scoreKey_levelIndex_type',
+          value: [scoreKey, levelIndex],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyEqualToLevelIndexNotEqualToAnyType(
+    int scoreKey,
+    LevelIndex levelIndex,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey],
+                upper: [scoreKey, levelIndex],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey, levelIndex],
+                includeLower: false,
+                upper: [scoreKey],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey, levelIndex],
+                includeLower: false,
+                upper: [scoreKey],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey],
+                upper: [scoreKey, levelIndex],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterWhereClause> scoreKeyLevelIndexTypeEqualTo(
+    int scoreKey,
+    LevelIndex levelIndex,
+    SongType type,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'scoreKey_levelIndex_type',
+          value: [scoreKey, levelIndex, type],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterWhereClause>
+  scoreKeyLevelIndexEqualToTypeNotEqualTo(
+    int scoreKey,
+    LevelIndex levelIndex,
+    SongType type,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey, levelIndex],
+                upper: [scoreKey, levelIndex, type],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey, levelIndex, type],
+                includeLower: false,
+                upper: [scoreKey, levelIndex],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey, levelIndex, type],
+                includeLower: false,
+                upper: [scoreKey, levelIndex],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'scoreKey_levelIndex_type',
+                lower: [scoreKey, levelIndex],
+                upper: [scoreKey, levelIndex, type],
+                includeUpper: false,
+              ),
+            );
+      }
     });
   }
 }
@@ -1965,6 +2242,63 @@ extension ScoreQueryFilter on QueryBuilder<Score, Score, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Score, Score, QAfterFilterCondition> scoreKeyEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'scoreKey', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterFilterCondition> scoreKeyGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'scoreKey',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterFilterCondition> scoreKeyLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'scoreKey',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterFilterCondition> scoreKeyBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'scoreKey',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<Score, Score, QAfterFilterCondition> songIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -2614,6 +2948,18 @@ extension ScoreQuerySortBy on QueryBuilder<Score, Score, QSortBy> {
     });
   }
 
+  QueryBuilder<Score, Score, QAfterSortBy> sortByScoreKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scoreKey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterSortBy> sortByScoreKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scoreKey', Sort.desc);
+    });
+  }
+
   QueryBuilder<Score, Score, QAfterSortBy> sortBySongId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'songId', Sort.asc);
@@ -2808,6 +3154,18 @@ extension ScoreQuerySortThenBy on QueryBuilder<Score, Score, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Score, Score, QAfterSortBy> thenByScoreKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scoreKey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Score, Score, QAfterSortBy> thenByScoreKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'scoreKey', Sort.desc);
+    });
+  }
+
   QueryBuilder<Score, Score, QAfterSortBy> thenBySongId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'songId', Sort.asc);
@@ -2941,6 +3299,12 @@ extension ScoreQueryWhereDistinct on QueryBuilder<Score, Score, QDistinct> {
     });
   }
 
+  QueryBuilder<Score, Score, QDistinct> distinctByScoreKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'scoreKey');
+    });
+  }
+
   QueryBuilder<Score, Score, QDistinct> distinctBySongId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'songId');
@@ -3042,6 +3406,12 @@ extension ScoreQueryProperty on QueryBuilder<Score, Score, QQueryProperty> {
   QueryBuilder<Score, RateType?, QQueryOperations> rateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'rate');
+    });
+  }
+
+  QueryBuilder<Score, int, QQueryOperations> scoreKeyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'scoreKey');
     });
   }
 

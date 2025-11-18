@@ -5,9 +5,14 @@ import 'package:rank_hub/pages/rank.dart';
 import 'package:rank_hub/pages/mine.dart';
 import 'package:rank_hub/pages/detail.dart';
 import 'package:rank_hub/pages/data_sync.dart';
+import 'package:rank_hub/pages/settings.dart';
+import 'package:rank_hub/pages/theme_settings.dart';
+import 'package:rank_hub/pages/privacy_policy.dart';
+import 'package:rank_hub/pages/about.dart';
 import 'package:rank_hub/routes/app_routes.dart';
 import 'package:rank_hub/controllers/main_controller.dart';
 import 'package:rank_hub/controllers/game_controller.dart';
+import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:rank_hub/controllers/data_sync_controller.dart';
 
 class AppPages {
@@ -16,6 +21,7 @@ class AppPages {
       name: AppRoutes.main,
       page: () => const MainPage(),
       binding: BindingsBuilder(() {
+        Get.lazyPut(() => AccountController(), fenix: true);
         Get.lazyPut(() => MainController());
         Get.lazyPut(() => GameController());
       }),
@@ -34,6 +40,26 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut(() => DataSyncController());
       }),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.settings,
+      page: () => const SettingsPage(),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.themeSettings,
+      page: () => const ThemeSettingsPage(),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.privacyPolicy,
+      page: () => const PrivacyPolicyPage(),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.about,
+      page: () => const AboutPage(),
       transition: Transition.native,
     ),
   ];

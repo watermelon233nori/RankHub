@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rank_hub/models/maimai/collection.dart';
 import 'package:rank_hub/models/maimai/song.dart';
+import 'package:rank_hub/models/maimai/score.dart';
+import 'package:rank_hub/models/maimai/player.dart';
 import 'package:rank_hub/services/isar_service.dart';
+import 'lxns_api_response.dart';
 
 /// 收藏品类型枚举
 enum CollectionType {
@@ -58,19 +60,6 @@ class MaimaiApiService {
       ),
     );
 
-    // 设置缓存
-    final cacheDir = await getTemporaryDirectory();
-    final cacheStore = FileCacheStore('${cacheDir.path}/dio_cache');
-    final cacheOptions = CacheOptions(
-      store: cacheStore,
-      policy: CachePolicy.forceCache,
-      maxStale: const Duration(days: 7), // 缓存7天
-      priority: CachePriority.high,
-      hitCacheOnErrorExcept: [401, 403], // 错误时使用缓存
-    );
-
-    dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
-
     // 添加日志拦截器（仅开发环境）
     dio.interceptors.add(
       LogInterceptor(
@@ -85,11 +74,16 @@ class MaimaiApiService {
 
   // ==================== 曲目相关 API ====================
 
-  /// 获取曲目列表
+  /// 获取曲目列表及相关数据
   ///
   /// [version] 游戏版本，默认 25000
   /// [notes] 是否包含谱面物量，默认 false
   /// [forceRefresh] 是否强制刷新，跳过缓存
+  ///
+  /// 返回值：
+  /// - songs: 曲目列表
+  /// - genres: 乐曲分类列表
+  /// - versions: 曲目版本列表
   Future<Map<String, dynamic>> getSongList({
     int version = defaultVersion,
     bool notes = false,
@@ -102,7 +96,30 @@ class MaimaiApiService {
       options: Options(extra: forceRefresh ? {'refresh': true} : {}),
     );
 
-    return response.data as Map<String, dynamic>;
+    final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+      response.data,
+      dataParser: (data) => data as Map<String, dynamic>,
+    );
+
+    if (!apiResponse.success) {
+      throw LxnsApiException(
+        message: apiResponse.message ?? '获取曲目列表失败',
+        code: apiResponse.code,
+      );
+    }
+
+    final data = apiResponse.data!;
+    final songs = (data['songs'] as List)
+        .map((e) => Song.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final genres = (data['genres'] as List)
+        .map((e) => Genre.fromJson(e as Map<String, dynamic>))
+        .toList();
+    final versions = (data['versions'] as List)
+        .map((e) => Version.fromJson(e as Map<String, dynamic>))
+        .toList();
+
+    return {'songs': songs, 'genres': genres, 'versions': versions};
   }
 
   /// 获取曲目信息
@@ -127,9 +144,22 @@ class MaimaiApiService {
     final client = await dio;
     final response = await client.get('/api/v0/maimai/alias/list');
 
-    final data = response.data as Map<String, dynamic>;
-    final aliases = data['aliases'] as List;
-    return aliases.map((e) => Alias.fromJson(e)).toList();
+    final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+      response.data,
+      dataParser: (data) => data as Map<String, dynamic>,
+    );
+
+    if (!apiResponse.success) {
+      throw LxnsApiException(
+        message: apiResponse.message ?? '获取别名列表失败',
+        code: apiResponse.code,
+      );
+    }
+
+    final aliases = apiResponse.data!['aliases'] as List;
+    return aliases
+        .map((e) => Alias.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   // ==================== 收藏品相关 API ====================
@@ -150,8 +180,19 @@ class MaimaiApiService {
       queryParameters: {'version': version, 'required': required},
     );
 
-    final data = response.data as Map<String, dynamic>;
-    final items = data[type.key] as List;
+    final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+      response.data,
+      dataParser: (data) => data as Map<String, dynamic>,
+    );
+
+    if (!apiResponse.success) {
+      throw LxnsApiException(
+        message: apiResponse.message ?? '获取收藏品列表失败',
+        code: apiResponse.code,
+      );
+    }
+
+    final items = apiResponse.data![type.key] as List;
     return items.map((e) {
       final json = e as Map<String, dynamic>;
       // 添加类型信息到 JSON
@@ -211,6 +252,110 @@ class MaimaiApiService {
     return CollectionGenre.fromJson(response.data as Map<String, dynamic>);
   }
 
+  // ==================== 玩家成绩相关 API ====================
+
+  /// 获取玩家成绩列表
+  ///
+  /// [accessToken] 访问令牌（从账号凭据中获取）
+  /// [version] 游戏版本
+  ///
+  /// 示例：
+  /// ```dart
+  /// final accountController = Get.find<AccountController>();
+  /// final currentAccount = accountController.currentAccount;
+  /// if (currentAccount?.accessToken != null) {
+  ///   final scores = await MaimaiApiService.instance.getPlayerScores(
+  ///     accessToken: currentAccount!.accessToken!,
+  ///   );
+  /// }
+  /// ```
+  Future<List<Score>> getPlayerScores({
+    required String accessToken,
+    int version = defaultVersion,
+  }) async {
+    final client = await dio;
+    final response = await client.get(
+      '/api/v0/user/maimai/player/scores',
+      queryParameters: {'version': version},
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+
+    final apiResponse = LxnsApiResponse<List>.fromJson(
+      response.data,
+      dataParser: (data) => data as List,
+    );
+
+    if (!apiResponse.success) {
+      throw LxnsApiException(
+        message: apiResponse.message ?? '获取玩家成绩失败',
+        code: apiResponse.code,
+      );
+    }
+
+    final scores = apiResponse.data!;
+    return scores
+        .map((e) => Score.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// 获取玩家 Best 50 成绩
+  ///
+  /// 返回玩家的 Best 50 成绩，包括：
+  /// - dx: 当期版本 Best 15（DX 谱面）
+  /// - standard: 往期版本 Best 35（标准谱面）
+  /// - dx_total: DX Rating 总和
+  /// - standard_total: 标准 Rating 总和
+  Future<Map<String, dynamic>> getPlayerBest50({
+    required String accessToken,
+    int version = defaultVersion,
+  }) async {
+    final client = await dio;
+    final response = await client.get(
+      '/api/v0/user/maimai/player/bests',
+      queryParameters: {'version': version},
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+
+    final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+      response.data,
+      dataParser: (data) => data as Map<String, dynamic>,
+    );
+
+    if (!apiResponse.success) {
+      throw LxnsApiException(
+        message: apiResponse.message ?? '获取 Best 50 失败',
+        code: apiResponse.code,
+      );
+    }
+
+    return apiResponse.data!;
+  }
+
+  /// 获取玩家信息
+  ///
+  /// [accessToken] 访问令牌
+  Future<Player> getPlayerInfo({required String accessToken}) async {
+    final client = await dio;
+    final response = await client.get(
+      '/api/v0/user/maimai/player',
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+
+    final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+      response.data,
+      dataParser: (data) => data as Map<String, dynamic>,
+    );
+
+    if (!apiResponse.success) {
+      throw LxnsApiException(
+        message: apiResponse.message ?? '获取玩家信息失败',
+        code: apiResponse.code,
+      );
+    }
+
+    return Player.fromJson(apiResponse.data!);
+  }
+
   // ==================== 资源 URL 生成 ====================
 
   /// 获取头像 URL
@@ -251,40 +396,43 @@ class MaimaiApiService {
     void Function(int current, int total, String description)? onProgress,
   }) async {
     try {
+      print('🔄 开始同步曲目数据...');
       onProgress?.call(0, 4, '正在获取曲目列表...');
 
-      // 1. 获取曲目列表
+      // 1. 获取曲目列表及相关数据
       final data = await getSongList(version: version, notes: includeNotes);
+      final songs = data['songs'] as List<Song>;
+      final genres = data['genres'] as List<Genre>;
+      final versions = data['versions'] as List<Version>;
 
-      // 2. 解析并保存曲目
-      final songs = (data['songs'] as List)
-          .map((e) => Song.fromJson(e))
-          .toList();
+      print('📥 获取到 ${songs.length} 首曲目');
+      print('📥 获取到 ${genres.length} 个分类');
+      print('📥 获取到 ${versions.length} 个版本');
+
+      // 2. 保存曲目
       onProgress?.call(1, 4, '正在保存 ${songs.length} 首曲目...');
       await IsarService.instance.maimai.saveSongs(songs);
 
       // 3. 保存分类
-      final genres = (data['genres'] as List)
-          .map((e) => Genre.fromJson(e))
-          .toList();
       onProgress?.call(2, 4, '正在保存 ${genres.length} 个分类...');
       await IsarService.instance.maimai.saveGenres(genres);
 
       // 4. 保存版本
-      final versions = (data['versions'] as List)
-          .map((e) => Version.fromJson(e))
-          .toList();
       onProgress?.call(3, 4, '正在保存 ${versions.length} 个版本...');
       await IsarService.instance.maimai.saveVersions(versions);
 
       // 5. 保存别名
       onProgress?.call(4, 4, '正在获取曲目别名...');
       final aliases = await getAliasList();
+      print('📥 获取到 ${aliases.length} 个曲目别名');
       await IsarService.instance.maimai.saveAliases(aliases);
 
-      onProgress?.call(4, 4, '同步完成！');
-    } catch (e) {
-      throw Exception('同步曲目数据失败: $e');
+      onProgress?.call(4, 4, '曲目数据同步完成！');
+      print('✨ 曲目数据同步完成！');
+    } catch (e, stackTrace) {
+      print('❌ 同步曲目数据失败: $e');
+      print('❌ 错误堆栈: $stackTrace');
+      rethrow;
     }
   }
 
@@ -348,15 +496,52 @@ class MaimaiApiService {
     }
   }
 
-  /// 同步所有数据到数据库
+  /// 同步玩家成绩数据到数据库
   ///
+  /// [accessToken] 访问令牌
   /// [version] 游戏版本
   /// [onProgress] 进度回调
-  Future<void> syncAllDataToDatabase({
+  Future<void> syncPlayerScoresToDatabase({
+    required String accessToken,
     int version = defaultVersion,
     void Function(int current, int total, String description)? onProgress,
   }) async {
-    const totalSteps = 2;
+    try {
+      print('🔄 开始同步玩家成绩数据...');
+      onProgress?.call(0, 2, '正在获取玩家成绩...');
+
+      // 1. 获取玩家成绩
+      final scores = await getPlayerScores(
+        accessToken: accessToken,
+        version: version,
+      );
+
+      print('📥 获取到 ${scores.length} 条成绩');
+      onProgress?.call(1, 2, '正在保存 ${scores.length} 条成绩...');
+
+      // 2. 保存到数据库
+      await IsarService.instance.maimai.saveScores(scores);
+
+      onProgress?.call(2, 2, '成绩同步完成！');
+      print('✨ 成绩同步完成！');
+    } catch (e, stackTrace) {
+      print('❌ 同步玩家成绩失败: $e');
+      print('❌ 错误堆栈: $stackTrace');
+      throw Exception('同步玩家成绩失败: $e');
+    }
+  }
+
+  /// 同步所有数据到数据库（包括曲目、收藏品和玩家成绩）
+  ///
+  /// [version] 游戏版本
+  /// [accessToken] 访问令牌（可选，如果提供则同步玩家成绩）
+  /// [onProgress] 进度回调
+  Future<void> syncAllDataToDatabase({
+    int version = defaultVersion,
+    String? accessToken,
+    void Function(int current, int total, String description)? onProgress,
+  }) async {
+    final totalSteps = accessToken != null ? 3 : 2;
 
     try {
       // 1. 同步曲目数据
@@ -375,7 +560,18 @@ class MaimaiApiService {
         onProgress: (c, t, desc) => onProgress?.call(2, totalSteps, desc),
       );
 
+      // 3. 同步玩家成绩（如果提供了访问令牌）
+      if (accessToken != null) {
+        onProgress?.call(3, totalSteps, '正在同步玩家成绩...');
+        await syncPlayerScoresToDatabase(
+          accessToken: accessToken,
+          version: version,
+          onProgress: (c, t, desc) => onProgress?.call(3, totalSteps, desc),
+        );
+      }
+
       onProgress?.call(totalSteps, totalSteps, '所有数据同步完成！');
+      print('✨ 所有数据同步完成！');
     } catch (e) {
       throw Exception('同步数据失败: $e');
     }

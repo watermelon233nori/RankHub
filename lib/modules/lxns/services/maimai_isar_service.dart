@@ -6,6 +6,8 @@ import 'package:rank_hub/models/maimai/player.dart';
 import 'package:rank_hub/models/maimai/song.dart';
 import 'package:rank_hub/models/maimai/collection.dart';
 import 'package:rank_hub/models/maimai/score.dart';
+import 'package:rank_hub/models/maimai/enums/level_index.dart';
+import 'package:rank_hub/models/maimai/enums/song_type.dart';
 
 /// Maimai 游戏数据库服务
 class MaimaiIsarService extends BaseIsarService {
@@ -99,11 +101,26 @@ class MaimaiIsarService extends BaseIsarService {
 
   // ==================== 曲目相关操作 ====================
 
-  /// 批量保存曲目
+  /// 批量保存曲目（智能合并）
   Future<void> saveSongs(List<Song> songs) async {
+    if (songs.isEmpty) return;
+
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.songs.putAll(songs);
+      for (final song in songs) {
+        // 检查是否已存在
+        final existing = await isar.songs
+            .filter()
+            .songIdEqualTo(song.songId)
+            .findFirst();
+
+        if (existing != null) {
+          // 合并数据：保留 Isar ID，更新其他字段
+          song.id = existing.id;
+        }
+
+        await isar.songs.put(song);
+      }
     });
   }
 
@@ -134,11 +151,25 @@ class MaimaiIsarService extends BaseIsarService {
     return await isar.songs.where().findAll();
   }
 
-  /// 保存分类
+  /// 保存分类（智能合并）
   Future<void> saveGenres(List<Genre> genres) async {
+    if (genres.isEmpty) return;
+
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.genres.putAll(genres);
+      for (final genre in genres) {
+        // 检查是否已存在
+        final existing = await isar.genres
+            .filter()
+            .genreEqualTo(genre.genre)
+            .findFirst();
+
+        if (existing != null) {
+          genre.id = existing.id;
+        }
+
+        await isar.genres.put(genre);
+      }
     });
   }
 
@@ -148,11 +179,25 @@ class MaimaiIsarService extends BaseIsarService {
     return await isar.genres.where().findAll();
   }
 
-  /// 保存版本信息
+  /// 保存版本信息（智能合并）
   Future<void> saveVersions(List<Version> versions) async {
+    if (versions.isEmpty) return;
+
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.versions.putAll(versions);
+      for (final version in versions) {
+        // 检查是否已存在
+        final existing = await isar.versions
+            .filter()
+            .versionEqualTo(version.version)
+            .findFirst();
+
+        if (existing != null) {
+          version.id = existing.id;
+        }
+
+        await isar.versions.put(version);
+      }
     });
   }
 
@@ -162,11 +207,25 @@ class MaimaiIsarService extends BaseIsarService {
     return await isar.versions.where().findAll();
   }
 
-  /// 保存曲目别名
+  /// 保存曲目别名（智能合并）
   Future<void> saveAliases(List<Alias> aliases) async {
+    if (aliases.isEmpty) return;
+
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.alias.putAll(aliases);
+      for (final alias in aliases) {
+        // 检查是否已存在
+        final existing = await isar.alias
+            .filter()
+            .songIdEqualTo(alias.songId)
+            .findFirst();
+
+        if (existing != null) {
+          alias.id = existing.id;
+        }
+
+        await isar.alias.put(alias);
+      }
     });
   }
 
@@ -178,11 +237,41 @@ class MaimaiIsarService extends BaseIsarService {
 
   // ==================== 成绩相关操作 ====================
 
-  /// 批量保存成绩
+  /// 批量保存成绩（智能合并）
   Future<void> saveScores(List<Score> scores) async {
+    if (scores.isEmpty) return;
+
+    print('💾 准备保存 ${scores.length} 条成绩到数据库...');
     final isar = await db;
+
     await isar.writeTxn(() async {
-      await isar.scores.putAll(scores);
+      int newCount = 0;
+      int updateCount = 0;
+
+      for (final score in scores) {
+        // 检查是否已存在（通过曲目ID、难度和类型精确匹配）
+        final existing = await isar.scores
+            .filter()
+            .songIdEqualTo(score.songId)
+            .and()
+            .levelIndexEqualTo(score.levelIndex)
+            .and()
+            .typeEqualTo(score.type)
+            .findFirst();
+
+        if (existing != null) {
+          // 已存在，保留 Isar ID 并更新数据
+          score.id = existing.id;
+          updateCount++;
+        } else {
+          // 新数据
+          newCount++;
+        }
+
+        await isar.scores.put(score);
+      }
+
+      print('✅ 成功保存成绩: 新增 $newCount 条, 更新 $updateCount 条');
     });
   }
 
@@ -190,6 +279,23 @@ class MaimaiIsarService extends BaseIsarService {
   Future<List<Score>> getScoresBySongId(int songId) async {
     final isar = await db;
     return await isar.scores.filter().songIdEqualTo(songId).findAll();
+  }
+
+  /// 根据曲目ID、难度和类型获取成绩
+  Future<Score?> getScoreBySongIdAndDifficulty({
+    required int songId,
+    required LevelIndex levelIndex,
+    required SongType type,
+  }) async {
+    final isar = await db;
+    return await isar.scores
+        .filter()
+        .songIdEqualTo(songId)
+        .and()
+        .levelIndexEqualTo(levelIndex)
+        .and()
+        .typeEqualTo(type)
+        .findFirst();
   }
 
   /// 获取所有成绩，按 DX Rating 降序
@@ -228,14 +334,40 @@ class MaimaiIsarService extends BaseIsarService {
 
   // ==================== 收藏品相关操作 ====================
 
-  /// 批量保存收藏品
+  /// 批量保存收藏品（智能合并，避免 ID 冲突）
   Future<void> saveCollections(List<MaimaiCollection> collections) async {
+    if (collections.isEmpty) return;
+
     print('💾 准备保存 ${collections.length} 个收藏品到数据库...');
     final isar = await db;
+
     await isar.writeTxn(() async {
-      await isar.maimaiCollections.putAll(collections);
+      int newCount = 0;
+      int updateCount = 0;
+
+      for (final collection in collections) {
+        // 检查是否已存在（通过类型和收藏品ID精确匹配）
+        final existing = await isar.maimaiCollections
+            .filter()
+            .collectionTypeEqualTo(collection.collectionType)
+            .and()
+            .collectionIdEqualTo(collection.collectionId)
+            .findFirst();
+
+        if (existing != null) {
+          // 已存在，保留 Isar ID 并更新数据
+          collection.id = existing.id;
+          updateCount++;
+        } else {
+          // 新数据
+          newCount++;
+        }
+
+        await isar.maimaiCollections.put(collection);
+      }
+
+      print('✅ 成功保存收藏品: 新增 $newCount 个, 更新 $updateCount 个');
     });
-    print('✅ 成功保存 ${collections.length} 个收藏品');
   }
 
   /// 根据收藏品 ID 获取收藏品（可能有多个不同类型的同 ID 收藏品）
@@ -296,11 +428,25 @@ class MaimaiIsarService extends BaseIsarService {
     print('✅ 收藏品数据已清空');
   }
 
-  /// 保存收藏品分类
+  /// 保存收藏品分类（智能合并）
   Future<void> saveCollectionGenres(List<CollectionGenre> genres) async {
+    if (genres.isEmpty) return;
+
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.collectionGenres.putAll(genres);
+      for (final genre in genres) {
+        // 检查是否已存在
+        final existing = await isar.collectionGenres
+            .filter()
+            .genreIdEqualTo(genre.genreId)
+            .findFirst();
+
+        if (existing != null) {
+          genre.id = existing.id;
+        }
+
+        await isar.collectionGenres.put(genre);
+      }
     });
   }
 

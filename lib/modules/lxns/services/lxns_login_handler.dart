@@ -1,24 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:dio/dio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
 import 'package:rank_hub/utils/pkce_helper.dart';
-
-/// Chrome Safari Browser 实例，用于打开授权页面
-class OAuth2Browser extends ChromeSafariBrowser {
-  @override
-  void onOpened() {
-    print('OAuth2 浏览器已打开');
-  }
-
-  @override
-  void onClosed() {
-    print('OAuth2 浏览器已关闭');
-  }
-}
+import 'lxns_api_response.dart';
 
 /// 落雪咖啡屋平台登录处理器
 /// 使用 OAuth2 + PKCE 授权流程
@@ -31,7 +18,7 @@ class LxnsLoginHandler extends PlatformLoginHandler {
   static const String foregroundUrl =
       'https://maimai.lxns.net/logo_foreground.webp';
   static const String clientId = 'd7a8e3dc-0e08-43b1-ac08-7e4b2b4574bd';
-  static const String redirectUri = 'urn:ietf:wg:oauth:2.0:oob'; // 无回调地址时使用
+  static const String redirectUri = 'https://rankhub.kamitsubaki.city/callback';
   static const String scope =
       'read_user_profile read_player read_user_token write_player';
 
@@ -63,6 +50,87 @@ class LxnsLoginHandler extends PlatformLoginHandler {
     );
   }
 
+  /// 执行 OAuth2 登录流程
+  Future<PlatformLoginResult?> performOAuth2Login() async {
+    try {
+      // 生成 PKCE 参数
+      final pkcePair = PkceHelper.generatePkcePair();
+      final codeVerifier = pkcePair['code_verifier']!;
+      final codeChallenge = pkcePair['code_challenge']!;
+
+      // 生成随机 state 用于防止 CSRF 攻击
+      final state = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // 构建授权 URL
+      final authUrl =
+          '$baseUrl/oauth/authorize?'
+          'response_type=code&'
+          'client_id=$clientId&'
+          'redirect_uri=${Uri.encodeComponent(redirectUri)}&'
+          'scope=${Uri.encodeComponent(scope)}&'
+          'code_challenge=$codeChallenge&'
+          'code_challenge_method=S256&'
+          'state=$state';
+
+      print('🔐 开始 OAuth2 授权...');
+      print('📤 授权 URL: $authUrl');
+      print('📤 Redirect URI: $redirectUri');
+
+      // 使用 flutter_web_auth 打开授权页面
+      final result = await FlutterWebAuth.authenticate(
+        url: authUrl,
+        callbackUrlScheme: 'rankhub',
+      );
+
+      print('📥 收到回调: $result');
+
+      // 解析回调 URL
+      final uri = Uri.parse(result);
+      final code = uri.queryParameters['code'];
+      final returnedState = uri.queryParameters['state'];
+
+      if (code == null) {
+        print('❌ 未收到授权码');
+        return null;
+      }
+
+      // 验证 state
+      if (returnedState != state) {
+        print('❌ State 验证失败');
+        return null;
+      }
+
+      print('✅ 授权码获取成功: $code');
+
+      // 使用授权码交换 token
+      final tokenData = await exchangeCodeForToken(code, codeVerifier);
+      if (tokenData == null) {
+        print('❌ 交换 token 失败');
+        return null;
+      }
+
+      // 获取账号信息
+      final accountInfo = await fetchAccountInfo(tokenData);
+      if (accountInfo == null) {
+        print('❌ 获取账号信息失败');
+        return null;
+      }
+
+      print('✅ 登录成功: ${accountInfo.displayName}');
+
+      return PlatformLoginResult(
+        externalId: accountInfo.externalId,
+        credentialData: tokenData,
+        displayName: accountInfo.displayName,
+        avatarUrl: accountInfo.avatarUrl,
+        metadata: accountInfo.metadata,
+      );
+    } catch (e) {
+      print('❌ OAuth2 登录失败: $e');
+      return null;
+    }
+  }
+
   @override
   Future<bool> validateCredentials(Map<String, dynamic> credentialData) async {
     final accessToken = credentialData['access_token'] as String?;
@@ -76,8 +144,14 @@ class LxnsLoginHandler extends PlatformLoginHandler {
         '$baseUrl/api/v0/user/profile',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
-      return response.statusCode == 200;
+
+      if (response.statusCode == 200) {
+        final apiResponse = LxnsApiResponse.fromJson(response.data);
+        return apiResponse.success;
+      }
+      return false;
     } catch (e) {
+      print('验证 token 失败: $e');
       return false;
     }
   }
@@ -92,27 +166,41 @@ class LxnsLoginHandler extends PlatformLoginHandler {
     }
 
     try {
-      // 获取用户 profile 信息
+      print('📤 获取用户信息...');
       final profileResponse = await _dio.get(
         '$baseUrl/api/v0/user/profile',
         options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
 
+      print('📥 响应: ${profileResponse.data}');
+
       if (profileResponse.statusCode == 200) {
-        final profileData = profileResponse.data['data'];
+        final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+          profileResponse.data,
+          dataParser: (data) => data as Map<String, dynamic>,
+        );
+
+        if (!apiResponse.success) {
+          print('❌ API 返回失败: ${apiResponse.message}');
+          return null;
+        }
+
+        final profileData = apiResponse.data!;
         final userId = profileData['id'];
         final userName = profileData['name'];
         final userEmail = profileData['email'];
 
+        print('✅ 获取用户信息成功: $userName (ID: $userId)');
+
         return PlatformAccountInfo(
           externalId: userId.toString(),
           displayName: userName ?? 'lxns_user',
-          avatarUrl: iconUrl, // 使用平台 icon 作为头像
+          avatarUrl: iconUrl,
           metadata: {'user_id': userId, 'email': userEmail},
         );
       }
     } catch (e) {
-      print('获取账号信息失败: $e');
+      print('❌ 获取账号信息失败: $e');
     }
     return null;
   }
@@ -123,8 +211,19 @@ class LxnsLoginHandler extends PlatformLoginHandler {
   ) async {
     final refreshToken = oldCredentialData['refresh_token'] as String?;
     if (refreshToken == null) {
+      print('❌ 刷新 token 失败: refresh_token 为 null');
       return null;
     }
+
+    print('🔄 开始刷新 token...');
+    print('📤 请求 URL: $baseUrl/api/v0/oauth/token');
+    print('📤 请求方法: POST');
+    print('📤 Content-Type: ${Headers.jsonContentType}');
+    print('📤 请求数据: {');
+    print('     client_id: $clientId');
+    print('     grant_type: refresh_token');
+    print('     refresh_token: $refreshToken');
+    print('   }');
 
     try {
       final response = await _dio.post(
@@ -133,22 +232,54 @@ class LxnsLoginHandler extends PlatformLoginHandler {
           'client_id': clientId,
           'grant_type': 'refresh_token',
           'refresh_token': refreshToken,
+          //'client_secret': 'gD93xzHD8XGrWNmjsyZ131REOd3nQxym',
         },
         options: Options(contentType: Headers.jsonContentType),
       );
 
+      print('📥 响应状态码: ${response.statusCode}');
+      print('📥 响应 Headers: ${response.headers}');
+      print('📥 响应数据: ${response.data}');
+
       if (response.statusCode == 200) {
-        final data = response.data['data'];
-        return {
+        final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+          response.data,
+          dataParser: (data) => data as Map<String, dynamic>,
+        );
+
+        if (!apiResponse.success) {
+          print('❌ API 返回失败: ${apiResponse.message}');
+          return null;
+        }
+
+        final data = apiResponse.data!;
+        final newTokenData = {
           'access_token': data['access_token'],
           'refresh_token': data['refresh_token'],
           'token_expiry': DateTime.now()
               .add(Duration(seconds: data['expires_in'] as int))
               .toIso8601String(),
         };
+        print('✅ 刷新 token 成功');
+        print(
+          '   新 access_token: ${(data['access_token'] as String).substring(0, 10)}...',
+        );
+        print(
+          '   新 refresh_token: ${(data['refresh_token'] as String).substring(0, 10)}...',
+        );
+        print('   过期时间: ${newTokenData['token_expiry']}');
+        return newTokenData;
       }
+    } on DioException catch (dioException) {
+      print('❌ 刷新 token 失败 (DioException):');
+      print('   错误类型: ${dioException.type}');
+      print('   错误消息: ${dioException.message}');
+      print('   响应状态码: ${dioException.response?.statusCode}');
+      print('   响应数据: ${dioException.response?.data}');
+      print('   响应 Headers: ${dioException.response?.headers}');
     } catch (e) {
-      print('刷新 token 失败: $e');
+      print('❌ 刷新 token 失败 (未知错误): $e');
+      print('   错误类型: ${e.runtimeType}');
     }
     return null;
   }
@@ -158,6 +289,10 @@ class LxnsLoginHandler extends PlatformLoginHandler {
     String code,
     String codeVerifier,
   ) async {
+    print('🔄 开始交换授权码...');
+    print('📤 请求 URL: $baseUrl/api/v0/oauth/token');
+    print('📤 授权码: $code');
+
     try {
       final response = await _dio.post(
         '$baseUrl/api/v0/oauth/token',
@@ -171,9 +306,22 @@ class LxnsLoginHandler extends PlatformLoginHandler {
         options: Options(contentType: Headers.jsonContentType),
       );
 
+      print('📥 响应状态码: ${response.statusCode}');
+      print('📥 响应数据: ${response.data}');
+
       if (response.statusCode == 200) {
-        final data = response.data['data'];
-        return {
+        final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+          response.data,
+          dataParser: (data) => data as Map<String, dynamic>,
+        );
+
+        if (!apiResponse.success) {
+          print('❌ API 返回失败: ${apiResponse.message}');
+          return null;
+        }
+
+        final data = apiResponse.data!;
+        final tokenData = {
           'access_token': data['access_token'],
           'refresh_token': data['refresh_token'],
           'token_expiry': DateTime.now()
@@ -181,13 +329,16 @@ class LxnsLoginHandler extends PlatformLoginHandler {
               .toIso8601String(),
           'scope': data['scope'],
         };
+
+        print('✅ 交换 token 成功');
+        return tokenData;
       }
     } on DioException catch (dioException) {
-      print(
-        '交换 token 失败: ${dioException.response?.data ?? dioException.message}',
-      );
+      print('❌ 交换 token 失败 (DioException):');
+      print('   错误类型: ${dioException.type}');
+      print('   响应数据: ${dioException.response?.data}');
     } catch (e) {
-      print('交换 token 失败: $e');
+      print('❌ 交换 token 失败: $e');
     }
     return null;
   }
@@ -202,198 +353,36 @@ class _LxnsOAuth2LoginPage extends StatefulWidget {
 }
 
 class _LxnsOAuth2LoginPageState extends State<_LxnsOAuth2LoginPage> {
-  final _codeController = TextEditingController();
-  String? _codeVerifier;
-  String? _authUrl;
   bool _isLoading = false;
-  bool _showCodeInput = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _generateAuthUrl();
-  }
 
   @override
   void dispose() {
-    _codeController.dispose();
     super.dispose();
   }
 
-  /// 生成授权链接
-  void _generateAuthUrl() {
-    final pkcePair = PkceHelper.generatePkcePair();
-    _codeVerifier = pkcePair['code_verifier'];
-    final codeChallenge = pkcePair['code_challenge'];
-
-    _authUrl =
-        '${LxnsLoginHandler.baseUrl}/oauth/authorize?'
-        'response_type=code&'
-        'client_id=${LxnsLoginHandler.clientId}&'
-        'redirect_uri=${Uri.encodeComponent(LxnsLoginHandler.redirectUri)}&'
-        'scope=${Uri.encodeComponent(LxnsLoginHandler.scope)}&'
-        'code_challenge=$codeChallenge&'
-        'code_challenge_method=S256';
-  }
-
-  /// 验证授权码格式
-  /// lxns 授权码格式: XXXX-XXXX-XXXX (12个字符 + 2个连字符)
-  bool _isValidAuthCode(String code) {
-    final cleaned = code.trim();
-    // 匹配格式: 4个大写字母/数字 - 4个大写字母/数字 - 4个大写字母/数字
-    final regex = RegExp(r'^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$');
-    return regex.hasMatch(cleaned);
-  }
-
-  /// 从剪切板读取并验证授权码
-  Future<String?> _readAuthCodeFromClipboard() async {
-    try {
-      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-      final text = clipboardData?.text?.trim();
-      if (text != null && _isValidAuthCode(text)) {
-        return text;
-      }
-    } catch (e) {
-      print('读取剪切板失败: $e');
-    }
-    return null;
-  }
-
-  /// 打开 WebView 进行授权
-  Future<void> _openWebView() async {
-    if (_authUrl == null) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      // 使用 ChromeSafariBrowser 打开授权页面
-      final browser = OAuth2Browser();
-      await browser.open(
-        url: WebUri(_authUrl!),
-        settings: ChromeSafariBrowserSettings(
-          shareState: CustomTabsShareState.SHARE_STATE_OFF,
-          barCollapsingEnabled: true,
-        ),
-      );
-
-      // 浏览器关闭后,尝试从剪切板读取授权码
-      setState(() {
-        _showCodeInput = true;
-        _isLoading = false;
-      });
-
-      // 延迟一下再读取剪切板,确保用户有时间复制
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      if (mounted) {
-        final authCode = await _readAuthCodeFromClipboard();
-        if (authCode != null) {
-          // 自动填充授权码
-          _codeController.text = authCode;
-
-          // 显示提示
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('已自动填充授权码'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-
-            // 自动提交登录
-            await Future.delayed(const Duration(milliseconds: 500));
-            if (mounted) {
-              await _handleCodeLogin();
-            }
-          }
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('打开授权页面失败: $e')));
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  /// 使用授权码登录
-  Future<void> _handleCodeLogin() async {
-    final code = _codeController.text.trim();
-    if (code.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('请输入授权码')));
-      return;
-    }
-
-    // 验证授权码格式
-    if (!_isValidAuthCode(code)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('授权码格式不正确,应为 XXXX-XXXX-XXXX 格式')),
-      );
-      return;
-    }
-
-    if (_codeVerifier == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('PKCE 验证码丢失,请重新授权')));
-      return;
-    }
-
+  /// 开始 OAuth2 登录流程
+  Future<void> _startOAuth2Login() async {
     setState(() => _isLoading = true);
 
     try {
       final handler = LxnsLoginHandler();
+      final result = await handler.performOAuth2Login();
 
-      // 使用授权码交换 token
-      final tokenData = await handler.exchangeCodeForToken(
-        code,
-        _codeVerifier!,
-      );
-      if (tokenData == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('获取访问令牌失败,请检查授权码是否正确')));
-        }
-        return;
-      }
-
-      // 获取账号信息
-      final accountInfo = await handler.fetchAccountInfo(tokenData);
-      if (accountInfo == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('获取账号信息失败')));
-        }
-        return;
-      }
-
-      // 返回登录结果
       if (mounted) {
-        Navigator.pop(
-          context,
-          PlatformLoginResult(
-            externalId: accountInfo.externalId,
-            credentialData: tokenData,
-            displayName: accountInfo.displayName,
-            avatarUrl: accountInfo.avatarUrl,
-            metadata: accountInfo.metadata,
-          ),
-        );
+        if (result != null) {
+          Navigator.pop(context, result);
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('登录失败，请重试')));
+          setState(() => _isLoading = false);
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('登录失败: $e')));
-      }
-    } finally {
-      if (mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -404,133 +393,138 @@ class _LxnsOAuth2LoginPageState extends State<_LxnsOAuth2LoginPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Banner 图片 (背景 + 前景叠加)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Stack(
-                alignment: Alignment.center,
+      appBar: AppBar(title: const Text('落雪咖啡屋登录')),
+      body: Column(
+        children: [
+          // 可滚动内容区域
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 背景图 - 使用 AspectRatio 确保完整显示
-                  CachedNetworkImage(
-                    imageUrl: LxnsLoginHandler.backgroundUrl,
-                    width: double.infinity,
-                    fit: BoxFit.contain,
-                    placeholder: (context, url) => AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Container(
-                        color: colorScheme.surfaceContainerHighest,
-                        child: const Center(child: CircularProgressIndicator()),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: Container(
-                        color: colorScheme.surfaceContainerHighest,
-                        child: Icon(
-                          Icons.coffee,
-                          size: 64,
-                          color: colorScheme.primary,
+                  // Banner 图片 (背景 + 前景叠加)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // 背景图
+                        CachedNetworkImage(
+                          imageUrl: LxnsLoginHandler.backgroundUrl,
+                          width: double.infinity,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: Container(
+                              color: colorScheme.surfaceContainerHighest,
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: Container(
+                              color: colorScheme.surfaceContainerHighest,
+                              child: Icon(
+                                Icons.coffee,
+                                size: 64,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                        // 前景图
+                        Positioned.fill(
+                          child: CachedNetworkImage(
+                            imageUrl: LxnsLoginHandler.foregroundUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const SizedBox(),
+                            errorWidget: (context, url, error) =>
+                                const SizedBox(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  // 前景图 - 使用 Positioned.fill 跟随背景尺寸
-                  Positioned.fill(
-                    child: CachedNetworkImage(
-                      imageUrl: LxnsLoginHandler.foregroundUrl,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => const SizedBox(),
-                      errorWidget: (context, url, error) => const SizedBox(),
+                  const SizedBox(height: 16),
+                  Text(
+                    '落雪咖啡屋',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '使用 OAuth2 安全授权登录',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 功能说明
+                  Card(
+                    elevation: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '登录说明',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            '点击下方按钮将打开浏览器进行授权，授权成功后会自动返回应用完成登录。',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '• 需要登录您的落雪咖啡屋账号\n'
+                            '• 授权应用访问您的游戏数据\n'
+                            '• 授权成功后自动跳转回应用',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              '落雪咖啡屋',
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '使用 OAuth2 安全授权登录',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
+          ),
 
-            // 步骤说明
-            _buildStepCard(
-              context,
-              step: '1',
-              title: '点击下方按钮打开授权页面',
-              description: '将在系统浏览器中打开,登录您的落雪咖啡屋账号并授权',
-            ),
-            const SizedBox(height: 16),
-            _buildStepCard(
-              context,
-              step: '2',
-              title: '复制授权码',
-              description: '授权成功后会显示授权码(形如 ABCD-EFGH-IJKL),复制到剪切板',
-            ),
-            const SizedBox(height: 16),
-            _buildStepCard(
-              context,
-              step: '3',
-              title: '返回应用',
-              description: '关闭浏览器,应用会自动读取剪切板并填充授权码',
-            ),
-            const SizedBox(height: 32),
-
-            // 打开授权页面按钮
-            if (!_showCodeInput)
-              FilledButton.icon(
-                onPressed: _isLoading ? null : _openWebView,
-                icon: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.open_in_browser),
-                label: const Text('打开授权页面'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+          // 固定在底部的登录按钮
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
                 ),
-              ),
-
-            // 授权码输入框
-            if (_showCodeInput) ...[
-              TextField(
-                controller: _codeController,
-                decoration: const InputDecoration(
-                  labelText: '授权码',
-                  hintText: '格式: XXXX-XXXX-XXXX (自动填充)',
-                  helperText: '复制授权码后会自动填充并提交',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.key),
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-                textCapitalization: TextCapitalization.characters,
-                readOnly: _isLoading,
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: _isLoading ? null : _handleCodeLogin,
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: FilledButton.icon(
+                onPressed: _isLoading ? null : _startOAuth2Login,
                 icon: _isLoading
                     ? const SizedBox(
                         width: 20,
@@ -538,74 +532,15 @@ class _LxnsOAuth2LoginPageState extends State<_LxnsOAuth2LoginPage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.login),
-                label: const Text('登录'),
+                label: Text(_isLoading ? '登录中...' : '使用 OAuth2 登录'),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: _isLoading ? null : _openWebView,
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('重新授权'),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStepCard(
-    BuildContext context, {
-    required String step,
-    required String title,
-    required String description,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: colorScheme.primaryContainer,
-              child: Text(
-                step,
-                style: TextStyle(
-                  color: colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
+                  minimumSize: const Size(double.infinity, 0),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
