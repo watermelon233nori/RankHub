@@ -17,12 +17,12 @@ RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支
 ### 应用截图
 
 <div align="center">
-  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.38.29-portrait.png" width="150" />
-  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.39.00-portrait.png" width="150" />
-  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.39.54-portrait.png" width="150" />
-  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.40.24-portrait.png" width="150" />
-  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.40.42-portrait.png" width="150" />
-  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.41.12-portrait.png" width="150" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.38.29-portrait.png" width="120" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.39.00-portrait.png" width="120" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.39.54-portrait.png" width="120" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.40.24-portrait.png" width="120" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.40.42-portrait.png" width="120" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.41.12-portrait.png" width="120" />
 </div>
 
 ### 核心功能
