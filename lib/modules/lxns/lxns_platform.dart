@@ -143,13 +143,14 @@ class LxnsPlatform extends BasePlatform {
     final playerCards = <Widget>[];
 
     for (final game in games) {
-      final card = game.buildPlayerInfoCard(context);
+      final card = game.buildPlayerInfoCard(context, account);
       if (card != null) {
         playerCards.add(card);
       }
     }
 
     if (playerCards.isEmpty) {
+      print('No player info cards available');
       return null;
     }
 

@@ -1,13 +1,16 @@
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
+import 'package:rank_hub/modules/musedash/services/musedash_credential_provider.dart';
 import 'package:rank_hub/services/account_service.dart';
 import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
 import 'package:rank_hub/services/platform_login_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 账号管理控制器
 class AccountController extends GetxController {
   final AccountService _accountService = AccountService.instance;
+  static const String _currentAccountIdKey = 'current_account_id';
 
   // ========== 状态管理 ==========
   final _accounts = <Account>[].obs;
@@ -33,6 +36,7 @@ class AccountController extends GetxController {
 
     // 注册凭据提供者
     _accountService.registerProvider(LxnsCredentialProvider());
+    _accountService.registerProvider(MuseDashCredentialProvider());
 
     // 加载账号列表
     loadAccounts();
@@ -47,9 +51,28 @@ class AccountController extends GetxController {
       final accounts = await _accountService.getAllAccounts();
       _accounts.value = accounts;
 
+      // 从 SharedPreferences 恢复上次选择的账号
+      final prefs = await SharedPreferences.getInstance();
+      final savedAccountId = prefs.getInt(_currentAccountIdKey);
+
+      if (savedAccountId != null) {
+        // 尝试找到保存的账号
+        final savedAccount = accounts.firstWhereOrNull(
+          (a) => a.id == savedAccountId,
+        );
+        if (savedAccount != null) {
+          _currentAccount.value = savedAccount;
+          return;
+        }
+      }
+
       // 如果没有当前账号,选择第一个激活的账号
       if (_currentAccount.value == null && accounts.isNotEmpty) {
         _currentAccount.value = accounts.firstWhereOrNull((a) => a.isActive);
+        // 保存选择
+        if (_currentAccount.value != null) {
+          await _saveCurrentAccountId(_currentAccount.value!.id);
+        }
       }
     } catch (e) {
       _errorMessage.value = '加载账号失败: $e';
@@ -112,6 +135,7 @@ class AccountController extends GetxController {
       // 如果删除的是当前账号,清空当前账号
       if (_currentAccount.value?.id == accountId) {
         _currentAccount.value = _accounts.firstWhereOrNull((a) => a.isActive);
+        await _saveCurrentAccountId(_currentAccount.value?.id);
       }
 
       Get.snackbar('成功', '账号解绑成功');
@@ -126,9 +150,20 @@ class AccountController extends GetxController {
   }
 
   /// 切换当前账号
-  void switchAccount(Account account) {
+  Future<void> switchAccount(Account account) async {
     _currentAccount.value = account;
+    await _saveCurrentAccountId(account.id);
     Get.snackbar('成功', '已切换到账号: ${account.displayName ?? account.externalId}');
+  }
+
+  /// 保存当前账号ID
+  Future<void> _saveCurrentAccountId(int? accountId) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (accountId != null) {
+      await prefs.setInt(_currentAccountIdKey, accountId);
+    } else {
+      await prefs.remove(_currentAccountIdKey);
+    }
   }
 
   /// 设置账号激活状态

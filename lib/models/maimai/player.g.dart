@@ -840,49 +840,64 @@ const PlayerSchema = CollectionSchema(
       name: r'classRank',
       type: IsarType.long,
     ),
-    r'courseRank': PropertySchema(
+    r'classRankImageUrl': PropertySchema(
       id: 1,
+      name: r'classRankImageUrl',
+      type: IsarType.string,
+    ),
+    r'courseRank': PropertySchema(
+      id: 2,
       name: r'courseRank',
       type: IsarType.long,
     ),
+    r'courseRankImageUrl': PropertySchema(
+      id: 3,
+      name: r'courseRankImageUrl',
+      type: IsarType.string,
+    ),
     r'frame': PropertySchema(
-      id: 2,
+      id: 4,
       name: r'frame',
       type: IsarType.object,
 
       target: r'Frame',
     ),
     r'friendCode': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'friendCode',
       type: IsarType.long,
     ),
     r'icon': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'icon',
       type: IsarType.object,
 
       target: r'IconData',
     ),
-    r'name': PropertySchema(id: 5, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 7, name: r'name', type: IsarType.string),
     r'namePlate': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'namePlate',
       type: IsarType.object,
 
       target: r'NamePlate',
     ),
-    r'rating': PropertySchema(id: 7, name: r'rating', type: IsarType.long),
-    r'star': PropertySchema(id: 8, name: r'star', type: IsarType.long),
+    r'rating': PropertySchema(id: 9, name: r'rating', type: IsarType.long),
+    r'star': PropertySchema(id: 10, name: r'star', type: IsarType.long),
+    r'starIconUrl': PropertySchema(
+      id: 11,
+      name: r'starIconUrl',
+      type: IsarType.string,
+    ),
     r'trophy': PropertySchema(
-      id: 9,
+      id: 12,
       name: r'trophy',
       type: IsarType.object,
 
       target: r'Trophy',
     ),
     r'uploadTime': PropertySchema(
-      id: 10,
+      id: 13,
       name: r'uploadTime',
       type: IsarType.string,
     ),
@@ -928,6 +943,8 @@ int _playerEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.classRankImageUrl.length * 3;
+  bytesCount += 3 + object.courseRankImageUrl.length * 3;
   {
     final value = object.frame;
     if (value != null) {
@@ -956,6 +973,7 @@ int _playerEstimateSize(
           );
     }
   }
+  bytesCount += 3 + object.starIconUrl.length * 3;
   {
     final value = object.trophy;
     if (value != null) {
@@ -979,36 +997,39 @@ void _playerSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.classRank);
-  writer.writeLong(offsets[1], object.courseRank);
+  writer.writeString(offsets[1], object.classRankImageUrl);
+  writer.writeLong(offsets[2], object.courseRank);
+  writer.writeString(offsets[3], object.courseRankImageUrl);
   writer.writeObject<Frame>(
-    offsets[2],
+    offsets[4],
     allOffsets,
     FrameSchema.serialize,
     object.frame,
   );
-  writer.writeLong(offsets[3], object.friendCode);
+  writer.writeLong(offsets[5], object.friendCode);
   writer.writeObject<IconData>(
-    offsets[4],
+    offsets[6],
     allOffsets,
     IconDataSchema.serialize,
     object.icon,
   );
-  writer.writeString(offsets[5], object.name);
+  writer.writeString(offsets[7], object.name);
   writer.writeObject<NamePlate>(
-    offsets[6],
+    offsets[8],
     allOffsets,
     NamePlateSchema.serialize,
     object.namePlate,
   );
-  writer.writeLong(offsets[7], object.rating);
-  writer.writeLong(offsets[8], object.star);
+  writer.writeLong(offsets[9], object.rating);
+  writer.writeLong(offsets[10], object.star);
+  writer.writeString(offsets[11], object.starIconUrl);
   writer.writeObject<Trophy>(
-    offsets[9],
+    offsets[12],
     allOffsets,
     TrophySchema.serialize,
     object.trophy,
   );
-  writer.writeString(offsets[10], object.uploadTime);
+  writer.writeString(offsets[13], object.uploadTime);
 }
 
 Player _playerDeserialize(
@@ -1019,33 +1040,33 @@ Player _playerDeserialize(
 ) {
   final object = Player(
     classRank: reader.readLongOrNull(offsets[0]) ?? 0,
-    courseRank: reader.readLongOrNull(offsets[1]) ?? 0,
+    courseRank: reader.readLongOrNull(offsets[2]) ?? 0,
     frame: reader.readObjectOrNull<Frame>(
-      offsets[2],
+      offsets[4],
       FrameSchema.deserialize,
       allOffsets,
     ),
-    friendCode: reader.readLongOrNull(offsets[3]) ?? 0,
+    friendCode: reader.readLongOrNull(offsets[5]) ?? 0,
     icon: reader.readObjectOrNull<IconData>(
-      offsets[4],
+      offsets[6],
       IconDataSchema.deserialize,
       allOffsets,
     ),
     id: id,
-    name: reader.readStringOrNull(offsets[5]) ?? '',
+    name: reader.readStringOrNull(offsets[7]) ?? '',
     namePlate: reader.readObjectOrNull<NamePlate>(
-      offsets[6],
+      offsets[8],
       NamePlateSchema.deserialize,
       allOffsets,
     ),
-    rating: reader.readLongOrNull(offsets[7]) ?? 0,
-    star: reader.readLongOrNull(offsets[8]) ?? 0,
+    rating: reader.readLongOrNull(offsets[9]) ?? 0,
+    star: reader.readLongOrNull(offsets[10]) ?? 0,
     trophy: reader.readObjectOrNull<Trophy>(
-      offsets[9],
+      offsets[12],
       TrophySchema.deserialize,
       allOffsets,
     ),
-    uploadTime: reader.readStringOrNull(offsets[10]),
+    uploadTime: reader.readStringOrNull(offsets[13]),
   );
   return object;
 }
@@ -1060,44 +1081,50 @@ P _playerDeserializeProp<P>(
     case 0:
       return (reader.readLongOrNull(offset) ?? 0) as P;
     case 1:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
+      return (reader.readString(offset)) as P;
     case 2:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
       return (reader.readObjectOrNull<Frame>(
             offset,
             FrameSchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 3:
+    case 5:
       return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 4:
+    case 6:
       return (reader.readObjectOrNull<IconData>(
             offset,
             IconDataSchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 5:
+    case 7:
       return (reader.readStringOrNull(offset) ?? '') as P;
-    case 6:
+    case 8:
       return (reader.readObjectOrNull<NamePlate>(
             offset,
             NamePlateSchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 7:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
-    case 8:
-      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 9:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 10:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
       return (reader.readObjectOrNull<Trophy>(
             offset,
             TrophySchema.deserialize,
             allOffsets,
           ))
           as P;
-    case 10:
+    case 13:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1424,6 +1451,153 @@ extension PlayerQueryFilter on QueryBuilder<Player, Player, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterFilterCondition> classRankImageUrlEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'classRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  classRankImageUrlGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'classRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> classRankImageUrlLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'classRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> classRankImageUrlBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'classRankImageUrl',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  classRankImageUrlStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'classRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> classRankImageUrlEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'classRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> classRankImageUrlContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'classRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> classRankImageUrlMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'classRankImageUrl',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  classRankImageUrlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'classRankImageUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  classRankImageUrlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'classRankImageUrl', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterFilterCondition> courseRankEqualTo(
     int value,
   ) {
@@ -1479,6 +1653,150 @@ extension PlayerQueryFilter on QueryBuilder<Player, Player, QFilterCondition> {
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> courseRankImageUrlEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'courseRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  courseRankImageUrlGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'courseRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  courseRankImageUrlLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'courseRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> courseRankImageUrlBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'courseRankImageUrl',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  courseRankImageUrlStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'courseRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  courseRankImageUrlEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'courseRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  courseRankImageUrlContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'courseRankImageUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> courseRankImageUrlMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'courseRankImageUrl',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  courseRankImageUrlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'courseRankImageUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition>
+  courseRankImageUrlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'courseRankImageUrl', value: ''),
       );
     });
   }
@@ -1907,6 +2225,152 @@ extension PlayerQueryFilter on QueryBuilder<Player, Player, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'starIconUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'starIconUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'starIconUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'starIconUrl',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'starIconUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'starIconUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'starIconUrl',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'starIconUrl',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'starIconUrl', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterFilterCondition> starIconUrlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'starIconUrl', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterFilterCondition> trophyIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -2135,6 +2599,18 @@ extension PlayerQuerySortBy on QueryBuilder<Player, Player, QSortBy> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterSortBy> sortByClassRankImageUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classRankImageUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByClassRankImageUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classRankImageUrl', Sort.desc);
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterSortBy> sortByCourseRank() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'courseRank', Sort.asc);
@@ -2144,6 +2620,18 @@ extension PlayerQuerySortBy on QueryBuilder<Player, Player, QSortBy> {
   QueryBuilder<Player, Player, QAfterSortBy> sortByCourseRankDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'courseRank', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByCourseRankImageUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseRankImageUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByCourseRankImageUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseRankImageUrl', Sort.desc);
     });
   }
 
@@ -2195,6 +2683,18 @@ extension PlayerQuerySortBy on QueryBuilder<Player, Player, QSortBy> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterSortBy> sortByStarIconUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'starIconUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> sortByStarIconUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'starIconUrl', Sort.desc);
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterSortBy> sortByUploadTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'uploadTime', Sort.asc);
@@ -2221,6 +2721,18 @@ extension PlayerQuerySortThenBy on QueryBuilder<Player, Player, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterSortBy> thenByClassRankImageUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classRankImageUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByClassRankImageUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classRankImageUrl', Sort.desc);
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterSortBy> thenByCourseRank() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'courseRank', Sort.asc);
@@ -2230,6 +2742,18 @@ extension PlayerQuerySortThenBy on QueryBuilder<Player, Player, QSortThenBy> {
   QueryBuilder<Player, Player, QAfterSortBy> thenByCourseRankDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'courseRank', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByCourseRankImageUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseRankImageUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByCourseRankImageUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'courseRankImageUrl', Sort.desc);
     });
   }
 
@@ -2293,6 +2817,18 @@ extension PlayerQuerySortThenBy on QueryBuilder<Player, Player, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Player, Player, QAfterSortBy> thenByStarIconUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'starIconUrl', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Player, Player, QAfterSortBy> thenByStarIconUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'starIconUrl', Sort.desc);
+    });
+  }
+
   QueryBuilder<Player, Player, QAfterSortBy> thenByUploadTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'uploadTime', Sort.asc);
@@ -2313,9 +2849,31 @@ extension PlayerQueryWhereDistinct on QueryBuilder<Player, Player, QDistinct> {
     });
   }
 
+  QueryBuilder<Player, Player, QDistinct> distinctByClassRankImageUrl({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'classRankImageUrl',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
   QueryBuilder<Player, Player, QDistinct> distinctByCourseRank() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'courseRank');
+    });
+  }
+
+  QueryBuilder<Player, Player, QDistinct> distinctByCourseRankImageUrl({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'courseRankImageUrl',
+        caseSensitive: caseSensitive,
+      );
     });
   }
 
@@ -2345,6 +2903,14 @@ extension PlayerQueryWhereDistinct on QueryBuilder<Player, Player, QDistinct> {
     });
   }
 
+  QueryBuilder<Player, Player, QDistinct> distinctByStarIconUrl({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'starIconUrl', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Player, Player, QDistinct> distinctByUploadTime({
     bool caseSensitive = true,
   }) {
@@ -2367,9 +2933,21 @@ extension PlayerQueryProperty on QueryBuilder<Player, Player, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Player, String, QQueryOperations> classRankImageUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'classRankImageUrl');
+    });
+  }
+
   QueryBuilder<Player, int, QQueryOperations> courseRankProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'courseRank');
+    });
+  }
+
+  QueryBuilder<Player, String, QQueryOperations> courseRankImageUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'courseRankImageUrl');
     });
   }
 
@@ -2412,6 +2990,12 @@ extension PlayerQueryProperty on QueryBuilder<Player, Player, QQueryProperty> {
   QueryBuilder<Player, int, QQueryOperations> starProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'star');
+    });
+  }
+
+  QueryBuilder<Player, String, QQueryOperations> starIconUrlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'starIconUrl');
     });
   }
 

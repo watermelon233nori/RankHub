@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rank_hub/models/account/account.dart';
 
 /// 游戏内容视图 - 用于多 Tab 场景
 class GameContentView {
@@ -102,7 +103,8 @@ abstract class IGame {
 
   /// 构建玩家信息卡片（可选）
   /// 如果游戏支持玩家信息展示，返回玩家卡片 Widget
-  Widget? buildPlayerInfoCard(BuildContext context) => null;
+  /// [account] 当前账号，用于获取对应的玩家数据
+  Widget? buildPlayerInfoCard(BuildContext context, Account account) => null;
 }
 
 /// 基础游戏实现类 - 提供默认实现
@@ -307,5 +309,5 @@ class BaseGame implements IGame {
   }
 
   @override
-  Widget? buildPlayerInfoCard(BuildContext context) => null;
+  Widget? buildPlayerInfoCard(BuildContext context, Account account) => null;
 }

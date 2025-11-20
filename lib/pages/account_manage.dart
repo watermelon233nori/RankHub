@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_manager.dart';
+import 'package:rank_hub/data/platforms_data.dart';
 
 /// 账号管理页面
 class AccountManagePage extends StatefulWidget {
@@ -283,7 +284,10 @@ class _AccountCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getPlatformName(account.platform),
+                        PlatformRegistry()
+                                .getPlatformByType(account.platform)
+                                ?.name ??
+                            '未知平台',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -314,19 +318,6 @@ class _AccountCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getPlatformName(Platform platform) {
-    switch (platform) {
-      case Platform.divingFish:
-        return '水鱼查分器';
-      case Platform.lxns:
-        return '落雪咖啡屋';
-      case Platform.developerFish:
-        return '开发者鱼';
-      case Platform.custom:
-        return '自定义';
-    }
   }
 
   String _formatTime(DateTime time) {

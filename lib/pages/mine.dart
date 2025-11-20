@@ -223,7 +223,12 @@ class MinePage extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               currentAccount != null
-                                  ? _getPlatformName(currentAccount.platform)
+                                  ? (PlatformRegistry()
+                                            .getPlatformByType(
+                                              currentAccount.platform,
+                                            )
+                                            ?.name ??
+                                        '未知平台')
                                   : '',
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
@@ -263,6 +268,7 @@ class MinePage extends StatelessWidget {
               currentAccount,
             );
             if (playerCard == null) {
+              print('No player info card for platform: ${platform.name}');
               return const SizedBox.shrink();
             }
 
@@ -271,18 +277,5 @@ class MinePage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _getPlatformName(Platform platform) {
-    switch (platform) {
-      case Platform.divingFish:
-        return '水鱼查分器';
-      case Platform.lxns:
-        return '落雪咖啡屋';
-      case Platform.developerFish:
-        return '开发者鱼';
-      case Platform.custom:
-        return '自定义';
-    }
   }
 }

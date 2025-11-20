@@ -1,5 +1,6 @@
 import 'package:rank_hub/services/base_isar_service.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_isar_service.dart';
+import 'package:rank_hub/modules/musedash/services/musedash_isar_service.dart';
 import 'package:rank_hub/services/account_isar_service.dart';
 
 /// Isar 数据库服务统一入口
@@ -22,6 +23,14 @@ class IsarService {
   /// final songs = await IsarService.instance.maimai.getAllSongs();
   /// ```
   MaimaiIsarService get maimai => MaimaiIsarService.instance;
+
+  /// MuseDash 游戏数据库服务
+  ///
+  /// 使用示例:
+  /// ```dart
+  /// final albums = await IsarService.instance.musedash.getAllAlbums();
+  /// ```
+  MuseDashIsarService get musedash => MuseDashIsarService.instance;
 
   /// 账号管理数据库服务
   ///

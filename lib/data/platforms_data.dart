@@ -1,6 +1,7 @@
 import 'package:rank_hub/models/platform.dart';
 import 'package:rank_hub/models/account/account.dart' show Platform;
 import 'package:rank_hub/modules/lxns/lxns_platform.dart';
+import 'package:rank_hub/modules/musedash/musedash_platform.dart';
 
 /// 平台注册中心
 /// 管理所有可用的平台
@@ -13,6 +14,7 @@ class PlatformRegistry {
   // 所有注册的平台
   final List<IPlatform> _platforms = [
     LxnsPlatform(),
+    MuseDashPlatform(),
     // 未来可以添加更多平台
     // DivingFishPlatform(),
     // OtherPlatform(),

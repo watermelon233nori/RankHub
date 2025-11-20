@@ -88,23 +88,44 @@ class _GameSelectorContent extends StatelessWidget {
           Flexible(
             child: games.isEmpty
                 ? _buildEmptyState(context)
-                : ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      bottom: 24,
-                    ),
-                    itemCount: games.length,
-                    itemBuilder: (context, index) {
-                      final game = games[index];
-                      final isSelected = game.id == selectedGame?.id;
+                : Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.only(
+                            left: 16,
+                            right: 16,
+                            bottom: 8,
+                          ),
+                          itemCount: games.length,
+                          itemBuilder: (context, index) {
+                            final game = games[index];
+                            final isSelected = game.id == selectedGame?.id;
 
-                      return _buildGameTile(context, game, isSelected, () {
-                        onGameSelected(game);
-                        Get.back();
-                      });
-                    },
+                            return _buildGameTile(
+                              context,
+                              game,
+                              isSelected,
+                              () {
+                                onGameSelected(game);
+                                Get.back();
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      // 提示信息
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        child: Text(
+                          '没有找到需要的游戏？你可能需要切换平台',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
           ),
         ],
@@ -255,6 +276,7 @@ class _GameSelectorContent extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

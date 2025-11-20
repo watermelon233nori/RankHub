@@ -38,28 +38,38 @@ class _ScoreListViewState extends State<ScoreListView> {
         // 成绩列表
         Obx(() {
           if (controller.scores.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.leaderboard,
-                    size: 64,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '暂无成绩数据',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '请先同步数据',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+            return RefreshIndicator(
+              onRefresh: () async {
+                await controller.loadScores(forceRefresh: true);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height - 200,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.leaderboard,
+                          size: 64,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '暂无成绩数据',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '请先同步数据',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             );
           }
@@ -120,38 +130,54 @@ class _ScoreListViewState extends State<ScoreListView> {
           });
 
           if (scores.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.filter_list_off,
-                    size: 64,
-                    color: colorScheme.onSurfaceVariant,
+            return RefreshIndicator(
+              onRefresh: () async {
+                await controller.loadScores(forceRefresh: true);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height - 200,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.filter_list_off,
+                          size: 64,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '没有符合条件的成绩',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '没有符合条件的成绩',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
+                ),
               ),
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.only(
-              bottom: 200,
-              left: 8,
-              right: 8,
-              top: 8,
-            ), // 为搜索栏和底部导航栏留出空间
-            itemCount: scores.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final score = scores[index];
-              return CompactScoreCard(score);
+          return RefreshIndicator(
+            onRefresh: () async {
+              await controller.loadScores(forceRefresh: true);
             },
+            child: ListView.separated(
+              padding: const EdgeInsets.only(
+                bottom: 200,
+                left: 8,
+                right: 8,
+                top: 8,
+              ), // 为搜索栏和底部导航栏留出空间
+              itemCount: scores.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final score = scores[index];
+                return CompactScoreCard(score);
+              },
+            ),
           );
         }),
         // 筛选和排序栏 - 浮在底部

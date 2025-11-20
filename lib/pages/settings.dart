@@ -36,14 +36,6 @@ class SettingsPage extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Get.to(() => const AccountManagePage()),
           ),
-          const Divider(indent: 16, endIndent: 16),
-          ListTile(
-            leading: const Icon(Icons.sync),
-            title: const Text('数据同步'),
-            subtitle: const Text('同步曲目、收藏品等数据'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Get.toNamed(AppRoutes.dataSync),
-          ),
 
           // 通用设置部分
           Padding(

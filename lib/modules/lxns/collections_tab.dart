@@ -63,25 +63,39 @@ class CollectionsTab extends StatelessWidget {
       // 空数据
       if (controller.filteredCollections.isEmpty &&
           controller.collections.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.collections_outlined,
-                size: 64,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: 16),
-              Text('暂无收藏品数据', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              Text(
-                '请先同步数据',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+        return RefreshIndicator(
+          onRefresh: () async {
+            await controller.loadCollections(forceRefresh: true);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height - 200,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.collections_outlined,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '暂无收藏品数据',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '请先同步数据',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         );
       }
@@ -159,29 +173,48 @@ class CollectionsTab extends StatelessWidget {
           // 收藏品列表
           Expanded(
             child: controller.filteredCollections.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ? RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.loadCollections(forceRefresh: true);
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 400,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                '未找到匹配的收藏品',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '未找到匹配的收藏品',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
+                      ),
                     ),
                   )
-                : ListView.builder(
-                    itemCount: controller.filteredCollections.length,
-                    itemBuilder: (context, index) {
-                      final collection = controller.filteredCollections[index];
-                      return CollectionListItem(collection: collection);
+                : RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.loadCollections(forceRefresh: true);
                     },
+                    child: ListView.builder(
+                      itemCount: controller.filteredCollections.length,
+                      itemBuilder: (context, index) {
+                        final collection =
+                            controller.filteredCollections[index];
+                        return CollectionListItem(collection: collection);
+                      },
+                    ),
                   ),
           ),
         ],

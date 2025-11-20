@@ -76,6 +76,9 @@ dependencies:
   http: ^1.2.2
   shared_preferences: ^2.5.3
 
+  # 图表库
+  fl_chart: ^0.69.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

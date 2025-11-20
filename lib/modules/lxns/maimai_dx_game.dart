@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/game.dart';
 import 'package:rank_hub/modules/lxns/maimai_lxns.dart';
 import 'package:rank_hub/modules/lxns/records_tab.dart';
@@ -56,7 +57,7 @@ class MaimaiDXGame extends BaseGame {
   }
 
   @override
-  Widget? buildPlayerInfoCard(BuildContext context) {
+  Widget? buildPlayerInfoCard(BuildContext context, Account account) {
     print('buildPlayerInfoCard called');
     return FutureBuilder<Player?>(
       future: _loadPlayerInfo(),

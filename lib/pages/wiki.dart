@@ -24,6 +24,10 @@ class WikiPage extends GetView<GameController> {
 
       return Scaffold(
         appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
           actionsPadding: const EdgeInsets.symmetric(horizontal: 8),
           titleSpacing: 24,
           title: const Text('资料库'),

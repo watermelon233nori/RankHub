@@ -42,32 +42,48 @@ class _SongListViewState extends State<SongListView> {
         // 曲目列表
         Obx(() {
           if (controller.filteredSongs.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 64,
-                    color: colorScheme.onSurfaceVariant,
+            return RefreshIndicator(
+              onRefresh: () async {
+                await controller.loadSongs(forceRefresh: true);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height - 200,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '未找到匹配的曲目',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '未找到匹配的曲目',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ],
+                ),
               ),
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 160), // 为搜索栏和底部导航栏留出空间
-            itemCount: controller.filteredSongs.length,
-            itemBuilder: (context, index) {
-              final song = controller.filteredSongs[index];
-              return SongListItem(song: song);
+          return RefreshIndicator(
+            onRefresh: () async {
+              await controller.loadSongs(forceRefresh: true);
             },
+            child: ListView.builder(
+              padding: const EdgeInsets.only(bottom: 160), // 为搜索栏和底部导航栏留出空间
+              itemCount: controller.filteredSongs.length,
+              itemBuilder: (context, index) {
+                final song = controller.filteredSongs[index];
+                return SongListItem(song: song);
+              },
+            ),
           );
         }),
         // 搜索栏 - 浮在底部

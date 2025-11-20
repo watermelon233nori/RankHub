@@ -13,6 +13,9 @@ enum Platform {
   /// 开发者鱼
   developerFish,
 
+  /// MuseDash.moe
+  musedash,
+
   /// 其他自定义平台
   custom,
 }

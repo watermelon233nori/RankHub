@@ -351,12 +351,14 @@ const _AccountplatformEnumValueMap = {
   r'divingFish': r'divingFish',
   r'lxns': r'lxns',
   r'developerFish': r'developerFish',
+  r'musedash': r'musedash',
   r'custom': r'custom',
 };
 const _AccountplatformValueEnumMap = {
   r'divingFish': Platform.divingFish,
   r'lxns': Platform.lxns,
   r'developerFish': Platform.developerFish,
+  r'musedash': Platform.musedash,
   r'custom': Platform.custom,
 };
 
