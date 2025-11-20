@@ -14,6 +14,17 @@ RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支
 
 ## 项目概述
 
+### 应用截图
+
+<div align="center">
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.38.29-portrait.png" width="150" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.39.00-portrait.png" width="150" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.39.54-portrait.png" width="150" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.40.24-portrait.png" width="150" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.40.42-portrait.png" width="150" />
+  <img src="screenshots/Simulator Screenshot - iPhone 17 Pro - 2025-11-20 at 18.41.12-portrait.png" width="150" />
+</div>
+
 ### 核心功能
 - **多平台支持**：支持落雪咖啡屋（LXNS）、MuseDash.moe等多个音游数据平台
 - **多游戏支持**：支持舞萌DX、喵斯快跑等多款音游
