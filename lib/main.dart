@@ -22,11 +22,8 @@ class MyApp extends StatelessWidget {
         theme: themeController.getLightTheme(),
         darkTheme: themeController.getDarkTheme(),
         themeMode: themeController.themeMode.value,
-        // 设置初始路由
         initialRoute: AppRoutes.main,
-        // 配置路由页面
         getPages: AppPages.routes,
-        // 禁用调试横幅
         debugShowCheckedModeBanner: false,
       ),
     );

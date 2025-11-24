@@ -591,6 +591,50 @@ class MaimaiApiService {
     }
   }
 
+  // ==================== 历史成绩相关 API ====================
+
+  /// 获取谱面历史成绩
+  ///
+  /// [accessToken] 访问令牌
+  /// [songId] 曲目ID
+  /// [levelIndex] 难度索引 (0: Basic, 1: Advanced, 2: Expert, 3: Master, 4: Re:Master)
+  /// [songType] 谱面类型 ('dx' 或 'standard')
+  Future<List<Map<String, dynamic>>> getScoreHistory({
+    required String accessToken,
+    required int songId,
+    required int levelIndex,
+    required String songType,
+  }) async {
+    final client = await dio;
+    final response = await client.get(
+      '/api/v0/user/maimai/player/score/history',
+      queryParameters: {
+        'song_id': songId,
+        'level_index': levelIndex,
+        'song_type': songType,
+      },
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+
+    final apiResponse = LxnsApiResponse<List>.fromJson(
+      response.data,
+      dataParser: (data) => data as List,
+    );
+
+    if (!apiResponse.success) {
+      throw LxnsApiException(
+        message: apiResponse.message ?? '获取历史成绩失败',
+        code: apiResponse.code,
+      );
+    }
+
+    if (apiResponse.data == null) {
+      return [];
+    }
+
+    return apiResponse.data!.map((e) => e as Map<String, dynamic>).toList();
+  }
+
   /// 清除缓存
   Future<void> clearCache() async {
     final cacheDir = await getTemporaryDirectory();

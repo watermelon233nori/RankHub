@@ -1,13 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/maimai/song.dart';
 import '../maimai_lxns_controller.dart';
+import '../services/maimai_isar_service.dart';
 
 /// 曲目信息标签页
-class SongInfoTab extends StatelessWidget {
+class SongInfoTab extends StatefulWidget {
   final Song song;
 
   const SongInfoTab({super.key, required this.song});
+
+  @override
+  State<SongInfoTab> createState() => _SongInfoTabState();
+}
+
+class _SongInfoTabState extends State<SongInfoTab> {
+  List<String>? _aliases;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAliases();
+  }
+
+  Future<void> _loadAliases() async {
+    final aliasData = await MaimaiIsarService.instance.getAliasBySongId(
+      widget.song.songId,
+    );
+    if (mounted) {
+      setState(() {
+        _aliases = aliasData?.aliases;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +62,7 @@ class SongInfoTab extends StatelessWidget {
                   context,
                   icon: Icons.music_note,
                   label: '曲名',
-                  value: song.title,
+                  value: widget.song.title,
                   colorScheme: colorScheme,
                 ),
                 const Divider(height: 24),
@@ -44,15 +70,23 @@ class SongInfoTab extends StatelessWidget {
                   context,
                   icon: Icons.person,
                   label: '艺术家',
-                  value: song.artist,
+                  value: widget.song.artist,
                   colorScheme: colorScheme,
                 ),
+                if (_aliases != null && _aliases!.isNotEmpty) ...[
+                  const Divider(height: 24),
+                  _buildAliasRow(
+                    context,
+                    aliases: _aliases!,
+                    colorScheme: colorScheme,
+                  ),
+                ],
                 const Divider(height: 24),
                 _buildInfoRow(
                   context,
                   icon: Icons.category,
                   label: '分类',
-                  value: song.genre,
+                  value: widget.song.genre,
                   colorScheme: colorScheme,
                 ),
                 const Divider(height: 24),
@@ -60,7 +94,7 @@ class SongInfoTab extends StatelessWidget {
                   context,
                   icon: Icons.speed,
                   label: 'BPM',
-                  value: song.bpm.toString(),
+                  value: widget.song.bpm.toString(),
                   colorScheme: colorScheme,
                 ),
                 const Divider(height: 24),
@@ -69,21 +103,23 @@ class SongInfoTab extends StatelessWidget {
                   icon: Icons.update,
                   label: '版本',
                   value:
-                      controller.getVersionBySongVersion(song.version)?.title ??
+                      controller
+                          .getVersionBySongVersion(widget.song.version)
+                          ?.title ??
                       '未知版本',
                   colorScheme: colorScheme,
                 ),
-                if (song.map != null) ...[
+                if (widget.song.map != null) ...[
                   const Divider(height: 24),
                   _buildInfoRow(
                     context,
                     icon: Icons.map,
                     label: '区域',
-                    value: song.map!,
+                    value: widget.song.map!,
                     colorScheme: colorScheme,
                   ),
                 ],
-                if (song.locked) ...[
+                if (widget.song.locked) ...[
                   const Divider(height: 24),
                   _buildInfoRow(
                     context,
@@ -100,7 +136,7 @@ class SongInfoTab extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         // 版权信息卡片
-        if (song.rights != null && song.rights!.isNotEmpty)
+        if (widget.song.rights != null && widget.song.rights!.isNotEmpty)
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -124,7 +160,7 @@ class SongInfoTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    song.rights!,
+                    widget.song.rights!,
                     style: TextStyle(
                       fontSize: 14,
                       color: colorScheme.onSurfaceVariant,
@@ -168,15 +204,76 @@ class SongInfoTab extends StatelessWidget {
     required ColorScheme colorScheme,
     Color? valueColor,
   }) {
+    return InkWell(
+      onTap: () => _copyToClipboard(value),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 20, color: colorScheme.primary),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 80,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: valueColor ?? colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.copy,
+              size: 16,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 复制到剪贴板
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    Get.snackbar(
+      '已复制',
+      text,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(seconds: 2),
+      margin: const EdgeInsets.all(16),
+    );
+  }
+
+  /// 构建别名信息行
+  Widget _buildAliasRow(
+    BuildContext context, {
+    required List<String> aliases,
+    required ColorScheme colorScheme,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 20, color: colorScheme.primary),
+        Icon(Icons.subtitles, size: 20, color: colorScheme.primary),
         const SizedBox(width: 12),
         SizedBox(
           width: 80,
           child: Text(
-            label,
+            '别名',
             style: TextStyle(
               fontSize: 14,
               color: colorScheme.onSurfaceVariant,
@@ -186,13 +283,34 @@ class SongInfoTab extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              color: valueColor ?? colorScheme.onSurface,
-              fontWeight: FontWeight.w500,
-            ),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: aliases
+                .map(
+                  (alias) => InkWell(
+                    onTap: () => _copyToClipboard(alias),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        alias,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
           ),
         ),
       ],
@@ -201,9 +319,9 @@ class SongInfoTab extends StatelessWidget {
 
   /// 构建谱面统计信息
   Widget _buildDifficultyStats(ColorScheme colorScheme) {
-    final standardCount = song.difficulties.standard.length;
-    final dxCount = song.difficulties.dx.length;
-    final utageCount = song.difficulties.utage.length;
+    final standardCount = widget.song.difficulties.standard.length;
+    final dxCount = widget.song.difficulties.dx.length;
+    final utageCount = widget.song.difficulties.utage.length;
     final totalCount = standardCount + dxCount + utageCount;
 
     return Column(
@@ -289,8 +407,8 @@ class SongInfoTab extends StatelessWidget {
   /// 构建定数范围信息
   Widget _buildLevelRange(ColorScheme colorScheme) {
     final allDifficulties = [
-      ...song.difficulties.standard,
-      ...song.difficulties.dx,
+      ...widget.song.difficulties.standard,
+      ...widget.song.difficulties.dx,
     ];
 
     if (allDifficulties.isEmpty) return const SizedBox.shrink();

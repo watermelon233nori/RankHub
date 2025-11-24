@@ -199,6 +199,7 @@ class _DifficultyCardState extends State<DifficultyCard> {
               () => DifficultyDetailPage(
                 difficulty: widget.difficulty,
                 songName: widget.songName,
+                songId: widget.songId,
               ),
               transition: Transition.cupertino,
             );

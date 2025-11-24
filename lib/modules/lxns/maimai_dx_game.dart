@@ -17,7 +17,7 @@ class MaimaiDXGame extends BaseGame {
         name: '舞萌DX',
         description: '街机音乐游戏 舞萌DX',
         icon: Icons.music_note_outlined,
-        iconUrl: 'https://maimai.lxns.net/favicon.webp',
+        iconUrl: 'https://map.bemanicn.com/images/titles/maimaidx.png',
         color: Colors.pink,
         sortOrder: 0,
         tags: ['音游', '街机'],

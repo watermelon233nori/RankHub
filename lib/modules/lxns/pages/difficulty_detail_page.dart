@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
+import 'package:rank_hub/controllers/account_controller.dart';
+import 'package:rank_hub/modules/lxns/maimai_lxns.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '../widgets/note_table.dart';
+import '../widgets/score_history_chart.dart';
 
 /// 谱面详情页面
 class DifficultyDetailPage extends StatefulWidget {
   final dynamic difficulty; // SongDifficulty or SongDifficultyUtage
   final String songName;
+  final int songId;
 
   const DifficultyDetailPage({
     super.key,
     required this.difficulty,
     required this.songName,
+    required this.songId,
   });
 
   @override
@@ -22,6 +28,66 @@ class DifficultyDetailPage extends StatefulWidget {
 class _DifficultyDetailPageState extends State<DifficultyDetailPage> {
   int _calculateMode = 0; // 0: 绝对值, 1: CRITICAL差值, 2: PERFECT差值
   final ChromeSafariBrowser browser = ChromeSafariBrowser();
+  List<Map<String, dynamic>>? _historyData;
+  bool _isLoadingHistory = false;
+  String? _historyError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadScoreHistory();
+  }
+
+  Future<void> _loadScoreHistory() async {
+    final accountController = Get.find<AccountController>();
+    final currentAccount = accountController.currentAccount;
+
+    if (currentAccount == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoadingHistory = true;
+      _historyError = null;
+    });
+
+    try {
+      final credential = await LxnsCredentialProvider().getCredential(
+        currentAccount,
+      );
+
+      if (credential.accessToken == null) {
+        return;
+      }
+
+      final history = await MaimaiApiService.instance.getScoreHistory(
+        accessToken: credential.accessToken!,
+        songId: widget.songId,
+        levelIndex: widget.difficulty.difficulty.value,
+        songType: widget.difficulty.type.value,
+      );
+
+      if (mounted) {
+        setState(() {
+          // 检查返回的数据是否为空
+          if (history.isEmpty) {
+            _historyData = null;
+            _historyError = '游玩记录不足，无法生成图表';
+          } else {
+            _historyData = history.reversed.toList(); // 反转，最早的在前
+          }
+          _isLoadingHistory = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _historyError = e.toString();
+          _isLoadingHistory = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +103,11 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage> {
             Text(widget.songName, style: const TextStyle(fontSize: 16)),
             Text(
               '${widget.difficulty.difficulty.label} ${widget.difficulty.level}',
-              style: TextStyle(
-                fontSize: 14,
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: TextStyle(fontSize: 14, color: difficultyColor),
             ),
           ],
         ),
-        backgroundColor: difficultyColor.withAlpha(80),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
       ),
@@ -152,6 +215,93 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    // 历史成绩图表
+                    if (_historyData != null ||
+                        _isLoadingHistory ||
+                        _historyError != null)
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    '历史成绩',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const Spacer(),
+                                  if (_historyData != null)
+                                    Text(
+                                      '共 ${_historyData!.length} 次游玩',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              if (_isLoadingHistory)
+                                const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(32),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              else if (_historyError != null)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(32),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          size: 48,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.error,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '加载失败: $_historyError',
+                                          style: TextStyle(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.error,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else if (_historyData != null &&
+                                  _historyData!.isNotEmpty)
+                                SizedBox(
+                                  height: 300,
+                                  child: ScoreHistoryChart(
+                                    historyData: _historyData!,
+                                  ),
+                                )
+                              else
+                                const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(32),
+                                    child: Text('暂无历史成绩数据'),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 16),
                     // 物量详情表（包含计算模式选择）
                     Card(

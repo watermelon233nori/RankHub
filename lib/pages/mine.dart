@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 import '../controllers/account_controller.dart';
-import '../models/account/account.dart';
 import '../data/platforms_data.dart';
 import 'account_manage.dart';
 

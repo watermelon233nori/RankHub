@@ -16,6 +16,9 @@ enum Platform {
   /// MuseDash.moe
   musedash,
 
+  /// Phigros
+  phigros,
+
   /// 其他自定义平台
   custom,
 }

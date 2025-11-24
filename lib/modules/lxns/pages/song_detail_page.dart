@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:rank_hub/models/maimai/song.dart';
 import '../widgets/difficulty_card.dart';
 import '../widgets/song_info_tab.dart';
@@ -261,8 +261,15 @@ class _SongDetailPageState extends State<SongDetailPage>
 
   /// 分享乐曲
   void _shareSong() {
-    // TODO: 实现分享功能
-    Get.snackbar('提示', '分享功能开发中', snackPosition: SnackPosition.BOTTOM);
+    final shareUrl =
+        'https://maimai.lxns.net/songs?game=maimai&song_id=${widget.song.songId}';
+    final shareText = '${widget.song.title} - ${widget.song.artist}\n$shareUrl';
+
+    Share.share(
+      shareText,
+      subject: widget.song.title,
+      sharePositionOrigin: Rect.fromLTWH(0, 0, 1, 1),
+    );
   }
 
   /// 显示封面大图
