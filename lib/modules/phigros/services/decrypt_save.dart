@@ -1,10 +1,16 @@
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:rank_hub/modules/phigros/services/ase_decrypt.dart';
 import 'package:rank_hub/modules/phigros/services/byte_reader.dart';
 import 'package:rank_hub/modules/phigros/services/save_file_reader.dart';
 
 class DecryptSave {
+  static final Uint8List DECRYPT_KEY = base64.decode(
+    "6Jaa0qVAJZuXkZCLiOa/Ax5tIZVu+taKUN1V1nqwkks=",
+  );
+  static final Uint8List DECRYPT_IV = base64.decode("Kk/wisgNYwcAV8WVGMgyUw==");
+
   final SaveFileReader saveFile;
   final Uint8List key;
   final Uint8List iv;
@@ -13,12 +19,12 @@ class DecryptSave {
   final Map<String, dynamic> songInfoList;
 
   DecryptSave(
-    String url,
+    this.saveFile,
     this.key,
     this.iv,
     this.chartConstantList,
     this.songInfoList,
-  ) : saveFile = SaveFileReader(url);
+  );
 
   List<Map<String, dynamic>> decryptRecords() {
     final encrypted = saveFile.readRecord();

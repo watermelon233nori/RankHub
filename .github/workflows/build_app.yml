@@ -1,0 +1,82 @@
+name: Build app
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+      - ".github/**"
+      - ".vscode/**"
+      - ".idea/**"
+      - "test/**"
+      - ".gitignore"
+
+jobs:
+  build_ios:
+    name: Build Unsigned iOS IPA
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.14.0
+
+      - name: Install Flutter Dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods Dependencies
+        run: |
+          cd ios
+          pod install
+          cd ..
+
+      - name: Build iOS App (Unsign)
+        run: |
+          flutter build ios --release --no-codesign
+
+      - name: Package Unsigned IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r RankHub.ipa Payload
+          rm -rf Payload
+
+      - name: Upload Unsigned IPA
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: Unsigned-iOS-IPA
+          path: RankHub.ipa
+
+  build_android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: cedvdb/action-flutter-build-android@v1
+        with:
+          keystore-base64: ${{ secrets.ANDROID_RELEASE_KEY }}
+          keystore-password: "${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}"
+          build-cmd: flutter build apk --split-per-abi
+          working-directory: ./
+
+      - name: Upload arm64-v8a APK
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: Android-APK-arm64-v8a
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+
+      - name: Upload armeabi-v7a APK
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: Android-APK-armeabi-v7a
+          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+
+      - name: Upload x86_64 APK
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: Android-APK-x86_64
+          path: build/app/outputs/flutter-apk/app-x86_64-release.apk

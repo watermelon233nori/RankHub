@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:rank_hub/models/game.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 /// 游戏选择器底部弹窗
 class GameSelectorSheet {
-  static Future<void> show({
+  static Future<void> show(
+    BuildContext context, {
     required List<IGame> games,
     required IGame? selectedGame,
     required Function(IGame) onGameSelected,
     String title = '选择游戏',
   }) async {
-    await Get.bottomSheet(
-      _GameSelectorContent(
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _GameSelectorContent(
         games: games,
         selectedGame: selectedGame,
         onGameSelected: onGameSelected,
         title: title,
       ),
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
     );
   }
 }
@@ -76,7 +77,7 @@ class _GameSelectorContent extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.close),
                   tooltip: '关闭',
                 ),
@@ -109,7 +110,7 @@ class _GameSelectorContent extends StatelessWidget {
                               isSelected,
                               () {
                                 onGameSelected(game);
-                                Get.back();
+                                Navigator.of(context).pop();
                               },
                             );
                           },

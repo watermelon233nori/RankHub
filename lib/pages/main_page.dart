@@ -51,8 +51,8 @@ class MainPage extends GetView<MainController> {
                   label: '资料库',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.grade_outlined),
-                  selectedIcon: Icon(Icons.grade),
+                  icon: Icon(Icons.query_stats_outlined),
+                  selectedIcon: Icon(Icons.query_stats),
                   label: '成绩',
                 ),
                 NavigationDestination(

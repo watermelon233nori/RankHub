@@ -3,8 +3,13 @@ import 'package:get/get.dart';
 import 'package:rank_hub/routes/app_pages.dart';
 import 'package:rank_hub/routes/app_routes.dart';
 import 'package:rank_hub/controllers/theme_controller.dart';
+import 'package:rank_hub/services/log_service.dart';
 
 void main() {
+  // 初始化日志服务
+  final logService = LogService.instance;
+  logService.initialize();
+
   runApp(const MyApp());
 }
 

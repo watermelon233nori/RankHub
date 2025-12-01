@@ -77,6 +77,9 @@ class GameController extends GetxController {
         !games.contains(_selectedWikiGame.value)) {
       _selectedWikiGame.value = games.first;
       await _saveWikiGameId(games.first.id);
+      games.first.onSelected(); // 触发游戏选中事件
+    } else {
+      _selectedWikiGame.value?.onSelected(); // 触发游戏选中事件
     }
 
     // 恢复 Rank 游戏
@@ -92,6 +95,9 @@ class GameController extends GetxController {
         !games.contains(_selectedRankGame.value)) {
       _selectedRankGame.value = games.first;
       await _saveRankGameId(games.first.id);
+      games.first.onSelected(); // 触发游戏选中事件
+    } else {
+      _selectedRankGame.value?.onSelected(); // 触发游戏选中事件
     }
   }
 

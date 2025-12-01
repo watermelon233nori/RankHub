@@ -8,6 +8,9 @@ import 'package:rank_hub/modules/lxns/best50_tab.dart';
 import 'package:rank_hub/modules/lxns/widgets/player_info_card.dart';
 import 'package:rank_hub/models/maimai/player.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
+import 'package:rank_hub/services/credential_provider.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
+import 'package:rank_hub/modules/lxns/services/maimai_api_service.dart';
 
 /// 舞萌DX 游戏
 class MaimaiDXGame extends BaseGame {
@@ -106,16 +109,24 @@ class MaimaiDXGame extends BaseGame {
       return null;
     }
 
-    final account = await credentialProvider.getCredential(currentAccount);
-
-    final accessToken = account.accessToken;
-    if (accessToken == null || accessToken.isEmpty) {
-      return null;
-    }
-
     try {
+      final account = await credentialProvider.getCredential(currentAccount);
+
+      final accessToken = account.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        return null;
+      }
+
       final apiService = MaimaiApiService.instance;
       return await apiService.getPlayerInfo(accessToken: accessToken);
+    } on CredentialExpiredException catch (e) {
+      print('凭据已失效: $e');
+      Get.snackbar(
+        '凭据已失效',
+        '请在账号管理页面重新登录',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
     } catch (e) {
       rethrow;
     }

@@ -1,9 +1,11 @@
 import 'package:isar_community/isar.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/base_isar_service.dart';
+import 'package:rank_hub/services/log_service.dart';
 
 /// 账号管理数据库服务
 class AccountIsarService extends BaseIsarService {
+  final LogService _logger = LogService.instance;
   static AccountIsarService? _instance;
 
   AccountIsarService._();
@@ -29,23 +31,9 @@ class AccountIsarService extends BaseIsarService {
       await isar.accounts.put(account);
     });
 
-    // 调试日志：验证凭据已保存
-    print('✅ 账号已保存到数据库:');
-    print('  - ID: ${account.id}');
-    print('  - 平台: ${account.platform.name}');
-    print('  - 外部ID: ${account.externalId}');
-    print('  - 凭据类型: ${account.credentialType.name}');
-    print(
-      '  - API Key: ${account.apiKey != null ? '已设置 (${account.apiKey!.length} 字符)' : '未设置'}',
+    _logger.debug(
+      '账号已保存到数据库: ID=${account.id}, 平台=${account.platform.name}, 外部ID=${account.externalId}',
     );
-    print(
-      '  - Access Token: ${account.accessToken != null ? '已设置 (${account.accessToken!.length} 字符)' : '未设置'}',
-    );
-    print(
-      '  - Refresh Token: ${account.refreshToken != null ? '已设置 (${account.refreshToken!.length} 字符)' : '未设置'}',
-    );
-    print('  - Token 过期时间: ${account.tokenExpiry ?? '无'}');
-    print('  - 用户名: ${account.username ?? '未设置'}');
   }
 
   /// 根据平台和外部 ID 获取账号
@@ -72,14 +60,9 @@ class AccountIsarService extends BaseIsarService {
     final isar = await db;
     final accounts = await isar.accounts.where().findAll();
 
-    // 调试日志：验证凭据已读取
-    print('📖 从数据库读取 ${accounts.length} 个账号:');
+    _logger.debug('📖 从数据库读取 ${accounts.length} 个账号');
     for (final account in accounts) {
-      print('  - ${account.platform.name} (${account.externalId}):');
-      print('    凭据类型: ${account.credentialType.name}');
-      print('    API Key: ${account.apiKey != null ? '已读取' : '无'}');
-      print('    Access Token: ${account.accessToken != null ? '已读取' : '无'}');
-      print('    Refresh Token: ${account.refreshToken != null ? '已读取' : '无'}');
+      _logger.debug('  - ${account.platform.name} (${account.externalId})');
     }
 
     return accounts;

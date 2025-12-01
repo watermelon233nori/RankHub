@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
 /// Phigros API 服务
@@ -162,6 +164,74 @@ class PhigrosGameSave {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
+  }
+
+  /// 解析 summary 数据
+  /// 使用算法: summary = struct.unpack("=BHfBx%ds12H" % summary[8], summary)
+  ///
+  /// 返回 Map 包含:
+  /// - version: 版本号 (B: unsigned char)
+  /// - challengeModeRank: 课题模式排名 (H: unsigned short)
+  /// - rks: RKS值 (f: float)
+  /// - gameProgress: 游戏进度 (B: unsigned char)
+  /// - avatarName: 头像名称 (string)
+  /// - levelRecords: 等级记录数组 (12个 unsigned short)，每个难度3个数字:
+  ///   [0-2]: EZ Clear/FC/AP 数量
+  ///   [3-5]: HD Clear/FC/AP 数量
+  ///   [6-8]: IN Clear/FC/AP 数量
+  ///   [9-11]: AT Clear/FC/AP 数量
+  Map<String, dynamic> parseSummary() {
+    try {
+      // Base64 解码
+      final bytes = base64.decode(summary);
+      final data = ByteData.sublistView(Uint8List.fromList(bytes));
+
+      int offset = 0;
+
+      // B: unsigned char (1 byte) - version
+      final version = data.getUint8(offset);
+      offset += 1;
+
+      // H: unsigned short (2 bytes) - challengeModeRank
+      final challengeModeRank = data.getUint16(offset, Endian.little);
+      offset += 2;
+
+      // f: float (4 bytes) - rks
+      final rks = data.getFloat32(offset, Endian.little);
+      offset += 4;
+
+      // B: unsigned char (1 byte) - gameProgress
+      final gameProgress = data.getUint8(offset);
+      offset += 1;
+
+      // x: pad byte (1 byte) - skip
+      offset += 1;
+
+      // %ds: string (length from byte at offset 8)
+      final stringLength = bytes[8];
+      final avatarBytes = bytes.sublist(offset, offset + stringLength);
+      final avatarName = utf8.decode(avatarBytes);
+      offset += stringLength;
+
+      // 12H: 12 unsigned shorts (24 bytes) - level records
+      final levelRecords = <int>[];
+      for (int i = 0; i < 12; i++) {
+        levelRecords.add(data.getUint16(offset, Endian.little));
+        offset += 2;
+      }
+
+      return {
+        'version': version,
+        'challengeModeRank': challengeModeRank,
+        'rks': rks,
+        'gameProgress': gameProgress,
+        'avatarName': avatarName,
+        'levelRecords': levelRecords,
+      };
+    } catch (e) {
+      print('❌ 解析 summary 失败: $e');
+      rethrow;
+    }
   }
 }
 

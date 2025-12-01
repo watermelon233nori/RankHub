@@ -31,18 +31,29 @@ class PhigrosResourceApiService {
       if (response.statusCode == 200 && response.data != null) {
         final lines = (response.data as String).split('\n');
         final difficulties = <String, Map<String, double>>{};
+        int invalidLineCount = 0;
 
         for (final line in lines) {
           if (line.trim().isEmpty) continue;
 
           final parts = line.split('\t');
-          if (parts.length < 4) continue;
+          if (parts.length < 4) {
+            invalidLineCount++;
+            print('⚠️ 跳过格式不正确的定数行 (字段数 < 4): $line');
+            continue;
+          }
 
           final key = parts[0].trim(); // 曲名.曲师
           final ez = double.tryParse(parts[1].trim());
           final hd = double.tryParse(parts[2].trim());
           final inDiff = double.tryParse(parts[3].trim());
           final at = parts.length > 4 ? double.tryParse(parts[4].trim()) : null;
+
+          if (ez == null || hd == null || inDiff == null) {
+            print(
+              '⚠️ 定数解析失败: "$key" - EZ:${parts[1]}, HD:${parts[2]}, IN:${parts[3]}',
+            );
+          }
 
           difficulties[key] = {
             'EZ': ez ?? 0.0,
@@ -53,6 +64,9 @@ class PhigrosResourceApiService {
         }
 
         print('✅ 获取定数表完成: ${difficulties.length} 首曲目');
+        if (invalidLineCount > 0) {
+          print('⚠️ 跳过了 $invalidLineCount 行无效数据');
+        }
         return difficulties;
       }
 
@@ -76,12 +90,16 @@ class PhigrosResourceApiService {
       if (infoResponse.statusCode == 200 && infoResponse.data != null) {
         final lines = (infoResponse.data as String).split('\n');
         final songs = <PhigrosSong>[];
+        int missingDifficultyCount = 0;
 
         for (final line in lines) {
           if (line.trim().isEmpty) continue;
 
           final parts = line.split('\t');
-          if (parts.length < 8) continue;
+          if (parts.length < 7) {
+            print('⚠️ 跳过格式不正确的行 (字段数 < 7): $line');
+            continue;
+          }
 
           final songId = parts[0].trim();
           final name = parts[1].trim();
@@ -92,9 +110,26 @@ class PhigrosResourceApiService {
           final chartIN = parts[6].trim();
           final chartAT = parts.length > 7 ? parts[7].trim() : null;
 
-          // 从定数表中查找对应的定数
-          final diffKey = '$name.$composer';
-          final diff = difficulties[diffKey];
+          // 直接使用 songId 查找定数（songId 格式为 "曲名.曲师"）
+          final diff = difficulties[songId];
+
+          // 调试：检查是否找到对应的定数
+          if (diff == null) {
+            missingDifficultyCount++;
+            print(
+              '⚠️ 未找到定数 [#$missingDifficultyCount]: "$name" by "$composer"',
+            );
+            print('   songId: "$songId"');
+            print('   可用的定数表键示例: ${difficulties.keys.take(3).join(", ")}');
+          } else {
+            final hasAllDifficulties =
+                diff['EZ'] != null && diff['HD'] != null && diff['IN'] != null;
+            if (!hasAllDifficulties) {
+              print(
+                '⚠️ 定数不完整: "$name" - EZ:${diff['EZ']}, HD:${diff['HD']}, IN:${diff['IN']}, AT:${diff['AT']}',
+              );
+            }
+          }
 
           songs.add(
             PhigrosSong.fromTsvData(
@@ -115,6 +150,9 @@ class PhigrosResourceApiService {
         }
 
         print('✅ 获取乐曲信息完成: ${songs.length} 首曲目');
+        if (missingDifficultyCount > 0) {
+          print('⚠️ 有 $missingDifficultyCount 首歌曲未找到对应的定数');
+        }
         return songs;
       }
 

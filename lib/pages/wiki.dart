@@ -9,6 +9,7 @@ class WikiPage extends GetView<GameController> {
   void _showGameSelector() {
     final games = controller.getAvailableGames();
     GameSelectorSheet.show(
+      Get.context!,
       games: games,
       selectedGame: controller.selectedWikiGame,
       onGameSelected: controller.selectWikiGame,

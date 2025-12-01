@@ -1,15 +1,18 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/modules/musedash/services/musedash_credential_provider.dart';
 import 'package:rank_hub/modules/phigros/services/phigros_credential_provider.dart';
 import 'package:rank_hub/services/account_service.dart';
 import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
+import 'package:rank_hub/services/log_service.dart';
 import 'package:rank_hub/services/platform_login_manager.dart';
+import 'package:rank_hub/services/credential_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 账号管理控制器
 class AccountController extends GetxController {
+  final LogService _logger = LogService.instance;
   final AccountService _accountService = AccountService.instance;
   static const String _currentAccountIdKey = 'current_account_id';
 
@@ -78,7 +81,7 @@ class AccountController extends GetxController {
       }
     } catch (e) {
       _errorMessage.value = '加载账号失败: $e';
-      print('加载账号失败: $e');
+      _logger.error('加载账号失败: $e');
       debugPrintStack(stackTrace: (e as Error).stackTrace);
     } finally {
       _isLoading.value = false;
@@ -117,7 +120,7 @@ class AccountController extends GetxController {
     } catch (e) {
       _errorMessage.value = '绑定账号失败: $e';
       Get.snackbar('错误', '绑定账号失败: $e');
-      print(e);
+      _logger.error('绑定账号失败: $e');
       debugPrintStack(stackTrace: (e as Error).stackTrace);
       return false;
     } finally {
@@ -179,9 +182,15 @@ class AccountController extends GetxController {
   }
 
   /// 获取账号凭据（含自动刷新）
+  /// 返回 null 表示凭据失效且需要重新登录
   Future<Account?> getAccountCredential(Account account) async {
     try {
       return await _accountService.getCredential(account);
+    } on CredentialExpiredException catch (e) {
+      // 凭据已完全失效，需要重新登录
+      _logger.warning('凭据失效: $e');
+      _showReloginDialog(account);
+      return null;
     } catch (e) {
       Get.snackbar('错误', '获取凭据失败: $e');
       return null;
@@ -212,5 +221,90 @@ class AccountController extends GetxController {
   /// 获取平台账号数量
   int getPlatformAccountCount(Platform platform) {
     return _accounts.where((a) => a.platform == platform).length;
+  }
+
+  /// 显示重新登录对话框
+  void _showReloginDialog(Account account) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('凭据已失效'),
+        content: Text(
+          '账号 "${account.displayName ?? account.externalId}" 的凭据已失效，需要重新登录以继续使用。',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('稍后')),
+          FilledButton(
+            onPressed: () {
+              Get.back();
+              reloginAccount(account);
+            },
+            child: const Text('重新登录'),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  /// 重新登录账号
+  Future<bool> reloginAccount(Account account) async {
+    try {
+      _isLoading.value = true;
+      _errorMessage.value = '';
+
+      // 获取平台的登录处理器
+      final loginManager = PlatformLoginManager.instance;
+      final handler = loginManager.getHandler(account.platform);
+
+      if (handler == null) {
+        throw Exception('不支持的平台: ${account.platform}');
+      }
+
+      // 显示登录页面
+      final result = await handler.showLoginPage(Get.context!);
+      if (result == null) {
+        // 用户取消登录
+        return false;
+      }
+
+      // 验证是否为同一账号
+      if (result.externalId != account.externalId) {
+        Get.snackbar('错误', '登录的账号与原账号不一致', snackPosition: SnackPosition.BOTTOM);
+        return false;
+      }
+
+      // 更新账号凭据
+      final provider = _accountService.getProvider(account.platform);
+      if (provider == null) {
+        throw Exception('找不到凭据提供者');
+      }
+
+      await provider.createCredential(account, result.credentialData);
+
+      // 更新显示信息
+      if (result.displayName != null) {
+        account.displayName = result.displayName;
+      }
+      if (result.avatarUrl != null) {
+        account.avatarUrl = result.avatarUrl;
+      }
+
+      // 保存更新后的账号
+      await _accountService.updateAccount(account);
+
+      // 重新加载账号列表
+      await loadAccounts();
+
+      Get.snackbar('成功', '重新登录成功', snackPosition: SnackPosition.BOTTOM);
+      return true;
+    } catch (e) {
+      _errorMessage.value = '重新登录失败: $e';
+      Get.snackbar('错误', '重新登录失败: $e', snackPosition: SnackPosition.BOTTOM);
+      _logger.error('重新登录失败: $e');
+      debugPrintStack(stackTrace: (e as Error).stackTrace);
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
   }
 }

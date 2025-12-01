@@ -1,5 +1,17 @@
 import 'package:rank_hub/models/account/account.dart';
 
+/// 凭据失效异常
+/// 当凭据完全失效且无法自动刷新时抛出
+class CredentialExpiredException implements Exception {
+  final String message;
+  final Account account;
+
+  CredentialExpiredException(this.account, [this.message = '凭据已失效，请重新登录']);
+
+  @override
+  String toString() => message;
+}
+
 /// 凭据提供者抽象接口
 /// 负责管理不同平台的凭据获取、刷新等操作
 abstract class CredentialProvider {
@@ -62,27 +74,32 @@ abstract class OAuth2CredentialProvider extends CredentialProvider {
   @override
   Future<Account> refreshCredential(Account account) async {
     if (account.refreshToken == null || account.refreshToken!.isEmpty) {
-      throw Exception('缺少刷新令牌');
+      throw CredentialExpiredException(account, '缺少刷新令牌，请重新登录');
     }
 
-    // 调用具体平台的刷新逻辑
-    final newTokenData = await requestTokenRefresh(account.refreshToken!);
+    try {
+      // 调用具体平台的刷新逻辑
+      final newTokenData = await requestTokenRefresh(account.refreshToken!);
 
-    // 更新账号中的凭据字段
-    account.accessToken = newTokenData['access_token'] as String;
-    account.tokenExpiry = DateTime.now().add(
-      Duration(seconds: newTokenData['expires_in'] as int),
-    );
-    account.credentialUpdatedAt = DateTime.now();
+      // 更新账号中的凭据字段
+      account.accessToken = newTokenData['access_token'] as String;
+      account.tokenExpiry = DateTime.now().add(
+        Duration(seconds: newTokenData['expires_in'] as int),
+      );
+      account.credentialUpdatedAt = DateTime.now();
 
-    if (newTokenData.containsKey('refresh_token')) {
-      account.refreshToken = newTokenData['refresh_token'] as String;
+      if (newTokenData.containsKey('refresh_token')) {
+        account.refreshToken = newTokenData['refresh_token'] as String;
+      }
+
+      // 保存更新后的账号
+      await saveAccount(account);
+
+      return account;
+    } catch (e) {
+      // 刷新失败，凭据已完全失效
+      throw CredentialExpiredException(account, '刷新凭据失败: $e');
     }
-
-    // 保存更新后的账号
-    await saveAccount(account);
-
-    return account;
   }
 
   /// 请求刷新令牌 (子类需实现)
@@ -97,13 +114,16 @@ abstract class UserPasswordCredentialProvider extends CredentialProvider {
   @override
   Future<Account> getCredential(Account account) async {
     if (account.username == null || account.password == null) {
-      throw Exception('账号 ${account.externalId} 缺少用户名或密码');
+      throw CredentialExpiredException(
+        account,
+        '账号 ${account.externalId} 缺少用户名或密码',
+      );
     }
 
     // 验证凭据是否仍然有效
     final isValid = await validateCredential(account);
     if (!isValid) {
-      throw Exception('凭据已失效，请重新登录');
+      throw CredentialExpiredException(account, '凭据已失效，请重新登录');
     }
 
     return account;

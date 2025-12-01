@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
+import 'package:rank_hub/services/credential_provider.dart';
 import 'package:rank_hub/modules/lxns/maimai_lxns.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -79,6 +80,18 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage> {
           _isLoadingHistory = false;
         });
       }
+    } on CredentialExpiredException {
+      if (mounted) {
+        setState(() {
+          _historyError = '凭据已失效，请在账号管理页面重新登录';
+          _isLoadingHistory = false;
+        });
+      }
+      Get.snackbar(
+        '凭据已失效',
+        '请在账号管理页面重新登录',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
       if (mounted) {
         setState(() {

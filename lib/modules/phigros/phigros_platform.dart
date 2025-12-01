@@ -8,6 +8,7 @@ import 'package:rank_hub/services/platform_login_handler.dart';
 import 'package:rank_hub/modules/phigros/services/phigros_login_handler.dart';
 import 'package:rank_hub/modules/phigros/services/phigros_credential_provider.dart';
 import 'package:rank_hub/modules/phigros/services/phigros_resource_sync_service.dart';
+import 'package:rank_hub/modules/phigros/services/phigros_score_sync_service.dart';
 import 'package:rank_hub/modules/phigros/phigros_game.dart';
 
 /// Phigros平台
@@ -86,20 +87,32 @@ class PhigrosPlatform extends BasePlatform {
       ),
     );
 
-    // TODO: 任务2: 同步玩家成绩（需要实现存档解析）
-    // tasks.add(
-    //   SyncTask(
-    //     id: 'phigros_sync_scores_${DateTime.now().millisecondsSinceEpoch}',
-    //     name: '同步玩家成绩',
-    //     description: '正在准备同步成绩数据...',
-    //     type: SyncTaskType.scores,
-    //     platformId: id,
-    //     priority: 20,
-    //     execute: (task) async {
-    //       // 实现成绩同步逻辑
-    //     },
-    //   ),
-    // );
+    // 任务2: 同步玩家成绩
+    tasks.add(
+      SyncTask(
+        id: 'phigros_sync_scores_${DateTime.now().millisecondsSinceEpoch}',
+        name: '同步玩家成绩',
+        description: '正在准备同步成绩数据...',
+        type: SyncTaskType.scores,
+        platformId: id,
+        priority: 20,
+        execute: (task) async {
+          final sessionToken = account.apiKey;
+          if (sessionToken == null || sessionToken.isEmpty) {
+            throw Exception('未找到Session Token，请先登录');
+          }
+
+          await PhigrosScoreSyncService.instance.syncPlayerScoresToDatabase(
+            accountId: account.id.toString(),
+            sessionToken: sessionToken,
+            onProgress: (current, total, description) {
+              final progress = current / total;
+              task.updateProgress(progress, description: description);
+            },
+          );
+        },
+      ),
+    );
 
     return SyncTaskGroup(
       id: 'phigros_full_sync_${DateTime.now().millisecondsSinceEpoch}',
@@ -113,17 +126,24 @@ class PhigrosPlatform extends BasePlatform {
   SyncTaskGroup? createIncrementalSyncTasks(Account account) {
     final tasks = <SyncTask>[];
 
-    // 增量同步：仅同步歌曲和收藏品
+    // 增量同步：仅同步玩家成绩
     tasks.add(
       SyncTask(
         id: 'phigros_quick_sync_${DateTime.now().millisecondsSinceEpoch}',
-        name: '快速同步',
-        description: '正在快速同步歌曲和收藏品...',
-        type: SyncTaskType.metadata,
+        name: '快速同步成绩',
+        description: '正在快速同步玩家成绩...',
+        type: SyncTaskType.scores,
         platformId: id,
         priority: 10,
         execute: (task) async {
-          await PhigrosResourceSyncService.instance.quickSync(
+          final sessionToken = account.apiKey;
+          if (sessionToken == null || sessionToken.isEmpty) {
+            throw Exception('未找到Session Token，请先登录');
+          }
+
+          await PhigrosScoreSyncService.instance.syncPlayerScoresToDatabase(
+            accountId: account.id.toString(),
+            sessionToken: sessionToken,
             onProgress: (current, total, description) {
               final progress = current / total;
               task.updateProgress(progress, description: description);

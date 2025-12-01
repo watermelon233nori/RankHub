@@ -88,6 +88,14 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           ListTile(
+            leading: const Icon(Icons.article_outlined),
+            title: const Text('应用日志'),
+            subtitle: const Text('查看调试信息'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Get.toNamed(AppRoutes.logs),
+          ),
+          const Divider(indent: 16, endIndent: 16),
+          ListTile(
             leading: const Icon(Icons.help_outline),
             title: const Text('帮助与反馈'),
             trailing: const Icon(Icons.chevron_right),

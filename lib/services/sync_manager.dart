@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:rank_hub/models/sync_task.dart';
 import 'package:rank_hub/models/platform.dart';
 import 'package:rank_hub/models/account/account.dart';
+import 'package:rank_hub/services/log_service.dart';
 
 /// 同步管理器 - 统一管理所有平台的数据同步任务
 class SyncManager extends GetxController {
@@ -54,7 +55,10 @@ class SyncManager extends GetxController {
 
   /// 提交任务组
   Future<void> submitTaskGroup(SyncTaskGroup taskGroup) async {
-    print('📦 提交任务组: ${taskGroup.name} (${taskGroup.tasks.length}个任务)');
+    LogService.i(
+      '提交任务组: ${taskGroup.name} (${taskGroup.tasks.length}个任务)',
+      tag: 'SyncManager',
+    );
 
     for (final task in taskGroup.tasks) {
       _pendingTasks.add(task);
@@ -69,7 +73,7 @@ class SyncManager extends GetxController {
 
   /// 提交单个任务
   Future<void> submitTask(SyncTask task) async {
-    print('📋 提交任务: ${task.name}');
+    LogService.i('提交任务: ${task.name}', tag: 'SyncManager');
     _pendingTasks.add(task);
     _pendingTasks.sort((a, b) => b.priority.compareTo(a.priority));
     _processNextTasks();
@@ -89,22 +93,24 @@ class SyncManager extends GetxController {
     _runningTasks.add(task);
     task.markAsRunning();
 
-    print('▶️  开始执行任务: ${task.name}');
+    LogService.i('开始执行任务: ${task.name}', tag: 'SyncManager');
 
     try {
       if (task.execute != null) {
         await task.execute!(task);
         task.markAsCompleted();
-        print('✅ 任务完成: ${task.name}');
+        LogService.i('任务完成: ${task.name}', tag: 'SyncManager');
       } else {
         task.markAsFailed('任务没有执行函数');
-        print('❌ 任务失败: ${task.name} - 没有执行函数');
+        LogService.w('任务失败: ${task.name} - 没有执行函数', tag: 'SyncManager');
       }
     } catch (e, stackTrace) {
       task.markAsFailed(e.toString());
-      print('❌ 任务失败: ${task.name}');
-      print('错误: $e');
-      print('堆栈: $stackTrace');
+      LogService.e(
+        '任务失败: ${task.name}\n错误: $e',
+        stackTrace: stackTrace.toString(),
+        tag: 'SyncManager',
+      );
     } finally {
       _runningTasks.remove(task);
       _completedTasks.add(task);

@@ -59,13 +59,17 @@ class _AccountManagePageState extends State<AccountManagePage> {
           );
         }
 
-        return ListView.builder(
-          itemCount: controller.accounts.length,
+        return ListView(
           padding: const EdgeInsets.all(16),
-          itemBuilder: (context, index) {
-            final account = controller.accounts[index];
-            return _AccountCard(account: account);
-          },
+          children: [
+            // 滑动提示
+            const _SwipeHintWidget(),
+            const SizedBox(height: 16),
+            // 账号列表
+            ...controller.accounts.map(
+              (account) => _AccountCard(account: account),
+            ),
+          ],
         );
       }),
       floatingActionButton: FloatingActionButton.extended(
@@ -113,7 +117,7 @@ class _PlatformSelectionSheet extends StatelessWidget {
             height: 4,
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -234,87 +238,142 @@ class _AccountCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isCurrent = controller.currentAccount?.id == account.id;
 
-    return Card(
-      elevation: 0,
-      margin: const EdgeInsets.only(bottom: 12),
-      color: isCurrent ? colorScheme.primaryContainer : null,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Dismissible(
+      key: Key('account_${account.id}'),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          // 右滑删除 - 显示确认对话框
+          return await _showDeleteConfirmDialog(context, account);
+        } else if (direction == DismissDirection.startToEnd) {
+          // 左滑重新登录
+          await controller.reloginAccount(account);
+          return false; // 不移除卡片
+        }
+        return false;
+      },
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: colorScheme.primary,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        child: Row(
           children: [
-            Row(
-              children: [
-                // 头像（圆角矩形）
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                    image: account.avatarUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(account.avatarUrl!),
-                            fit: BoxFit.cover,
+            Icon(Icons.refresh, color: colorScheme.onPrimary),
+            const SizedBox(width: 8),
+            Text(
+              '重新登录',
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      secondaryBackground: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: colorScheme.error,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              '删除',
+              style: TextStyle(
+                color: colorScheme.onError,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.delete, color: colorScheme.onError),
+          ],
+        ),
+      ),
+      onDismissed: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          // 执行删除
+          await controller.unbindAccount(account.id);
+        }
+      },
+      child: Card(
+        elevation: 0,
+        margin: const EdgeInsets.only(bottom: 12),
+        color: isCurrent ? colorScheme.primaryContainer : null,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  // 头像（圆角矩形）
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                      image: account.avatarUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(account.avatarUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: account.avatarUrl == null
+                        ? Icon(
+                            Icons.person,
+                            size: 32,
+                            color: colorScheme.onSecondaryContainer,
                           )
                         : null,
                   ),
-                  child: account.avatarUrl == null
-                      ? Icon(
-                          Icons.person,
-                          size: 32,
-                          color: colorScheme.onSecondaryContainer,
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                // 账号信息
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            account.displayName ?? account.externalId,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        PlatformRegistry()
-                                .getPlatformByType(account.platform)
-                                ?.name ??
-                            '未知平台',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                  const SizedBox(width: 12),
+                  // 账号信息
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              account.displayName ?? account.externalId,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
-                      ),
-                      if (account.lastSyncTime != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          '最后同步: ${_formatTime(account.lastSyncTime!)}',
+                          PlatformRegistry()
+                                  .getPlatformByType(account.platform)
+                                  ?.name ??
+                              '未知平台',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
+                        if (account.lastSyncTime != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '最后同步: ${_formatTime(account.lastSyncTime!)}',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: colorScheme.onSurfaceVariant),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                // 状态开关
-                TextButton.icon(
-                  onPressed: () => _showDeleteConfirmDialog(context, account),
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  label: const Text('解绑'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: colorScheme.error,
-                  ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -335,10 +394,11 @@ class _AccountCard extends StatelessWidget {
     }
   }
 
-  void _showDeleteConfirmDialog(BuildContext context, Account account) {
-    final controller = Get.find<AccountController>();
-
-    showDialog(
+  Future<bool?> _showDeleteConfirmDialog(
+    BuildContext context,
+    Account account,
+  ) async {
+    return await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('确认解绑'),
@@ -347,14 +407,11 @@ class _AccountCard extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, false),
             child: const Text('取消'),
           ),
           FilledButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await controller.unbindAccount(account.id);
-            },
+            onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
@@ -362,6 +419,34 @@ class _AccountCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 滑动提示组件
+class _SwipeHintWidget extends StatelessWidget {
+  const _SwipeHintWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.swipe,
+          size: 14,
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          '左滑删除 · 右滑重新登录',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
     );
   }
 }

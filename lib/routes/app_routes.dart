@@ -8,4 +8,5 @@ class AppRoutes {
   static const themeSettings = '/theme-settings';
   static const privacyPolicy = '/privacy-policy';
   static const about = '/about';
+  static const logs = '/logs';
 }

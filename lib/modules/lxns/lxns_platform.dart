@@ -98,25 +98,29 @@ class LxnsPlatform extends BasePlatform {
         execute: (task) async {
           task.updateProgress(0, description: '正在获取访问令牌...');
 
-          // 使用 credentialProvider 获取凭据（自动处理刷新）
-          final updatedAccount = await _credentialProvider.getCredential(
-            account,
-          );
-          final accessToken = updatedAccount.accessToken;
+          try {
+            // 使用 credentialProvider 获取凭据（自动处理刷新）
+            final updatedAccount = await _credentialProvider.getCredential(
+              account,
+            );
+            final accessToken = updatedAccount.accessToken;
 
-          if (accessToken == null || accessToken.isEmpty) {
-            throw Exception('访问令牌不存在，请重新登录');
+            if (accessToken == null || accessToken.isEmpty) {
+              throw Exception('访问令牌不存在，请重新登录');
+            }
+
+            task.updateProgress(0.1, description: '正在同步玩家成绩...');
+            await MaimaiApiService.instance.syncPlayerScoresToDatabase(
+              accessToken: accessToken,
+              onProgress: (current, total, description) {
+                // 将进度映射到 0.1 - 1.0 范围
+                final progress = 0.1 + (current / total) * 0.9;
+                task.updateProgress(progress, description: description);
+              },
+            );
+          } on CredentialExpiredException catch (e) {
+            throw Exception('凭据已失效: ${e.message}，请在账号管理页面重新登录');
           }
-
-          task.updateProgress(0.1, description: '正在同步玩家成绩...');
-          await MaimaiApiService.instance.syncPlayerScoresToDatabase(
-            accessToken: accessToken,
-            onProgress: (current, total, description) {
-              // 将进度映射到 0.1 - 1.0 范围
-              final progress = 0.1 + (current / total) * 0.9;
-              task.updateProgress(progress, description: description);
-            },
-          );
         },
       ),
     );

@@ -8,6 +8,7 @@ import 'package:rank_hub/pages/settings.dart';
 import 'package:rank_hub/pages/theme_settings.dart';
 import 'package:rank_hub/pages/privacy_policy.dart';
 import 'package:rank_hub/pages/about.dart';
+import 'package:rank_hub/pages/log_page.dart';
 import 'package:rank_hub/routes/app_routes.dart';
 import 'package:rank_hub/controllers/main_controller.dart';
 import 'package:rank_hub/controllers/game_controller.dart';
@@ -50,6 +51,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.about,
       page: () => const AboutPage(),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.logs,
+      page: () => const LogPage(),
       transition: Transition.native,
     ),
   ];

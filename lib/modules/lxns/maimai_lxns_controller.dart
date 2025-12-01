@@ -5,6 +5,7 @@ import 'package:rank_hub/models/maimai/song.dart';
 import 'package:rank_hub/models/maimai/score.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:rank_hub/services/account_service.dart';
+import 'package:rank_hub/services/credential_provider.dart';
 import 'services/maimai_isar_service.dart';
 import 'services/maimai_api_service.dart';
 
@@ -384,6 +385,17 @@ class MaimaiLxnsController extends GetxController {
       _loadStatus.value = DataLoadStatus.success;
 
       print('✅ API 加载完成，设置到 controller: ${_scores.length} 条成绩');
+    } on CredentialExpiredException catch (e) {
+      print('🔐 凭据已失效: $e');
+      _loadStatus.value = DataLoadStatus.error;
+      _errorMessage.value = '凭据已失效，请在账号管理页面重新登录';
+
+      // 显示用户友好提示
+      Get.snackbar(
+        '凭据已失效',
+        '请在账号管理页面重新登录',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
       print('❌ API 加载成绩失败: $e');
       print('❌ 错误堆栈: ${StackTrace.current}');
