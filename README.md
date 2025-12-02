@@ -100,10 +100,12 @@ flutter build apk --split-per-abi
   </tr>
 </thead>
 <tbody>
+
+  <!-- 落雪咖啡屋 舞萌DX -->
   <tr>
-    <td rowspan="8">🍵 <b>落雪咖啡屋</b><br/><sub>LXNS</sub><br/><br/>OAuth2</td>
-    <td rowspan="8">🎮 <b>舞萌DX</b></td>
-    <td rowspan="8">✅ 稳定</td>
+    <td rowspan="24"><b>落雪咖啡屋</b><br/><sub>LXNS</sub></td>
+    <td rowspan="18"><b>舞萌DX</b></td>
+    <td rowspan="18">OAuth2</td>
     <td>曲目列表</td>
     <td align="center">✅</td>
     <td>完整曲目数据库，支持搜索和筛选</td>
@@ -139,14 +141,128 @@ flutter build apk --split-per-abi
     <td>自动同步所有数据</td>
   </tr>
   <tr>
-    <td>数据导出</td>
+    <td>单曲 Rating 计算</td>
     <td align="center">⏳</td>
+    <td>开发中</td>
+  </tr>
+  <tr>
+    <td>达成率容错计算</td>
+    <td align="center">⏳</td>
+    <td>开发中</td>
+  </tr>
+  <tr>
+    <td>保存曲绘/藏品图片到相册</td>
+    <td align="center">⏳</td>
+    <td>开发中</td>
+  </tr>
+  <tr>
+    <td>从 Net 同步玩家数据</td>
+    <td align="center">📋</td>
     <td>计划中</td>
   </tr>
   <tr>
-    <td rowspan="7">🎵 <b>MuseDash.moe</b><br/><br/>API Key</td>
-    <td rowspan="7">🎵 <b>Muse Dash</b></td>
-    <td rowspan="7">✅ 稳定</td>
+    <td>数据导出</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>B50 图片生成</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>单曲评论与评分</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>别名投票</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>完成率分布计算</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>乐曲试听</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>Simai 谱面下载</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+
+  <!-- 落雪咖啡屋 中二节奏 CHUNITHM -->
+  <tr>
+    <td rowspan="6"><b>中二节奏</b><br/><sub>CHUNITHM</sub></td>
+    <td rowspan="6">OAuth2</td>
+    <td>曲目列表</td>
+    <td align="center">⏳</td>
+    <td>开发中</td>
+  </tr>
+  <tr>
+    <td>成绩查询</td>
+    <td align="center">⏳</td>
+    <td>开发中</td>
+  </tr>
+  <tr>
+    <td>玩家信息</td>
+    <td align="center">⏳</td>
+    <td>开发中</td>
+  </tr>
+  <tr>
+    <td>Rating 计算</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>数据同步</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+  <tr>
+    <td>曲绘显示</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+
+  <!-- Diving-Fish -->
+  <tr>
+    <td rowspan="4"><b>Diving-Fish</b><br/><sub>水鱼查分器</sub></td>
+    <td rowspan="2"><b>舞萌DX</b></td>
+    <td rowspan="2">账密登录</td>
+    <td>成绩查询</td>
+    <td align="center">📋</td>
+    <td>通过水鱼接口查询分数</td>
+  </tr>
+  <tr>
+    <td>其他功能参见落雪查分器</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+
+  <tr>
+    <td rowspan="2"><b>中二节奏</b><br/><sub>CHUNITHM</sub></td>
+    <td rowspan="2">账密登录</td>
+    <td>成绩查询</td>
+    <td align="center">📋</td>
+    <td>通过水鱼接口查询分数</td>
+  </tr>
+  <tr>
+    <td>其他功能参见落雪查分器</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+
+  <!-- MuseDash -->
+  <tr>
+    <td rowspan="8"><b>MuseDash.moe</b></td>
+    <td rowspan="8"><b>Muse Dash</b></td>
+    <td rowspan="8">Player UUID</td>
     <td>曲目列表</td>
     <td align="center">✅</td>
     <td>完整曲目数据，支持筛选</td>
@@ -162,9 +278,9 @@ flutter build apk --split-per-abi
     <td>角色收藏展示</td>
   </tr>
   <tr>
-    <td>小精灵图鉴</td>
+    <td>精灵图鉴</td>
     <td align="center">✅</td>
-    <td>小精灵收藏展示</td>
+    <td>精灵收藏展示</td>
   </tr>
   <tr>
     <td>玩家信息</td>
@@ -182,9 +298,16 @@ flutter build apk --split-per-abi
     <td>支持曲绘缓存</td>
   </tr>
   <tr>
-    <td rowspan="7">⭐ <b>Phigros</b><br/><br/>Session Token</td>
-    <td rowspan="7">⭐ <b>Phigros</b></td>
-    <td rowspan="7">✅ 稳定</td>
+    <td>排行榜</td>
+    <td align="center">📋</td>
+    <td>计划中</td>
+  </tr>
+
+  <!-- Phigros -->
+  <tr>
+    <td rowspan="7"><b>Phigros</b></td>
+    <td rowspan="7"><b>Phigros</b></td>
+    <td rowspan="7">Session Token</td>
     <td>曲目列表</td>
     <td align="center">✅</td>
     <td>完整曲目数据库</td>
@@ -195,9 +318,9 @@ flutter build apk --split-per-abi
     <td>所有难度成绩记录</td>
   </tr>
   <tr>
-    <td>B19+φ 分析</td>
+    <td>B30 分析</td>
     <td align="center">✅</td>
-    <td>Best 19 + Phi 1.00 分表</td>
+    <td>Best 27 + Phi 3 分表</td>
   </tr>
   <tr>
     <td>RKS 计算</td>
@@ -219,39 +342,7 @@ flutter build apk --split-per-abi
     <td align="center">✅</td>
     <td>自动同步所有数据</td>
   </tr>
-</tbody>
-</table>
 
-#### 计划支持
-
-<table>
-<thead>
-  <tr>
-    <th>平台/游戏</th>
-    <th>预计时间</th>
-    <th>优先级</th>
-    <th>说明</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>🐟 <b>水鱼查分器</b> (DivingFish)</td>
-    <td>待定</td>
-    <td align="center">📋 中</td>
-    <td>舞萌DX、中二节奏数据平台</td>
-  </tr>
-  <tr>
-    <td>🎯 <b>Arcaea</b></td>
-    <td>待定</td>
-    <td align="center">📋 低</td>
-    <td>需要 Arcaea Online 订阅</td>
-  </tr>
-  <tr>
-    <td>🎼 <b>中二节奏</b> (Chunithm)</td>
-    <td>待定</td>
-    <td align="center">📋 中</td>
-    <td>依赖落雪或水鱼平台支持</td>
-  </tr>
 </tbody>
 </table>
 
