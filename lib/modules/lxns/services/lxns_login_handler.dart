@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:dio/dio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
 import 'package:rank_hub/utils/pkce_helper.dart';
@@ -77,7 +77,7 @@ class LxnsLoginHandler extends PlatformLoginHandler {
       print('📤 Redirect URI: $redirectUri');
 
       // 使用 flutter_web_auth 打开授权页面
-      final result = await FlutterWebAuth.authenticate(
+      final result = await FlutterWebAuth2.authenticate(
         url: authUrl,
         callbackUrlScheme: 'rankhub',
       );

@@ -62,7 +62,7 @@ dependencies:
   flutter_inappwebview: ^6.1.5
 
   # OAuth2 登录
-  flutter_web_auth: ^0.6.0
+  flutter_web_auth_2: ^4.1.0
 
   # 用于生成 PKCE code_verifier 和 code_challenge
   crypto: ^3.0.6
