@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/platform.dart';
+import 'package:rank_hub/models/platform_feature_item.dart';
 import 'package:rank_hub/models/game.dart';
 import 'package:rank_hub/models/sync_task.dart';
 import 'package:rank_hub/services/credential_provider.dart';
@@ -172,5 +174,60 @@ class LxnsPlatform extends BasePlatform {
         ],
       ],
     );
+  }
+
+  @override
+  List<PlatformFeatureItem> getCustomFeatures(
+    BuildContext context,
+    Account account,
+  ) {
+    return [
+      // 示例功能1: 访问官网
+      PlatformFeatureItem(
+        title: '访问官网',
+        description: '跳转到落雪咖啡屋官方网站',
+        icon: Icons.language,
+        onTap: () {
+          // 这里可以实现打开浏览器跳转到官网的逻辑
+          Get.snackbar(
+            '提示',
+            '即将跳转到落雪咖啡屋官网',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        },
+      ),
+
+      // 示例功能2: 数据导出
+      PlatformFeatureItem(
+        title: '导出数据',
+        description: '将成绩数据导出为 JSON 文件',
+        icon: Icons.download,
+        badge: 'Beta',
+        onTap: () {
+          Get.snackbar('提示', '数据导出功能开发中', snackPosition: SnackPosition.BOTTOM);
+        },
+      ),
+
+      // 示例功能3: 统计分析
+      PlatformFeatureItem(
+        title: '统计分析',
+        description: '查看详细的成绩统计和趋势分析',
+        icon: Icons.analytics,
+        iconColor: Colors.white,
+        iconBackgroundColor: Colors.blue,
+        onTap: () {
+          Get.snackbar('提示', '统计分析功能即将推出', snackPosition: SnackPosition.BOTTOM);
+        },
+      ),
+
+      // 示例功能4: 账号设置（禁用状态示例）
+      PlatformFeatureItem(
+        title: '高级设置',
+        description: '配置数据同步和缓存选项',
+        icon: Icons.tune,
+        enabled: false, // 禁用状态
+        onTap: () {},
+      ),
+    ];
   }
 }
