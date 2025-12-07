@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/platform.dart';
+import 'package:rank_hub/models/platform_feature_item.dart';
 import 'package:rank_hub/models/game.dart';
 import 'package:rank_hub/models/sync_task.dart';
 import 'package:rank_hub/services/credential_provider.dart';
@@ -8,6 +11,7 @@ import 'package:rank_hub/services/platform_login_handler.dart';
 import 'package:rank_hub/modules/lxns/services/lxns_login_handler.dart';
 import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_api_service.dart';
+import 'package:rank_hub/modules/lxns/services/maimai_export_service.dart';
 import 'package:rank_hub/modules/lxns/maimai_dx_game.dart';
 
 /// 落雪咖啡屋平台（LXNS）
@@ -172,5 +176,49 @@ class LxnsPlatform extends BasePlatform {
         ],
       ],
     );
+  }
+
+  @override
+  List<PlatformFeatureItem> getCustomFeatures(
+    BuildContext context,
+    Account account,
+  ) {
+    return [
+      PlatformFeatureItem(
+        title: '同步玩家数据',
+        description: '从 NET 同步最新的玩家成绩和信息',
+        icon: Icons.sync,
+        onTap: () {
+          Get.snackbar('提示', '功能开发中', snackPosition: SnackPosition.BOTTOM);
+        },
+      ),
+
+      // 舞萌DX 成绩导出
+      PlatformFeatureItem(
+        title: '导出成绩',
+        description: '导出舞萌DX成绩数据为 CSV 或 JSON 文件',
+        icon: Icons.download,
+        onTap: () {
+          MaimaiExportService.instance.showExportDialog(context);
+        },
+      ),
+
+      // 访问官网
+      PlatformFeatureItem(
+        title: '访问官网',
+        description: '跳转到落雪咖啡屋官方网站',
+        icon: Icons.language,
+        onTap: () async {
+          final browser = ChromeSafariBrowser();
+          await browser.open(
+            url: WebUri('https://maimai.lxns.net'),
+            settings: ChromeSafariBrowserSettings(
+              shareState: CustomTabsShareState.SHARE_STATE_OFF,
+              barCollapsingEnabled: true,
+            ),
+          );
+        },
+      ),
+    ];
   }
 }

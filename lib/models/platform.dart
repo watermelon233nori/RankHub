@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/game.dart';
+import 'package:rank_hub/models/platform_feature_item.dart';
 import 'package:rank_hub/models/sync_task.dart';
 import 'package:rank_hub/services/credential_provider.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
@@ -102,6 +103,17 @@ abstract class IPlatform {
   /// 聚合所有游戏的玩家信息卡片
   /// [account] 当前账号，用于获取对应的玩家数据
   Widget? buildPlayerInfoCard(BuildContext context, Account account) => null;
+
+  // ========== 自定义功能 ==========
+
+  /// 获取平台自定义功能列表
+  /// 返回在 Mine 页面展示的功能项列表
+  /// [context] BuildContext，用于导航等操作
+  /// [account] 当前账号，用于根据账号状态提供不同功能
+  List<PlatformFeatureItem> getCustomFeatures(
+    BuildContext context,
+    Account account,
+  ) => [];
 }
 
 /// 基础平台实现类 - 提供默认实现
@@ -183,4 +195,10 @@ abstract class BasePlatform implements IPlatform {
 
   @override
   Widget? buildPlayerInfoCard(BuildContext context, Account account) => null;
+
+  @override
+  List<PlatformFeatureItem> getCustomFeatures(
+    BuildContext context,
+    Account account,
+  ) => [];
 }

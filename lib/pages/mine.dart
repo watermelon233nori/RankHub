@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 import '../controllers/account_controller.dart';
 import '../data/platforms_data.dart';
+import '../pages/qr_code_scanner.dart';
 import 'account_manage.dart';
 
 class MinePage extends StatelessWidget {
@@ -20,8 +21,14 @@ class MinePage extends StatelessWidget {
         centerTitle: false,
         actions: [
           IconButton(
+            onPressed: () => Get.to(() => const QRCodeScannerPage()),
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: '扫描二维码',
+          ),
+          IconButton(
             onPressed: () => Get.toNamed(AppRoutes.settings),
             icon: const Icon(Icons.settings),
+            tooltip: '设置',
           ),
         ],
         actionsPadding: const EdgeInsets.symmetric(horizontal: 8),

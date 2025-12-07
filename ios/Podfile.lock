@@ -1,5 +1,7 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_app_group_directory (0.0.1):
+    - Flutter
   - flutter_inappwebview_ios (0.0.1):
     - Flutter
     - flutter_inappwebview_ios/Core (= 0.0.1)
@@ -7,12 +9,15 @@ PODS:
   - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 6.0.3)
-  - flutter_web_auth (0.5.0):
-    - Flutter
-  - image_gallery_saver (2.0.2):
+  - flutter_web_auth_2 (3.0.0):
     - Flutter
   - isar_community_flutter_libs (1.0.0):
     - Flutter
+  - live_activities (0.0.1):
+    - Flutter
+  - mobile_scanner (7.0.0):
+    - Flutter
+    - FlutterMacOS
   - objective_c (0.0.1):
     - Flutter
   - OrderedSet (6.0.3)
@@ -31,10 +36,12 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_app_group_directory (from `.symlinks/plugins/flutter_app_group_directory/ios`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
-  - flutter_web_auth (from `.symlinks/plugins/flutter_web_auth/ios`)
-  - image_gallery_saver (from `.symlinks/plugins/image_gallery_saver/ios`)
+  - flutter_web_auth_2 (from `.symlinks/plugins/flutter_web_auth_2/ios`)
   - isar_community_flutter_libs (from `.symlinks/plugins/isar_community_flutter_libs/ios`)
+  - live_activities (from `.symlinks/plugins/live_activities/ios`)
+  - mobile_scanner (from `.symlinks/plugins/mobile_scanner/darwin`)
   - objective_c (from `.symlinks/plugins/objective_c/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -49,14 +56,18 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_app_group_directory:
+    :path: ".symlinks/plugins/flutter_app_group_directory/ios"
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
-  flutter_web_auth:
-    :path: ".symlinks/plugins/flutter_web_auth/ios"
-  image_gallery_saver:
-    :path: ".symlinks/plugins/image_gallery_saver/ios"
+  flutter_web_auth_2:
+    :path: ".symlinks/plugins/flutter_web_auth_2/ios"
   isar_community_flutter_libs:
     :path: ".symlinks/plugins/isar_community_flutter_libs/ios"
+  live_activities:
+    :path: ".symlinks/plugins/live_activities/ios"
+  mobile_scanner:
+    :path: ".symlinks/plugins/mobile_scanner/darwin"
   objective_c:
     :path: ".symlinks/plugins/objective_c/ios"
   permission_handler_apple:
@@ -72,10 +83,12 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_app_group_directory: d2c3337f424828558953172f9378d00df9b7756d
   flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
-  flutter_web_auth: c25208760459cec375a3c39f6a8759165ca0fa4d
-  image_gallery_saver: cb43cc43141711190510e92c460eb1655cd343cb
+  flutter_web_auth_2: 06d500582775790a0d4c323222fcb6d7990f9603
   isar_community_flutter_libs: cf478bdca01f7fb2bde0320930a785456748f1ad
+  live_activities: 5a5313d5bf801bbbbe80d51eab80aed6d6df376b
+  mobile_scanner: 77265f3dc8d580810e91849d4a0811a90467ed5e
   objective_c: 77e887b5ba1827970907e10e832eec1683f3431d
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2

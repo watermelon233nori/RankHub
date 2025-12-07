@@ -69,11 +69,9 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.notifications),
             title: const Text('通知'),
-            subtitle: const Text('推送通知设置'),
+            subtitle: const Text('推送通知和实时活动设置'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Get.snackbar('提示', '功能开发中...');
-            },
+            onTap: () => Get.toNamed(AppRoutes.notificationSettings),
           ),
 
           // 其他部分
