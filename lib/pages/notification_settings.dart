@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'dart:io';
 import '../services/live_activity_service.dart';
 import '../services/queue_status_manager.dart';
-import 'live_activity_intro_page.dart';
 
 /// 通知设置页面
 class NotificationSettingsPage extends StatelessWidget {
@@ -28,16 +27,6 @@ class NotificationSettingsPage extends StatelessWidget {
               ),
             ),
             const _LiveActivitySwitch(),
-            const Divider(indent: 16, endIndent: 16),
-            ListTile(
-              leading: const Icon(Icons.preview),
-              title: const Text('效果预览'),
-              subtitle: const Text('查看实时活动效果演示'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                LiveActivityIntroPage.show(showSkipButton: false);
-              },
-            ),
             const Divider(indent: 16, endIndent: 16),
             ListTile(
               leading: const Icon(Icons.animation),

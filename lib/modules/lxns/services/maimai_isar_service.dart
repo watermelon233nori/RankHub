@@ -6,6 +6,7 @@ import 'package:rank_hub/models/maimai/player.dart';
 import 'package:rank_hub/models/maimai/song.dart';
 import 'package:rank_hub/models/maimai/collection.dart';
 import 'package:rank_hub/models/maimai/score.dart';
+import 'package:rank_hub/models/maimai/pinned_collection.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
 import 'package:rank_hub/models/maimai/enums/song_type.dart';
 
@@ -43,6 +44,7 @@ class MaimaiIsarService extends BaseIsarService {
     // 收藏品相关
     MaimaiCollectionSchema,
     CollectionGenreSchema,
+    PinnedCollectionSchema,
   ];
 
   // ==================== 玩家相关操作 ====================
@@ -454,5 +456,59 @@ class MaimaiIsarService extends BaseIsarService {
   Future<List<CollectionGenre>> getAllCollectionGenres() async {
     final isar = await db;
     return await isar.collectionGenres.where().findAll();
+  }
+
+  // ==================== 固定收藏品相关操作 ====================
+
+  /// 保存固定的收藏品
+  Future<void> pinCollection(int collectionId, String collectionType) async {
+    final isar = await db;
+    final pinnedCollection = PinnedCollection(
+      collectionId: collectionId,
+      collectionType: collectionType,
+      pinnedAt: DateTime.now(),
+    );
+
+    await isar.writeTxn(() async {
+      await isar.pinnedCollections.put(pinnedCollection);
+    });
+  }
+
+  /// 取消固定收藏品
+  Future<void> unpinCollection(int collectionId, String collectionType) async {
+    final isar = await db;
+    final pinned = await isar.pinnedCollections
+        .filter()
+        .collectionTypeEqualTo(collectionType)
+        .and()
+        .collectionIdEqualTo(collectionId)
+        .findFirst();
+
+    if (pinned != null) {
+      await isar.writeTxn(() async {
+        await isar.pinnedCollections.delete(pinned.id);
+      });
+    }
+  }
+
+  /// 获取所有固定的收藏品ID列表
+  Future<List<PinnedCollection>> getAllPinnedCollections() async {
+    final isar = await db;
+    return await isar.pinnedCollections.where().sortByPinnedAt().findAll();
+  }
+
+  /// 检查收藏品是否已固定
+  Future<bool> isCollectionPinned(
+    int collectionId,
+    String collectionType,
+  ) async {
+    final isar = await db;
+    final count = await isar.pinnedCollections
+        .filter()
+        .collectionTypeEqualTo(collectionType)
+        .and()
+        .collectionIdEqualTo(collectionId)
+        .count();
+    return count > 0;
   }
 }

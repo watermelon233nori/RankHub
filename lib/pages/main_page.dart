@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:rank_hub/controllers/main_controller.dart';
 import 'package:rank_hub/pages/wiki.dart';
 import 'package:rank_hub/pages/rank.dart';
+import 'package:rank_hub/pages/toolbox.dart';
 import 'package:rank_hub/pages/mine.dart';
 import 'dart:ui';
 
@@ -30,7 +31,7 @@ class MainPage extends GetView<MainController> {
           child: IndexedStack(
             key: ValueKey<int>(controller.currentIndex.value),
             index: controller.currentIndex.value,
-            children: const [WikiPage(), RankPage(), MinePage()],
+            children: const [WikiPage(), RankPage(), ToolboxPage(), MinePage()],
           ),
         ),
       ),
@@ -54,6 +55,11 @@ class MainPage extends GetView<MainController> {
                   icon: Icon(Icons.query_stats_outlined),
                   selectedIcon: Icon(Icons.query_stats),
                   label: '成绩',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.construction_outlined),
+                  selectedIcon: Icon(Icons.construction),
+                  label: '工具箱',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.person_outline),

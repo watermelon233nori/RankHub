@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
 import '../controllers/account_controller.dart';
-import '../pages/qr_code_test_page.dart';
 import 'account_manage.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -92,14 +91,6 @@ class SettingsPage extends StatelessWidget {
             subtitle: const Text('查看调试信息'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Get.toNamed(AppRoutes.logs),
-          ),
-          const Divider(indent: 16, endIndent: 16),
-          ListTile(
-            leading: const Icon(Icons.bug_report),
-            title: const Text('二维码功能测试'),
-            subtitle: const Text('测试二维码扫描和排队功能'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Get.to(() => const QRCodeTestPage()),
           ),
           const Divider(indent: 16, endIndent: 16),
           ListTile(

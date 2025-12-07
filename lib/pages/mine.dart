@@ -4,7 +4,6 @@ import '../routes/app_routes.dart';
 import '../controllers/account_controller.dart';
 import '../data/platforms_data.dart';
 import '../pages/qr_code_scanner.dart';
-import '../widgets/queue_status_card.dart';
 import 'account_manage.dart';
 
 class MinePage extends StatelessWidget {
@@ -36,9 +35,6 @@ class MinePage extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          // 排队状态卡片
-          const QueueStatusCard(),
-
           Obx(() {
             final accounts = controller.accounts;
             final currentAccount = controller.currentAccount;
@@ -283,54 +279,6 @@ class MinePage extends StatelessWidget {
             }
 
             return Column(children: [const SizedBox(height: 16), playerCard]);
-          }),
-
-          // 平台自定义功能列表
-          Obx(() {
-            final currentAccount = controller.currentAccount;
-            if (currentAccount == null) {
-              return const SizedBox.shrink();
-            }
-
-            // 获取平台实例
-            final platformRegistry = PlatformRegistry();
-            final platform = platformRegistry.getPlatformByType(
-              currentAccount.platform,
-            );
-
-            if (platform == null) {
-              return const SizedBox.shrink();
-            }
-
-            // 获取自定义功能列表
-            final features = platform.getCustomFeatures(
-              context,
-              currentAccount,
-            );
-            if (features.isEmpty) {
-              return const SizedBox.shrink();
-            }
-
-            return Container(
-              margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  for (int i = 0; i < features.length; i++) ...[
-                    features[i].buildWidget(context),
-                    if (i < features.length - 1)
-                      Divider(
-                        height: 1,
-                        indent: 72,
-                        color: colorScheme.outlineVariant.withOpacity(0.5),
-                      ),
-                  ],
-                ],
-              ),
-            );
           }),
         ],
       ),

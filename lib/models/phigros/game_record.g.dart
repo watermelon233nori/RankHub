@@ -30,18 +30,19 @@ const PhigrosGameRecordSchema = CollectionSchema(
       type: IsarType.double,
     ),
     r'fc': PropertySchema(id: 4, name: r'fc', type: IsarType.bool),
+    r'isBlueV': PropertySchema(id: 5, name: r'isBlueV', type: IsarType.bool),
     r'lastUpdated': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'lastUpdated',
       type: IsarType.dateTime,
     ),
-    r'level': PropertySchema(id: 6, name: r'level', type: IsarType.string),
-    r'rating': PropertySchema(id: 7, name: r'rating', type: IsarType.string),
-    r'rks': PropertySchema(id: 8, name: r'rks', type: IsarType.double),
-    r'score': PropertySchema(id: 9, name: r'score', type: IsarType.long),
-    r'songId': PropertySchema(id: 10, name: r'songId', type: IsarType.string),
+    r'level': PropertySchema(id: 7, name: r'level', type: IsarType.string),
+    r'rating': PropertySchema(id: 8, name: r'rating', type: IsarType.string),
+    r'rks': PropertySchema(id: 9, name: r'rks', type: IsarType.double),
+    r'score': PropertySchema(id: 10, name: r'score', type: IsarType.long),
+    r'songId': PropertySchema(id: 11, name: r'songId', type: IsarType.string),
     r'songName': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'songName',
       type: IsarType.string,
     ),
@@ -128,13 +129,14 @@ void _phigrosGameRecordSerialize(
   writer.writeString(offsets[2], object.artist);
   writer.writeDouble(offsets[3], object.constant);
   writer.writeBool(offsets[4], object.fc);
-  writer.writeDateTime(offsets[5], object.lastUpdated);
-  writer.writeString(offsets[6], object.level);
-  writer.writeString(offsets[7], object.rating);
-  writer.writeDouble(offsets[8], object.rks);
-  writer.writeLong(offsets[9], object.score);
-  writer.writeString(offsets[10], object.songId);
-  writer.writeString(offsets[11], object.songName);
+  writer.writeBool(offsets[5], object.isBlueV);
+  writer.writeDateTime(offsets[6], object.lastUpdated);
+  writer.writeString(offsets[7], object.level);
+  writer.writeString(offsets[8], object.rating);
+  writer.writeDouble(offsets[9], object.rks);
+  writer.writeLong(offsets[10], object.score);
+  writer.writeString(offsets[11], object.songId);
+  writer.writeString(offsets[12], object.songName);
 }
 
 PhigrosGameRecord _phigrosGameRecordDeserialize(
@@ -150,12 +152,12 @@ PhigrosGameRecord _phigrosGameRecordDeserialize(
   object.constant = reader.readDouble(offsets[3]);
   object.fc = reader.readBool(offsets[4]);
   object.id = id;
-  object.lastUpdated = reader.readDateTime(offsets[5]);
-  object.level = reader.readString(offsets[6]);
-  object.rks = reader.readDouble(offsets[8]);
-  object.score = reader.readLong(offsets[9]);
-  object.songId = reader.readString(offsets[10]);
-  object.songName = reader.readString(offsets[11]);
+  object.lastUpdated = reader.readDateTime(offsets[6]);
+  object.level = reader.readString(offsets[7]);
+  object.rks = reader.readDouble(offsets[9]);
+  object.score = reader.readLong(offsets[10]);
+  object.songId = reader.readString(offsets[11]);
+  object.songName = reader.readString(offsets[12]);
   return object;
 }
 
@@ -177,18 +179,20 @@ P _phigrosGameRecordDeserializeProp<P>(
     case 4:
       return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readDouble(offset)) as P;
-    case 9:
-      return (reader.readLong(offset)) as P;
-    case 10:
       return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readDouble(offset)) as P;
+    case 10:
+      return (reader.readLong(offset)) as P;
     case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -942,6 +946,15 @@ extension PhigrosGameRecordQueryFilter
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QAfterFilterCondition>
+  isBlueVEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'isBlueV', value: value),
       );
     });
   }
@@ -1773,6 +1786,20 @@ extension PhigrosGameRecordQuerySortBy
   }
 
   QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QAfterSortBy>
+  sortByIsBlueV() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBlueV', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QAfterSortBy>
+  sortByIsBlueVDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBlueV', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QAfterSortBy>
   sortByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.asc);
@@ -1954,6 +1981,20 @@ extension PhigrosGameRecordQuerySortThenBy
   }
 
   QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QAfterSortBy>
+  thenByIsBlueV() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBlueV', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QAfterSortBy>
+  thenByIsBlueVDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBlueV', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QAfterSortBy>
   thenByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastUpdated', Sort.asc);
@@ -2088,6 +2129,13 @@ extension PhigrosGameRecordQueryWhereDistinct
   }
 
   QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QDistinct>
+  distinctByIsBlueV() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isBlueV');
+    });
+  }
+
+  QueryBuilder<PhigrosGameRecord, PhigrosGameRecord, QDistinct>
   distinctByLastUpdated() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastUpdated');
@@ -2173,6 +2221,12 @@ extension PhigrosGameRecordQueryProperty
   QueryBuilder<PhigrosGameRecord, bool, QQueryOperations> fcProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fc');
+    });
+  }
+
+  QueryBuilder<PhigrosGameRecord, bool, QQueryOperations> isBlueVProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isBlueV');
     });
   }
 
