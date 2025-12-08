@@ -13,6 +13,7 @@ import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_api_service.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_export_service.dart';
 import 'package:rank_hub/modules/lxns/maimai_dx_game.dart';
+import 'package:rank_hub/modules/lxns/pages/net_sync_page.dart';
 
 /// 落雪咖啡屋平台（LXNS）
 /// 提供舞萌DX数据查询服务
@@ -185,11 +186,11 @@ class LxnsPlatform extends BasePlatform {
   ) {
     return [
       PlatformFeatureItem(
-        title: '同步玩家数据',
-        description: '从 NET 同步最新的玩家成绩和信息',
+        title: '从 NET 同步成绩',
+        description: '扫描 QR Code 或输入 User ID 同步 NET 数据',
         icon: Icons.sync,
         onTap: () {
-          Get.snackbar('提示', '功能开发中', snackPosition: SnackPosition.BOTTOM);
+          Get.to(() => NetSyncPage(account: account));
         },
       ),
 

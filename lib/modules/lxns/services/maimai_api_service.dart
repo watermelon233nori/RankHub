@@ -641,4 +641,60 @@ class MaimaiApiService {
     final cacheStore = FileCacheStore('${cacheDir.path}/dio_cache');
     await cacheStore.clean();
   }
+
+  /// 上传成绩到LXNS查分器
+  /// [accessToken] 访问令牌
+  /// [scores] 要上传的成绩列表
+  /// [onProgress] 进度回调 (current, total, description)
+  Future<void> uploadScoresToLxns({
+    required String accessToken,
+    required List<Score> scores,
+    Function(int current, int total, String description)? onProgress,
+  }) async {
+    if (scores.isEmpty) {
+      onProgress?.call(0, 0, '没有成绩需要上传');
+      return;
+    }
+
+    final client = await dio;
+    final totalCount = scores.length;
+
+    try {
+      onProgress?.call(0, totalCount, '正在上传 ${totalCount} 条成绩...');
+
+      // 转换为API要求的格式
+      final scoresData = scores
+          .map(
+            (score) => {
+              'id': score.songId,
+              'type': score.type.value,
+              'level_index': score.levelIndex.value,
+              'achievements': score.achievements,
+              'fc': score.fc?.value,
+              'fs': score.fs?.value,
+              'dx_score': score.dxScore,
+              'play_time': score.playTime,
+            },
+          )
+          .toList();
+
+      // 一次性上传所有成绩
+      final response = await client.post(
+        '/api/v0/user/maimai/player/scores',
+        data: {'scores': scoresData},
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+      );
+
+      final apiResponse = LxnsApiResponse<dynamic>.fromJson(response.data);
+
+      if (apiResponse.success) {
+        onProgress?.call(totalCount, totalCount, '上传完成！');
+      } else {
+        throw Exception('上传失败: ${apiResponse.message}');
+      }
+    } catch (e) {
+      print('上传成绩失败: $e');
+      rethrow;
+    }
+  }
 }
