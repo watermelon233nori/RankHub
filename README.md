@@ -48,6 +48,10 @@ RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支
 
 > **注意**：未签名的 IPA 需要自行签名才能安装到 iOS 设备。推荐使用 AltStore 或 Sideloadly 进行侧载安装。
 
+库克太坏了：
+
+<img width="120" alt="IMG_6282" src="https://github.com/user-attachments/assets/ab0daf84-d959-422f-9ce1-5b5d3e3b33c5" />
+
 ### Android
 
 [![下载 Android APK](https://img.shields.io/badge/下载-Android%20APK-green?style=for-the-badge&logo=android)](https://github.com/qianmo2233/RankHub/actions/workflows/build_app.yml)
