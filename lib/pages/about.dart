@@ -6,8 +6,8 @@ import '../routes/app_routes.dart';
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
-  static const String appVersion = '1.0.0';
-  static const String buildNumber = '1';
+  static const String appVersion = '1.0.1';
+  static const String buildNumber = '2';
   static const String githubRepo = 'https://github.com/qianmo2233/RankHub';
 
   @override

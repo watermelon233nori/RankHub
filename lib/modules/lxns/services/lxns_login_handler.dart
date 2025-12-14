@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
@@ -768,15 +769,39 @@ class _ManualAuthPageState extends State<_ManualAuthPage> {
     setState(() => _browserOpened = true);
 
     try {
-      await _browser.open(
-        url: WebUri(widget.authUrl),
-        settings: ChromeSafariBrowserSettings(
-          shareState: CustomTabsShareState.SHARE_STATE_OFF,
-          barCollapsingEnabled: true,
-        ),
-      );
+      // 首先尝试使用 ChromeSafariBrowser
+      print('📱 尝试使用 ChromeSafariBrowser 打开浏览器...');
+      try {
+        await _browser.open(
+          url: WebUri(widget.authUrl),
+          settings: ChromeSafariBrowserSettings(
+            shareState: CustomTabsShareState.SHARE_STATE_OFF,
+            barCollapsingEnabled: true,
+          ),
+        );
+        print('✅ ChromeSafariBrowser 打开成功');
+        return;
+      } on PlatformException catch (e) {
+        print('⚠️ ChromeSafariBrowser 打开失败: $e');
+        print('📱 降级方案：使用 url_launcher 打开默认浏览器...');
+      }
+
+      // 如果 ChromeSafariBrowser 失败，使用 url_launcher 打开默认浏览器
+      final Uri authUri = Uri.parse(widget.authUrl);
+      if (await canLaunchUrl(authUri)) {
+        await launchUrl(authUri, mode: LaunchMode.externalApplication);
+        print('✅ 使用 url_launcher 打开浏览器成功');
+      } else {
+        print('❌ 无法打开 URL: ${widget.authUrl}');
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('无法打开浏览器，请检查 URL')));
+        }
+        setState(() => _browserOpened = false);
+      }
     } catch (e) {
-      print('打开浏览器失败: $e');
+      print('❌ 打开浏览器失败: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,

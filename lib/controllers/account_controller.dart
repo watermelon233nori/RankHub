@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
+import 'package:rank_hub/modules/divingfish/services/divingfish_credential_provider.dart';
 import 'package:rank_hub/modules/musedash/services/musedash_credential_provider.dart';
 import 'package:rank_hub/modules/phigros/services/phigros_credential_provider.dart';
 import 'package:rank_hub/services/account_service.dart';
@@ -42,6 +43,7 @@ class AccountController extends GetxController {
     _accountService.registerProvider(LxnsCredentialProvider());
     _accountService.registerProvider(MuseDashCredentialProvider());
     _accountService.registerProvider(PhigrosCredentialProvider());
+    _accountService.registerProvider(DivingFishCredentialProvider());
 
     // 加载账号列表
     loadAccounts();

@@ -458,8 +458,8 @@ class TieredSongView extends StatelessWidget {
       // 排序：从高到低
       final sortedLevels = tiers.keys.toList()
         ..sort((a, b) {
-          final aNum = double.tryParse(a.replaceAll('+', '.7')) ?? 0;
-          final bNum = double.tryParse(b.replaceAll('+', '.7')) ?? 0;
+          final aNum = double.tryParse(a.replaceAll('+', '.6')) ?? 0;
+          final bNum = double.tryParse(b.replaceAll('+', '.6')) ?? 0;
           return bNum.compareTo(aNum);
         });
 

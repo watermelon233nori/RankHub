@@ -78,7 +78,14 @@ class PhigrosGame extends BaseGame {
         }
 
         if (snapshot.hasData && snapshot.data != null) {
-          return PhigrosPlayerInfoCard(summary: snapshot.data!);
+          final data = snapshot.data as Map<String, dynamic>;
+          final records = data['records'] as List;
+          final progress = data['progress'];
+
+          return PhigrosPlayerInfoCard(
+            records: records.cast(),
+            progress: progress,
+          );
         }
 
         return const SizedBox.shrink();
@@ -86,12 +93,16 @@ class PhigrosGame extends BaseGame {
     );
   }
 
-  Future<dynamic> _loadPlayerInfo(Account account) async {
+  Future<Map<String, dynamic>?> _loadPlayerInfo(Account account) async {
     try {
-      final summary = await PhigrosIsarService.instance.getPlayerSummary(
+      final records = await PhigrosIsarService.instance.getGameRecords(
         account.id.toString(),
       );
-      return summary;
+      final progress = await PhigrosIsarService.instance.getGameProgress(
+        account.id.toString(),
+      );
+
+      return {'records': records, 'progress': progress};
     } catch (e) {
       print('❌ 加载玩家信息失败: $e');
       rethrow;
