@@ -119,7 +119,16 @@ class ByteReader {
       for (int level = 0; level < constants.length; level++) {
         if (getBool(exists, level)) {
           final scoreAcc = readScoreAcc();
-          final double preRks = (scoreAcc["acc"] - 55) / 45;
+          final double acc = scoreAcc["acc"];
+
+          // 如果准确率低于70%，RKS为0
+          final double rks;
+          if (acc < 70.0) {
+            rks = 0.0;
+          } else {
+            final double preRks = (acc - 55) / 45;
+            rks = preRks * preRks * constants[level];
+          }
 
           records.add({
             "id": songId,
@@ -128,8 +137,8 @@ class ByteReader {
             "level": ["EZ", "HD", "IN", "AT", "Legacy"][level],
             "constant": constants[level],
             "score": scoreAcc["score"],
-            "acc": scoreAcc["acc"],
-            "rks": preRks * preRks * constants[level],
+            "acc": acc,
+            "rks": rks,
             "fc": getBool(fc, level),
           });
         }
