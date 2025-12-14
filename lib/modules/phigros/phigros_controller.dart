@@ -303,7 +303,17 @@ class PhigrosController extends GetxController {
     if (currentRecord.acc >= 100.0) return null; // 已经是Phi（100%），无需计算
 
     final currentPersonalRks = calculatePersonalRks();
-    final targetPersonalRks = currentPersonalRks + 0.01;
+    // 如果要推分，就是让游戏内显示的小数点第二位数增加至少0.01
+    // 而游戏内的两位小数是四舍五入的
+    // 所以目标RKS = 原RKS的第三位小数>=5?(将原RKS的第二位小数+1，第三位为设置为5):(将原RKS的第三位小数设置为5)
+    double calculateTargetRks(double currentRks){
+      int expanded=(currentRks*1000).floor();
+      int root=(currentRks*10).floor()*100;
+      int third=expanded%10;
+      int second=(expanded/10).toInt()%10;
+      return (third>=5?root+(second+1)*10+5:root+second*10+5)/1000;
+    }
+    final targetPersonalRks = calculateTargetRks(currentPersonalRks);
 
     final b30 = getB30Records();
     final phi = b30['phi'] ?? [];
@@ -325,7 +335,6 @@ class PhigrosController extends GetxController {
 
     // 情况2: 该曲目已在B30中
     final allB30 = [...phi, ...best];
-    final isInPhi = phi.any((r) => r.id == currentRecord.id);
 
     // 计算除了当前曲目外其他曲目的RKS总和
     final otherRksSum = allB30
@@ -345,60 +354,61 @@ class PhigrosController extends GetxController {
       }
     }
 
-    // 方案B: 如果不在P1-P3中，考虑打到100%进入P1-P3
+    //如果打到accA已经可以推分，直接返回，此为最佳结果
+    if(accA!=null) return accA;
+
+    // 方案B: 如果不在P1-P3中
+    // 如果曲目的定数比P3中最低的还要低，那么本曲目不能影响RKS
+    if (maxRks < (phi.isNotEmpty ? phi.last.rks : 0.0)) {
+      return null;
+    }
+
+    // 否则，考虑打到100%进入P1-P3
     double? accB;
-    if (!isInPhi && maxRks > (phi.isNotEmpty ? phi.last.rks : 0.0)) {
-      // 模拟该曲目打到100%并进入P1-P3后的情况
-      List<PhigrosGameRecord> newPhi = List.from(phi);
+    // 模拟该曲目打到100%并进入P1-P3后的情况
+    List<PhigrosGameRecord> newPhi = List.from(phi);
 
-      // 创建100%的假设记录
-      final maxRecord = PhigrosGameRecord()
-        ..id = currentRecord.id
-        ..accountId = currentRecord.accountId
-        ..songId = currentRecord.songId
-        ..songName = currentRecord.songName
-        ..artist = currentRecord.artist
-        ..level = currentRecord.level
-        ..constant = currentRecord.constant
-        ..score = 1000000
-        ..acc = 100.0
-        ..rks = maxRks
-        ..fc = true
-        ..lastUpdated = DateTime.now();
+    // 创建100%的假设记录
+    final maxRecord = PhigrosGameRecord()
+      ..id = currentRecord.id
+      ..accountId = currentRecord.accountId
+      ..songId = currentRecord.songId
+      ..songName = currentRecord.songName
+      ..artist = currentRecord.artist
+      ..level = currentRecord.level
+      ..constant = currentRecord.constant
+      ..score = 1000000
+      ..acc = 100.0
+      ..rks = maxRks
+      ..fc = true
+      ..lastUpdated = DateTime.now();
 
-      newPhi.add(maxRecord);
-      newPhi.sort((a, b) => b.rks.compareTo(a.rks));
-      newPhi = newPhi.take(3).toList();
+    newPhi.add(maxRecord);
+    newPhi.sort((a, b) => b.rks.compareTo(a.rks));
+    newPhi = newPhi.take(3).toList();
 
-      // 重新计算B27（排除当前曲目和新P1-P3）
-      final newPhiIds = newPhi.map((r) => r.id).toSet();
-      final newBest =
-          allB30
-              .where(
-                (r) => !newPhiIds.contains(r.id) && r.id != currentRecord.id,
-              )
-              .toList()
+    // 重新计算B27（排除当前曲目和新P1-P3）
+    final newPhiIds = newPhi.map((r) => r.id).toSet();
+    // 将本曲在B30里的旧条目替换为100%准度的假设记录
+    final newBest =
+        allB30
+            .map((r)=>r.id==currentRecord.id?maxRecord:r)
+            .toList()
             ..sort((a, b) => b.rks.compareTo(a.rks));
-      final newBest27 = newBest.take(27).toList();
+    final newBest27 = newBest.take(27).toList();
 
-      // 计算新的个人RKS
-      final newPhiSum = newPhi.fold<double>(0.0, (sum, r) => sum + r.rks);
-      final newBestAvg = newBest27.isEmpty
-          ? 0.0
-          : newBest27.fold<double>(0.0, (sum, r) => sum + r.rks) /
-                newBest27.length;
-      final newPersonalRks = (newPhiSum + newBestAvg * 27) / 30;
+    // 计算新的个人RKS
+    final newPhiSum = newPhi.fold<double>(0.0, (sum, r) => sum + r.rks);
+    final newBestAvg = newBest27.isEmpty
+        ? 0.0
+        : newBest27.fold<double>(0.0, (sum, r) => sum + r.rks);
+    final newPersonalRks = (newPhiSum + newBestAvg) / 30;
 
-      // 如果打到100%能使个人RKS提升0.01或更多
-      if (newPersonalRks >= targetPersonalRks) {
-        accB = 100.0;
-      }
+    // 如果打到100%能使个人RKS提升0.01或更多
+    if (newPersonalRks >= targetPersonalRks) {
+      accB = 100.0;
     }
 
-    // 返回较小的ACC要求（即更容易达到的方案）
-    if (accA != null && accB != null) {
-      return accA < accB ? accA : accB;
-    }
-    return accA ?? accB;
+    return accB;
   }
 }
