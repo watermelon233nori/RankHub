@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rank_hub/models/phigros/song.dart';
+import 'package:rank_hub/modules/phigros/pages/song_detail_page.dart';
 
 /// Phigros 曲目列表项
 class PhigrosSongListItem extends StatelessWidget {
@@ -17,7 +18,12 @@ class PhigrosSongListItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: InkWell(
         onTap: () {
-          // TODO: 跳转到曲目详情页
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PhigrosSongDetailPage(song: song),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(

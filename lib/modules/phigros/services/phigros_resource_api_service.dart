@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:rank_hub/models/phigros/song.dart';
 import 'package:rank_hub/models/phigros/collection.dart';
 import 'package:rank_hub/models/phigros/avatar.dart';
+import 'package:rank_hub/models/phigros/chart.dart';
 
 /// Phigros 资源 API 服务
 class PhigrosResourceApiService {
@@ -218,5 +221,55 @@ class PhigrosResourceApiService {
       print('❌ 获取头像列表失败: $e');
       rethrow;
     }
+  }
+
+  /// 获取谱面数据
+  /// [songId] 曲目ID（格式：曲名.曲师）
+  /// [difficulty] 难度（EZ/HD/IN/AT）
+  Future<PhigrosChart> fetchChart(String songId, String difficulty) async {
+    try {
+      // URL 格式: /chart/{songId}.0/{difficulty}.json
+      final url = '/chart/$songId.0/$difficulty.json';
+
+      print('📥 开始获取谱面: $songId - $difficulty');
+      print('   URL: $url');
+
+      final response = await _dio.get(url);
+
+      if (response.statusCode == 200 && response.data != null) {
+        final chart = PhigrosChart.fromJson(
+          jsonDecode(response.data) as Map<String, dynamic>,
+        );
+        print('✅ 获取谱面完成: ${chart.totalNotes} 个音符');
+        return chart;
+      }
+
+      throw Exception('获取谱面失败: ${response.statusCode}');
+    } catch (e) {
+      print('❌ 获取谱面失败: $songId - $difficulty, 错误: $e');
+      rethrow;
+    }
+  }
+
+  /// 批量获取谱面数据
+  /// [songId] 曲目ID
+  /// [difficulties] 难度列表，默认获取所有难度
+  Future<Map<String, PhigrosChart>> fetchCharts(
+    String songId, {
+    List<String>? difficulties,
+  }) async {
+    final diffList = difficulties ?? ['EZ', 'HD', 'IN', 'AT'];
+    final charts = <String, PhigrosChart>{};
+
+    for (final diff in diffList) {
+      try {
+        final chart = await fetchChart(songId, diff);
+        charts[diff] = chart;
+      } catch (e) {
+        print('⚠️ 跳过难度 $diff: $e');
+      }
+    }
+
+    return charts;
   }
 }
