@@ -116,6 +116,15 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_RELEASE_KEY }}" | base64 --decode > android/app/release.keystore
 
+      - name: Create key.properties
+        run: |
+          cat <<EOF > android/key.properties
+          storePassword=${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+          keyAlias=key
+          storeFile=release.keystore
+          EOF
+
       - name: Build Android APK
         run: flutter build apk --split-per-abi --release
         env:
