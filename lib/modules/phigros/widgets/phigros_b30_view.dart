@@ -247,7 +247,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      stats.totalRks.toStringAsFixed(2),
+                      stats.totalRks.toStringAsFixed(4),
                       style: textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -421,16 +421,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
 
   /// 从记录列表计算统计数据
   _PlayerStats _calculateStats(List<PhigrosGameRecord> records) {
-    // 计算B19（Best 19，取RKS最高的19首）
-    final sortedRecords = List<PhigrosGameRecord>.from(records)
-      ..sort((a, b) => b.rks.compareTo(a.rks));
-
-    final b19Records = sortedRecords.take(19).toList();
-    final b19Sum = b19Records.fold<double>(
-      0.0,
-      (sum, record) => sum + record.rks,
-    );
-    final b19Average = b19Records.isNotEmpty ? b19Sum / b19Records.length : 0.0;
+    final controller = Get.find<PhigrosController>();
 
     // 统计各种数据
     int phiCount = 0;
@@ -461,7 +452,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
     }
 
     return _PlayerStats(
-      totalRks: b19Average,
+      totalRks: controller.calculatePersonalRks(),
       phiCount: phiCount,
       fcCount: fcCount,
       ezCount: ezCount,
