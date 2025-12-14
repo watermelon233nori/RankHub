@@ -19,6 +19,7 @@ class DxRatingTable extends StatelessWidget {
     final stages = _generateRatingStages();
 
     // 计算当前达成率对应的 Rating
+    // ignore: unused_local_variable
     int? currentRating;
     if (currentAchievement != null) {
       // 找到适用的系数
