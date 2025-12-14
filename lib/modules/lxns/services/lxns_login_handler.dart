@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart' hide Response;
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
 import 'package:rank_hub/utils/pkce_helper.dart';
@@ -21,6 +24,10 @@ class LxnsLoginHandler extends PlatformLoginHandler {
   static const String redirectUri = 'https://rankhub.kamitsubaki.city/callback';
   static const String scope =
       'read_user_profile read_player read_user_token write_player';
+
+  // 手动输入授权码配置（使用 urn:ietf:wg:oauth:2.0:oob）
+  static const String manualClientId = '2f8e94e4-1faf-4213-bfbc-0aaf55e71a86';
+  static const String manualRedirectUri = 'urn:ietf:wg:oauth:2.0:oob';
 
   final Dio _dio = Dio();
 
@@ -129,6 +136,86 @@ class LxnsLoginHandler extends PlatformLoginHandler {
       print('❌ OAuth2 登录失败: $e');
       return null;
     }
+  }
+
+  /// 执行手动授权码登录流程（使用 InAppWebView）
+  Future<PlatformLoginResult?> performManualOAuth2Login() async {
+    try {
+      // 生成 PKCE 参数
+      final pkcePair = PkceHelper.generatePkcePair();
+      final codeVerifier = pkcePair['code_verifier']!;
+      final codeChallenge = pkcePair['code_challenge']!;
+
+      // 生成随机 state 用于防止 CSRF 攻击
+      final state = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // 构建授权 URL（使用手动配置）
+      final authUrl =
+          '$baseUrl/oauth/authorize?'
+          'response_type=code&'
+          'client_id=$manualClientId&'
+          'redirect_uri=${Uri.encodeComponent(manualRedirectUri)}&'
+          'scope=${Uri.encodeComponent(scope)}&'
+          'code_challenge=$codeChallenge&'
+          'code_challenge_method=S256&'
+          'state=$state';
+
+      print('🔐 开始手动授权流程...');
+      print('📤 授权 URL: $authUrl');
+      print('📤 Redirect URI: $manualRedirectUri');
+
+      // 此方法返回用户输入的授权码
+      final code = await _showManualAuthPage(authUrl);
+
+      if (code == null || code.isEmpty) {
+        print('❌ 未收到授权码');
+        return null;
+      }
+
+      print('✅ 授权码获取成功: $code');
+
+      // 使用授权码交换 token（使用手动配置）
+      final tokenData = await exchangeCodeForTokenManual(code, codeVerifier);
+      if (tokenData == null) {
+        print('❌ 交换 token 失败');
+        return null;
+      }
+
+      // 获取账号信息
+      final accountInfo = await fetchAccountInfo(tokenData);
+      if (accountInfo == null) {
+        print('❌ 获取账号信息失败');
+        return null;
+      }
+
+      print('✅ 登录成功: ${accountInfo.displayName}');
+
+      return PlatformLoginResult(
+        externalId: accountInfo.externalId,
+        credentialData: tokenData,
+        displayName: accountInfo.displayName,
+        avatarUrl: accountInfo.avatarUrl,
+        metadata: accountInfo.metadata,
+      );
+    } catch (e) {
+      print('❌ 手动授权登录失败: $e');
+      return null;
+    }
+  }
+
+  /// 显示手动授权页面（使用 InAppWebView）
+  Future<String?> _showManualAuthPage(String authUrl) async {
+    // 导航到手动授权页面
+    final BuildContext? context = Get.context;
+    if (context == null) return null;
+
+    return await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _ManualAuthPage(authUrl: authUrl),
+        fullscreenDialog: true,
+      ),
+    );
   }
 
   @override
@@ -342,6 +429,65 @@ class LxnsLoginHandler extends PlatformLoginHandler {
     }
     return null;
   }
+
+  /// 使用授权码交换访问令牌（手动输入模式）
+  Future<Map<String, dynamic>?> exchangeCodeForTokenManual(
+    String code,
+    String codeVerifier,
+  ) async {
+    print('🔄 开始交换授权码（手动模式）...');
+    print('📤 请求 URL: $baseUrl/api/v0/oauth/token');
+    print('📤 授权码: $code');
+
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v0/oauth/token',
+        data: {
+          'client_id': manualClientId,
+          'grant_type': 'authorization_code',
+          'code': code,
+          'redirect_uri': manualRedirectUri,
+          'code_verifier': codeVerifier,
+        },
+        options: Options(contentType: Headers.jsonContentType),
+      );
+
+      print('📥 响应状态码: ${response.statusCode}');
+      print('📥 响应数据: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+          response.data,
+          dataParser: (data) => data as Map<String, dynamic>,
+        );
+
+        if (!apiResponse.success) {
+          print('❌ API 返回失败: ${apiResponse.message}');
+          return null;
+        }
+
+        final data = apiResponse.data!;
+        final tokenData = {
+          'access_token': data['access_token'],
+          'refresh_token': data['refresh_token'],
+          'token_expiry': DateTime.now()
+              .add(Duration(seconds: data['expires_in'] as int))
+              .toIso8601String(),
+          'scope': data['scope'],
+        };
+
+        print('✅ 交换 token 成功');
+        return tokenData;
+      }
+    } on DioException catch (dioException) {
+      print('❌ 交换 token 失败 (DioException):');
+      print('   错误类型: ${dioException.type}');
+      print('   响应数据: ${dioException.response?.data}');
+    } catch (e) {
+      print('❌ 交换 token 失败: $e');
+    }
+    return null;
+  }
 }
 
 /// 落雪咖啡屋 OAuth2 登录页面
@@ -367,6 +513,34 @@ class _LxnsOAuth2LoginPageState extends State<_LxnsOAuth2LoginPage> {
     try {
       final handler = LxnsLoginHandler();
       final result = await handler.performOAuth2Login();
+
+      if (mounted) {
+        if (result != null) {
+          Navigator.pop(context, result);
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('登录失败，请重试')));
+          setState(() => _isLoading = false);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('登录失败: $e')));
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  /// 开始手动授权码登录流程
+  Future<void> _startManualLogin() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final handler = LxnsLoginHandler();
+      final result = await handler.performManualOAuth2Login();
 
       if (mounted) {
         if (result != null) {
@@ -488,14 +662,17 @@ class _LxnsOAuth2LoginPageState extends State<_LxnsOAuth2LoginPage> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            '点击下方按钮将打开浏览器进行授权，授权成功后会自动返回应用完成登录。',
+                            '选择一种登录方式：',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '• 需要登录您的落雪咖啡屋账号\n'
-                            '• 授权应用访问您的游戏数据\n'
-                            '• 授权成功后自动跳转回应用',
+                            '方式1：自动跳转（推荐）\n'
+                            '• 打开浏览器进行授权\n'
+                            '• 授权成功后自动返回应用\n\n'
+                            '方式2：手动输入授权码\n'
+                            '• 适用于自动跳转失败的情况\n'
+                            '• 需要手动复制授权码',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: colorScheme.onSurfaceVariant),
                           ),
@@ -523,20 +700,311 @@ class _LxnsOAuth2LoginPageState extends State<_LxnsOAuth2LoginPage> {
             ),
             child: SafeArea(
               top: false,
-              child: FilledButton.icon(
-                onPressed: _isLoading ? null : _startOAuth2Login,
-                icon: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.login),
-                label: Text(_isLoading ? '登录中...' : '使用 OAuth2 登录'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  minimumSize: const Size(double.infinity, 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 自动跳转登录按钮
+                  FilledButton.icon(
+                    onPressed: _isLoading ? null : _startOAuth2Login,
+                    icon: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.login),
+                    label: Text(_isLoading ? '登录中...' : '自动跳转登录'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size(double.infinity, 0),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // 手动输入授权码按钮
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _startManualLogin,
+                    icon: const Icon(Icons.edit),
+                    label: const Text('手动输入授权码'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size(double.infinity, 0),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 手动授权页面（使用 ChromeSafariBrowser）
+class _ManualAuthPage extends StatefulWidget {
+  final String authUrl;
+
+  const _ManualAuthPage({required this.authUrl});
+
+  @override
+  State<_ManualAuthPage> createState() => _ManualAuthPageState();
+}
+
+class _ManualAuthPageState extends State<_ManualAuthPage> {
+  final TextEditingController _codeController = TextEditingController();
+  final ChromeSafariBrowser _browser = ChromeSafariBrowser();
+  bool _browserOpened = false;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _browser.close();
+    super.dispose();
+  }
+
+  Future<void> _openBrowser() async {
+    if (_browserOpened) return;
+
+    setState(() => _browserOpened = true);
+
+    try {
+      await _browser.open(
+        url: WebUri(widget.authUrl),
+        settings: ChromeSafariBrowserSettings(
+          shareState: CustomTabsShareState.SHARE_STATE_OFF,
+          barCollapsingEnabled: true,
+        ),
+      );
+    } catch (e) {
+      print('打开浏览器失败: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('打开浏览器失败: $e')));
+      }
+      setState(() => _browserOpened = false);
+    }
+  }
+
+  void _submitCode() {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入授权码')));
+      return;
+    }
+    Navigator.pop(context, code);
+  }
+
+  Widget _buildStep(
+    BuildContext context,
+    String number,
+    String title,
+    String description,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: TextStyle(
+                color: colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                description,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('授权登录')),
+      body: Column(
+        children: [
+          // 说明区域
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 步骤说明
+                  Card(
+                    elevation: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '操作步骤',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildStep(
+                            context,
+                            '1',
+                            '点击下方按钮打开浏览器',
+                            '在浏览器中登录您的落雪咖啡屋账号',
+                          ),
+                          const SizedBox(height: 12),
+                          _buildStep(context, '2', '完成授权', '在浏览器页面中确认授权'),
+                          const SizedBox(height: 12),
+                          _buildStep(
+                            context,
+                            '3',
+                            '复制授权码',
+                            '授权成功后，页面会显示授权码，请复制',
+                          ),
+                          const SizedBox(height: 12),
+                          _buildStep(context, '4', '粘贴并提交', '返回此页面，粘贴授权码并点击确认'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // 打开浏览器按钮
+                  FilledButton.icon(
+                    onPressed: _browserOpened ? null : _openBrowser,
+                    icon: Icon(
+                      _browserOpened ? Icons.check : Icons.open_in_browser,
+                    ),
+                    label: Text(_browserOpened ? '浏览器已打开' : '打开浏览器授权'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 授权码输入区域
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    elevation: 0,
+                    color: colorScheme.primaryContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 20,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '完成授权后，页面会显示授权码，请复制并粘贴到下方',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: colorScheme.onPrimaryContainer,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _codeController,
+                    decoration: InputDecoration(
+                      labelText: '授权码',
+                      hintText: '请输入或粘贴授权码',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.vpn_key),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.paste),
+                        onPressed: () async {
+                          final data = await Clipboard.getData(
+                            Clipboard.kTextPlain,
+                          );
+                          if (data?.text != null) {
+                            _codeController.text = data!.text!;
+                          }
+                        },
+                        tooltip: '粘贴',
+                      ),
+                    ),
+                    maxLines: 3,
+                    minLines: 1,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _submitCode(),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: _submitCode,
+                    icon: const Icon(Icons.check),
+                    label: const Text('确认登录'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
