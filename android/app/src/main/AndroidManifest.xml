@@ -16,7 +16,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     
     <application
-        android:label="rank_hub"
+        android:label="RankHub"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

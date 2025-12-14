@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
+import 'package:rank_hub/modules/divingfish/services/divingfish_login_handler.dart';
 import 'package:rank_hub/modules/musedash/services/musedash_login_handler.dart';
 import 'package:rank_hub/modules/phigros/services/phigros_login_handler.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
@@ -25,6 +26,7 @@ class PlatformLoginManager extends GetxService {
     registerHandler(LxnsLoginHandler());
     registerHandler(MuseDashLoginHandler());
     registerHandler(PhigrosLoginHandler());
+    registerHandler(DivingFishLoginHandler());
     // 未来可以继续添加其他平台
   }
 
