@@ -266,10 +266,8 @@ class PhigrosController extends GetxController {
         .take(3)
         .toList();
 
-    // 移除已经在Phi列表中的成绩，从剩余成绩中取前27个
-    final phiIds = phiRecords.map((r) => r.id).toSet();
+    // 从最好的成绩中取前27个
     final bestRecords = sortedRecords
-        .where((record) => !phiIds.contains(record.id))
         .take(27)
         .toList();
 
@@ -286,11 +284,11 @@ class PhigrosController extends GetxController {
     if (phi.isEmpty && best.isEmpty) return 0.0;
 
     final phiSum = phi.fold<double>(0.0, (sum, r) => sum + r.rks);
-    final bestAvg = best.isEmpty
+    final bestSum = best.isEmpty
         ? 0.0
-        : best.fold<double>(0.0, (sum, r) => sum + r.rks) / best.length;
+        : best.fold<double>(0.0, (sum, r) => sum + r.rks);
 
-    return (phiSum + bestAvg * 27) / 30;
+    return (phiSum + bestSum) / 30;
   }
 
   /// 计算要使个人RKS提高0.01所需的ACC
