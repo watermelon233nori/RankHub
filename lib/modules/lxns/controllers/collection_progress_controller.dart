@@ -308,12 +308,12 @@ class CollectionProgressController extends GetxController {
     }
 
     // 检查 FC 要求
-    if (req.fc != null && (score.fc?.index ?? -1) < req.fc!.index) {
+    if (req.fc != null && (score.fc?.index ?? -1) > req.fc!.index) {
       return false;
     }
 
     // 检查 FS 要求
-    if (req.fs != null && (score.fs?.index ?? -1) < req.fs!.index) {
+    if (req.fs != null && (score.fs?.index ?? -1) > req.fs!.index) {
       return false;
     }
 
