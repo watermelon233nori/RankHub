@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:rank_hub/modules/phigros/phigros_controller.dart';
 import 'package:rank_hub/modules/phigros/widgets/phigros_record_list_item.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
-import 'package:rank_hub/models/phigros/player_summary.dart';
+import 'package:rank_hub/models/phigros/game_record.dart';
 
 /// Phigros B30成绩视图
 class PhigrosB30View extends StatefulWidget {
@@ -77,8 +77,6 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
         );
       }
 
-      final summary = controller.playerSummary.value as PhigrosPlayerSummary?;
-
       return RefreshIndicator(
         onRefresh: () async {
           final accountController = Get.find<AccountController>();
@@ -99,7 +97,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
           itemBuilder: (context, index) {
             // Player info card
             if (index == 0) {
-              return _buildPlayerInfoCard(context, summary);
+              return _buildPlayerInfoCard(context, controller.records);
             }
 
             // P1-P3 section
@@ -211,14 +209,21 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
 
   Widget _buildPlayerInfoCard(
     BuildContext context,
-    PhigrosPlayerSummary? summary,
+    List<PhigrosGameRecord> records,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final controller = Get.find<PhigrosController>();
 
-    if (summary == null) {
+    if (records.isEmpty) {
       return const SizedBox.shrink();
     }
+
+    // 计算统计数据
+    final stats = _calculateStats(records);
+
+    // 从 controller 获取进度数据（用于显示挑战模式）
+    final summary = controller.playerSummary.value;
 
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -242,14 +247,15 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      summary.totalRks.toStringAsFixed(2),
+                      stats.totalRks.toStringAsFixed(2),
                       style: textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                if (summary.challengeModeRank > 0)
+                // 挑战模式信息
+                if (summary != null && summary.challengeModeRank > 0)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -283,7 +289,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                 Expanded(
                   child: _buildDifficultyStats(
                     'EZ',
-                    summary.ezCount,
+                    stats.ezCount,
                     colorScheme,
                   ),
                 ),
@@ -291,7 +297,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                 Expanded(
                   child: _buildDifficultyStats(
                     'HD',
-                    summary.hdCount,
+                    stats.hdCount,
                     colorScheme,
                   ),
                 ),
@@ -299,7 +305,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                 Expanded(
                   child: _buildDifficultyStats(
                     'IN',
-                    summary.inCount,
+                    stats.inCount,
                     colorScheme,
                   ),
                 ),
@@ -307,7 +313,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                 Expanded(
                   child: _buildDifficultyStats(
                     'AT',
-                    summary.atCount,
+                    stats.atCount,
                     colorScheme,
                   ),
                 ),
@@ -320,7 +326,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                 Expanded(
                   child: _buildStatChip(
                     'FC',
-                    summary.fcCount,
+                    stats.fcCount,
                     Colors.blue,
                     colorScheme,
                   ),
@@ -329,7 +335,7 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                 Expanded(
                   child: _buildStatChip(
                     'Phi',
-                    summary.phiCount,
+                    stats.phiCount,
                     Colors.amber,
                     colorScheme,
                   ),
@@ -413,6 +419,58 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
     );
   }
 
+  /// 从记录列表计算统计数据
+  _PlayerStats _calculateStats(List<PhigrosGameRecord> records) {
+    // 计算B19（Best 19，取RKS最高的19首）
+    final sortedRecords = List<PhigrosGameRecord>.from(records)
+      ..sort((a, b) => b.rks.compareTo(a.rks));
+
+    final b19Records = sortedRecords.take(19).toList();
+    final b19Sum = b19Records.fold<double>(
+      0.0,
+      (sum, record) => sum + record.rks,
+    );
+    final b19Average = b19Records.isNotEmpty ? b19Sum / b19Records.length : 0.0;
+
+    // 统计各种数据
+    int phiCount = 0;
+    int fcCount = 0;
+    int ezCount = 0;
+    int hdCount = 0;
+    int inCount = 0;
+    int atCount = 0;
+
+    for (final record in records) {
+      if (record.score >= 1000000) phiCount++;
+      if (record.fc) fcCount++;
+
+      switch (record.level) {
+        case 'EZ':
+          ezCount++;
+          break;
+        case 'HD':
+          hdCount++;
+          break;
+        case 'IN':
+          inCount++;
+          break;
+        case 'AT':
+          atCount++;
+          break;
+      }
+    }
+
+    return _PlayerStats(
+      totalRks: b19Average,
+      phiCount: phiCount,
+      fcCount: fcCount,
+      ezCount: ezCount,
+      hdCount: hdCount,
+      inCount: inCount,
+      atCount: atCount,
+    );
+  }
+
   Color _getChallengeColor(int level) {
     switch (level) {
       case 1:
@@ -429,4 +487,25 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
         return Colors.grey;
     }
   }
+}
+
+/// 玩家统计数据辅助类
+class _PlayerStats {
+  final double totalRks;
+  final int phiCount;
+  final int fcCount;
+  final int ezCount;
+  final int hdCount;
+  final int inCount;
+  final int atCount;
+
+  _PlayerStats({
+    required this.totalRks,
+    required this.phiCount,
+    required this.fcCount,
+    required this.ezCount,
+    required this.hdCount,
+    required this.inCount,
+    required this.atCount,
+  });
 }

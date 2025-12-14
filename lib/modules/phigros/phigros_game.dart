@@ -80,11 +80,11 @@ class PhigrosGame extends BaseGame {
         if (snapshot.hasData && snapshot.data != null) {
           final data = snapshot.data as Map<String, dynamic>;
           final records = data['records'] as List;
-          final progress = data['progress'];
+          final summary = data['summary'];
 
           return PhigrosPlayerInfoCard(
             records: records.cast(),
-            progress: progress,
+            summary: summary,
           );
         }
 
@@ -98,11 +98,11 @@ class PhigrosGame extends BaseGame {
       final records = await PhigrosIsarService.instance.getGameRecords(
         account.id.toString(),
       );
-      final progress = await PhigrosIsarService.instance.getGameProgress(
+      final summary = await PhigrosIsarService.instance.getPlayerSummary(
         account.id.toString(),
       );
 
-      return {'records': records, 'progress': progress};
+      return {'records': records, 'summary': summary};
     } catch (e) {
       print('❌ 加载玩家信息失败: $e');
       rethrow;

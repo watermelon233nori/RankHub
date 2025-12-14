@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:rank_hub/models/phigros/game_record.dart';
-import 'package:rank_hub/models/phigros/game_progress.dart';
+import 'package:rank_hub/models/phigros/player_summary.dart';
 
 /// Phigros 玩家信息卡片
 class PhigrosPlayerInfoCard extends StatelessWidget {
   final List<PhigrosGameRecord> records;
-  final PhigrosGameProgress? progress;
+  final PhigrosPlayerSummary? summary;
 
-  const PhigrosPlayerInfoCard({
-    super.key,
-    required this.records,
-    this.progress,
-  });
+  const PhigrosPlayerInfoCard({super.key, required this.records, this.summary});
 
   @override
   Widget build(BuildContext context) {
@@ -76,12 +72,12 @@ class PhigrosPlayerInfoCard extends StatelessWidget {
             const Divider(),
             const SizedBox(height: 16),
             // 挑战模式信息
-            if (progress != null && progress!.challengeModeRank > 0) ...[
+            if (summary != null && summary!.challengeModeRank > 0) ...[
               Row(
                 children: [
                   Icon(
                     Icons.military_tech,
-                    color: _getChallengeColor(progress!.challengeRankLevel),
+                    color: _getChallengeColor(summary!.challengeRankLevel),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -98,18 +94,18 @@ class PhigrosPlayerInfoCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: _getChallengeColor(
-                        progress!.challengeRankLevel,
+                        summary!.challengeRankLevel,
                       ).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: _getChallengeColor(progress!.challengeRankLevel),
+                        color: _getChallengeColor(summary!.challengeRankLevel),
                       ),
                     ),
                     child: Text(
-                      progress!.challengeRankDescription,
+                      summary!.challengeRankDescription,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _getChallengeColor(progress!.challengeRankLevel),
+                        color: _getChallengeColor(summary!.challengeRankLevel),
                       ),
                     ),
                   ),
