@@ -10,6 +10,7 @@ import 'package:rank_hub/modules/lxns/widgets/player_info_card.dart';
 import 'package:rank_hub/models/maimai/player.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:rank_hub/services/credential_provider.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_api_response.dart';
 
 /// 舞萌DX 游戏
 class MaimaiDXGame extends BaseGame {
@@ -131,6 +132,18 @@ class MaimaiDXGame extends BaseGame {
         snackPosition: SnackPosition.BOTTOM,
       );
       return null;
+    } on LxnsApiException catch (e) {
+      if (e.isNotFound) {
+        print('玩家档案不存在(404): $e');
+        Get.snackbar(
+          '玩家档案不存在',
+          '请前往落雪咖啡屋官网同步一次数据来创建玩家档案',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 5),
+        );
+        return null;
+      }
+      rethrow;
     } catch (e) {
       rethrow;
     }

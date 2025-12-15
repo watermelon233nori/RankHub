@@ -8,6 +8,7 @@ import 'package:rank_hub/services/account_service.dart';
 import 'package:rank_hub/services/credential_provider.dart';
 import 'services/maimai_isar_service.dart';
 import 'services/maimai_api_service.dart';
+import 'services/lxns_api_response.dart';
 
 /// Maimai 数据加载状态
 enum DataLoadStatus {
@@ -396,6 +397,24 @@ class MaimaiLxnsController extends GetxController {
         '请在账号管理页面重新登录',
         snackPosition: SnackPosition.BOTTOM,
       );
+    } on LxnsApiException catch (e) {
+      if (e.isNotFound) {
+        print('❌ 玩家档案不存在(404): $e');
+        _loadStatus.value = DataLoadStatus.error;
+        _errorMessage.value = '玩家档案不存在，请前往落雪咖啡屋官网同步一次数据来创建玩家档案';
+
+        // 显示用户友好提示
+        Get.snackbar(
+          '玩家档案不存在',
+          '请前往落雪咖啡屋官网同步一次数据来创建玩家档案',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 5),
+        );
+      } else {
+        print('❌ API 错误: $e');
+        _loadStatus.value = DataLoadStatus.error;
+        _errorMessage.value = e.message;
+      }
     } catch (e) {
       print('❌ API 加载成绩失败: $e');
       print('❌ 错误堆栈: ${StackTrace.current}');

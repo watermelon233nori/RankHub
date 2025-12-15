@@ -45,6 +45,8 @@ dependencies:
       url: https://github.com/qianmo2233/flutter_live_activities.git
   mobile_scanner: ^7.1.3
   techno_kitchen_dart: ^1.0.1
+  qr_flutter: ^4.1.0
+  device_info_plus: ^11.2.0
 
 dev_dependencies:
   flutter_test:

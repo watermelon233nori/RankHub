@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/platform.dart';
+import 'package:rank_hub/models/platform_feature_item.dart';
 import 'package:rank_hub/models/game.dart';
 import 'package:rank_hub/models/sync_task.dart';
 import 'package:rank_hub/services/credential_provider.dart';
@@ -163,4 +166,46 @@ class PhigrosPlatform extends BasePlatform {
 
   @override
   bool get supportsIncrementalSync => true;
+
+  @override
+  List<PlatformFeatureItem> getCustomFeatures(
+    BuildContext context,
+    Account account,
+  ) {
+    return [
+      PlatformFeatureItem(
+        title: '复制 Session Token',
+        description: '将 Session Token 复制到剪切板',
+        icon: Icons.content_copy,
+        onTap: () async {
+          final sessionToken = account.apiKey;
+          if (sessionToken == null || sessionToken.isEmpty) {
+            Get.snackbar(
+              '错误',
+              '未找到 Session Token，请先登录',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red.withValues(alpha: 0.9),
+              colorText: Colors.white,
+              margin: const EdgeInsets.all(16),
+              borderRadius: 8,
+              duration: const Duration(seconds: 2),
+            );
+            return;
+          }
+
+          await Clipboard.setData(ClipboardData(text: sessionToken));
+          Get.snackbar(
+            '成功',
+            'Session Token 已复制到剪切板',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green.withValues(alpha: 0.9),
+            colorText: Colors.white,
+            margin: const EdgeInsets.all(16),
+            borderRadius: 8,
+            duration: const Duration(seconds: 2),
+          );
+        },
+      ),
+    ];
+  }
 }
