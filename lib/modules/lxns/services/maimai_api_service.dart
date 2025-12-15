@@ -273,29 +273,40 @@ class MaimaiApiService {
     required String accessToken,
     int version = defaultVersion,
   }) async {
-    final client = await dio;
-    final response = await client.get(
-      '/api/v0/user/maimai/player/scores',
-      queryParameters: {'version': version},
-      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
-    );
-
-    final apiResponse = LxnsApiResponse<List>.fromJson(
-      response.data,
-      dataParser: (data) => data as List,
-    );
-
-    if (!apiResponse.success) {
-      throw LxnsApiException(
-        message: apiResponse.message ?? '获取玩家成绩失败',
-        code: apiResponse.code,
+    try {
+      final client = await dio;
+      final response = await client.get(
+        '/api/v0/user/maimai/player/scores',
+        queryParameters: {'version': version},
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
-    }
 
-    final scores = apiResponse.data!;
-    return scores
-        .map((e) => Score.fromJson(e as Map<String, dynamic>))
-        .toList();
+      final apiResponse = LxnsApiResponse<List>.fromJson(
+        response.data,
+        dataParser: (data) => data as List,
+      );
+
+      if (!apiResponse.success) {
+        throw LxnsApiException(
+          message: apiResponse.message ?? '获取玩家成绩失败',
+          code: apiResponse.code,
+        );
+      }
+
+      final scores = apiResponse.data!;
+      return scores
+          .map((e) => Score.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw LxnsApiException(
+          message: '玩家档案不存在,请前往落雪咖啡屋官网同步一次数据来创建玩家档案',
+          code: 404,
+          originalError: e,
+        );
+      }
+      rethrow;
+    }
   }
 
   /// 获取玩家 Best 50 成绩
@@ -309,51 +320,73 @@ class MaimaiApiService {
     required String accessToken,
     int version = defaultVersion,
   }) async {
-    final client = await dio;
-    final response = await client.get(
-      '/api/v0/user/maimai/player/bests',
-      queryParameters: {'version': version},
-      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
-    );
-
-    final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      dataParser: (data) => data as Map<String, dynamic>,
-    );
-
-    if (!apiResponse.success) {
-      throw LxnsApiException(
-        message: apiResponse.message ?? '获取 Best 50 失败',
-        code: apiResponse.code,
+    try {
+      final client = await dio;
+      final response = await client.get(
+        '/api/v0/user/maimai/player/bests',
+        queryParameters: {'version': version},
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
-    }
 
-    return apiResponse.data!;
+      final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        dataParser: (data) => data as Map<String, dynamic>,
+      );
+
+      if (!apiResponse.success) {
+        throw LxnsApiException(
+          message: apiResponse.message ?? '获取 Best 50 失败',
+          code: apiResponse.code,
+        );
+      }
+
+      return apiResponse.data!;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw LxnsApiException(
+          message: '玩家档案不存在,请前往落雪咖啡屋官网同步一次数据来创建玩家档案',
+          code: 404,
+          originalError: e,
+        );
+      }
+      rethrow;
+    }
   }
 
   /// 获取玩家信息
   ///
   /// [accessToken] 访问令牌
   Future<Player> getPlayerInfo({required String accessToken}) async {
-    final client = await dio;
-    final response = await client.get(
-      '/api/v0/user/maimai/player',
-      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
-    );
-
-    final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      dataParser: (data) => data as Map<String, dynamic>,
-    );
-
-    if (!apiResponse.success) {
-      throw LxnsApiException(
-        message: apiResponse.message ?? '获取玩家信息失败',
-        code: apiResponse.code,
+    try {
+      final client = await dio;
+      final response = await client.get(
+        '/api/v0/user/maimai/player',
+        options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
       );
-    }
 
-    return Player.fromJson(apiResponse.data!);
+      final apiResponse = LxnsApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        dataParser: (data) => data as Map<String, dynamic>,
+      );
+
+      if (!apiResponse.success) {
+        throw LxnsApiException(
+          message: apiResponse.message ?? '获取玩家信息失败',
+          code: apiResponse.code,
+        );
+      }
+
+      return Player.fromJson(apiResponse.data!);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        throw LxnsApiException(
+          message: '玩家档案不存在,请前往落雪咖啡屋官网同步一次数据来创建玩家档案',
+          code: 404,
+          originalError: e,
+        );
+      }
+      rethrow;
+    }
   }
 
   // ==================== 资源 URL 生成 ====================

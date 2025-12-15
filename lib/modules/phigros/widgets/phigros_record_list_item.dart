@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:rank_hub/models/phigros/game_record.dart';
 import 'package:rank_hub/modules/phigros/phigros_controller.dart';
+import 'package:rank_hub/modules/phigros/pages/song_detail_page.dart';
 
 /// Phigros 成绩列表项
 class PhigrosRecordListItem extends StatelessWidget {
@@ -27,7 +28,25 @@ class PhigrosRecordListItem extends StatelessWidget {
       color: colorScheme.surface, // 使用深色主题的surface颜色
       child: InkWell(
         onTap: () {
-          // TODO: 跳转到成绩详情页
+          // 从 controller 查找对应的 song
+          final controller = Get.find<PhigrosController>();
+          final song = controller.songs.firstWhereOrNull(
+            (s) => s.songId == record.songId,
+          );
+
+          if (song != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PhigrosSongDetailPage(song: song),
+              ),
+            );
+          } else {
+            // 如果找不到歌曲，显示提示
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('未找到对应的歌曲信息')));
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Stack(

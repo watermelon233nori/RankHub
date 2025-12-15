@@ -95,6 +95,9 @@ class LxnsApiException implements Exception {
     this.originalError,
   });
 
+  /// 是否为404错误(玩家档案不存在)
+  bool get isNotFound => code == 404;
+
   @override
   String toString() {
     if (code != null) {

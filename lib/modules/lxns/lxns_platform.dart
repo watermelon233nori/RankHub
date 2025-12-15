@@ -12,6 +12,7 @@ import 'package:rank_hub/modules/lxns/services/lxns_login_handler.dart';
 import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_api_service.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_export_service.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_api_response.dart';
 import 'package:rank_hub/modules/lxns/maimai_dx_game.dart';
 import 'package:rank_hub/modules/lxns/pages/net_sync_page.dart';
 
@@ -125,6 +126,11 @@ class LxnsPlatform extends BasePlatform {
             );
           } on CredentialExpiredException catch (e) {
             throw Exception('凭据已失效: ${e.message}，请在账号管理页面重新登录');
+          } on LxnsApiException catch (e) {
+            if (e.isNotFound) {
+              throw Exception('玩家档案不存在，请前往落雪咖啡屋官网同步一次数据来创建玩家档案');
+            }
+            rethrow;
           }
         },
       ),

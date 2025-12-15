@@ -3,6 +3,7 @@ import 'package:rank_hub/models/maimai/score.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_api_service.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_api_response.dart';
 import 'package:rank_hub/modules/lxns/widgets/compact_score_card.dart';
 
 /// Best 50 成绩 Tab
@@ -172,6 +173,15 @@ class _Best50TabState extends State<Best50Tab> {
             .toList();
         _dxTotal = data['dx_total'] as int;
         _standardTotal = data['standard_total'] as int;
+        _isLoading = false;
+      });
+    } on LxnsApiException catch (e) {
+      setState(() {
+        if (e.isNotFound) {
+          _errorMessage = '玩家档案不存在，请前往落雪咖啡屋官网同步一次数据来创建玩家档案';
+        } else {
+          _errorMessage = e.toString();
+        }
         _isLoading = false;
       });
     } catch (e) {
