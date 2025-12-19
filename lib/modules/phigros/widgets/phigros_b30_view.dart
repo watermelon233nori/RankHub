@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/modules/phigros/phigros_controller.dart';
 import 'package:rank_hub/modules/phigros/widgets/phigros_record_list_item.dart';
+import 'package:rank_hub/modules/phigros/pages/phigros_b30_export_page.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:rank_hub/models/phigros/game_record.dart';
 
@@ -40,8 +41,9 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
 
       final b30Records = controller.getB30Records();
 
+      Widget mainContent;
       if (b30Records.isEmpty) {
-        return RefreshIndicator(
+        mainContent = RefreshIndicator(
           onRefresh: () async {
             final accountController = Get.find<AccountController>();
             if (accountController.currentAccount != null) {
@@ -75,134 +77,182 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
             ),
           ),
         );
+      } else {
+        mainContent = RefreshIndicator(
+          onRefresh: () async {
+            final accountController = Get.find<AccountController>();
+            if (accountController.currentAccount != null) {
+              await controller.loadRecords(
+                accountController.currentAccount!.id.toString(),
+                forceRefresh: true,
+              );
+            }
+          },
+          child: ListView.builder(
+            padding: const EdgeInsets.only(bottom: 200),
+            itemCount:
+                1 + // player info card
+                2 + // 2 section headers
+                (b30Records['phi']?.length ?? 0) +
+                (b30Records['best']?.length ?? 0),
+            itemBuilder: (context, index) {
+              // Player info card
+              if (index == 0) {
+                return _buildPlayerInfoCard(context, controller.records);
+              }
+
+              // P1-P3 section
+              if (index == 1) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.amber),
+                        ),
+                        child: const Text(
+                          'P1-P3',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Phi评级歌曲前三',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // P1, P2, P3
+              if (index >= 2 && index <= 4) {
+                final recordIndex = index - 2;
+                if (recordIndex < (b30Records['phi']?.length ?? 0)) {
+                  return PhigrosRecordListItem(
+                    record: b30Records['phi']![recordIndex],
+                  );
+                }
+                return const SizedBox.shrink();
+              }
+
+              // B1-B27 section header
+              final phiCount = b30Records['phi']?.length ?? 0;
+              if (index == 2 + phiCount) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.purple),
+                        ),
+                        child: const Text(
+                          'B1-B27',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.purple,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '剩余最佳成绩',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // B1-B27
+              if (index >= 3 + phiCount) {
+                final recordIndex = index - 3 - phiCount;
+                if (recordIndex < (b30Records['best']?.length ?? 0)) {
+                  return PhigrosRecordListItem(
+                    record: b30Records['best']![recordIndex],
+                  );
+                }
+              }
+
+              return const SizedBox.shrink();
+            },
+          ),
+        );
       }
 
-      return RefreshIndicator(
-        onRefresh: () async {
-          final accountController = Get.find<AccountController>();
-          if (accountController.currentAccount != null) {
-            await controller.loadRecords(
-              accountController.currentAccount!.id.toString(),
-              forceRefresh: true,
-            );
-          }
-        },
-        child: ListView.builder(
-          padding: const EdgeInsets.only(bottom: 100),
-          itemCount:
-              1 + // player info card
-              2 + // 2 section headers
-              (b30Records['phi']?.length ?? 0) +
-              (b30Records['best']?.length ?? 0),
-          itemBuilder: (context, index) {
-            // Player info card
-            if (index == 0) {
-              return _buildPlayerInfoCard(context, controller.records);
-            }
-
-            // P1-P3 section
-            if (index == 1) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber),
-                      ),
-                      child: const Text(
-                        'P1-P3',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber,
+      // 浮动按钮实现
+      final records = controller.records;
+      final stats = _calculateStats(records);
+      final summary = controller.playerSummary.value;
+      return Stack(
+        children: [
+          mainContent,
+          Positioned(
+            bottom: 120,
+            right: 24,
+            child: FloatingActionButton.extended(
+              onPressed: records.isEmpty
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PhigrosB30ExportPage(
+                            ezCount: stats.ezCount,
+                            ezC: stats.ezC,
+                            ezFC: stats.ezFC,
+                            ezPhi: stats.ezPhi,
+                            hdCount: stats.hdCount,
+                            hdC: stats.hdC,
+                            hdFC: stats.hdFC,
+                            hdPhi: stats.hdPhi,
+                            inCount: stats.inCount,
+                            inC: stats.inC,
+                            inFC: stats.inFC,
+                            inPhi: stats.inPhi,
+                            atCount: stats.atCount,
+                            atC: stats.atC,
+                            atFC: stats.atFC,
+                            atPhi: stats.atPhi,
+                            fcCount: stats.fcCount,
+                            phiCount: stats.phiCount,
+                            challengeMode: summary?.challengeModeRank,
+                            challengeRankLevel: summary?.challengeRankLevel,
+                            avatarName: summary?.avatarName ?? '',
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Phi评级歌曲前三',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // P1, P2, P3
-            if (index >= 2 && index <= 4) {
-              final recordIndex = index - 2;
-              if (recordIndex < (b30Records['phi']?.length ?? 0)) {
-                return PhigrosRecordListItem(
-                  record: b30Records['phi']![recordIndex],
-                );
-              }
-              return const SizedBox.shrink();
-            }
-
-            // B1-B27 section header
-            final phiCount = b30Records['phi']?.length ?? 0;
-            if (index == 2 + phiCount) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.purple),
-                      ),
-                      child: const Text(
-                        'B1-B27',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '剩余最佳成绩',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // B1-B27
-            if (index >= 3 + phiCount) {
-              final recordIndex = index - 3 - phiCount;
-              if (recordIndex < (b30Records['best']?.length ?? 0)) {
-                return PhigrosRecordListItem(
-                  record: b30Records['best']![recordIndex],
-                );
-              }
-            }
-
-            return const SizedBox.shrink();
-          },
-        ),
+                      );
+                    },
+              icon: const Icon(Icons.file_download),
+              label: const Text('导出B30图片'),
+            ),
+          ),
+        ],
       );
     });
   }
@@ -254,30 +304,40 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
                     ),
                   ],
                 ),
-                // 挑战模式信息
-                if (summary != null && summary.challengeModeRank > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getChallengeColor(
-                        summary.challengeRankLevel,
-                      ).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: _getChallengeColor(summary.challengeRankLevel),
+                Row(
+                  children: [
+                    // 挑战模式信息
+                    if (summary != null && summary.challengeModeRank > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getChallengeColor(
+                            summary.challengeRankLevel,
+                          ).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: _getChallengeColor(
+                              summary.challengeRankLevel,
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          summary.challengeDifficulty.toString(),
+                          style: textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: _getChallengeColor(
+                              summary.challengeRankLevel,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      summary.challengeDifficulty.toString(),
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: _getChallengeColor(summary.challengeRankLevel),
-                      ),
-                    ),
-                  ),
+                    ],
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -426,27 +486,43 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
     // 统计各种数据
     int phiCount = 0;
     int fcCount = 0;
-    int ezCount = 0;
-    int hdCount = 0;
-    int inCount = 0;
-    int atCount = 0;
+    int ezCount = 0, ezC = 0, ezFC = 0, ezPhi = 0;
+    int hdCount = 0, hdC = 0, hdFC = 0, hdPhi = 0;
+    int inCount = 0, inC = 0, inFC = 0, inPhi = 0;
+    int atCount = 0, atC = 0, atFC = 0, atPhi = 0;
 
     for (final record in records) {
-      if (record.score >= 1000000) phiCount++;
-      if (record.fc) fcCount++;
+      final isPhi = record.score >= 1000000;
+      final isFC = record.fc;
+      final isC = record.acc >= 70.0;
+
+      if (isPhi) phiCount++;
+      if (isFC) fcCount++;
 
       switch (record.level) {
         case 'EZ':
           ezCount++;
+          if (isC) ezC++;
+          if (isFC) ezFC++;
+          if (isPhi) ezPhi++;
           break;
         case 'HD':
           hdCount++;
+          if (isC) hdC++;
+          if (isFC) hdFC++;
+          if (isPhi) hdPhi++;
           break;
         case 'IN':
           inCount++;
+          if (isC) inC++;
+          if (isFC) inFC++;
+          if (isPhi) inPhi++;
           break;
         case 'AT':
           atCount++;
+          if (isC) atC++;
+          if (isFC) atFC++;
+          if (isPhi) atPhi++;
           break;
       }
     }
@@ -456,9 +532,21 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
       phiCount: phiCount,
       fcCount: fcCount,
       ezCount: ezCount,
+      ezC: ezC,
+      ezFC: ezFC,
+      ezPhi: ezPhi,
       hdCount: hdCount,
+      hdC: hdC,
+      hdFC: hdFC,
+      hdPhi: hdPhi,
       inCount: inCount,
+      inC: inC,
+      inFC: inFC,
+      inPhi: inPhi,
       atCount: atCount,
+      atC: atC,
+      atFC: atFC,
+      atPhi: atPhi,
     );
   }
 
@@ -486,17 +574,41 @@ class _PlayerStats {
   final int phiCount;
   final int fcCount;
   final int ezCount;
+  final int ezC;
+  final int ezFC;
+  final int ezPhi;
   final int hdCount;
+  final int hdC;
+  final int hdFC;
+  final int hdPhi;
   final int inCount;
+  final int inC;
+  final int inFC;
+  final int inPhi;
   final int atCount;
+  final int atC;
+  final int atFC;
+  final int atPhi;
 
   _PlayerStats({
     required this.totalRks,
     required this.phiCount,
     required this.fcCount,
     required this.ezCount,
+    required this.ezC,
+    required this.ezFC,
+    required this.ezPhi,
     required this.hdCount,
+    required this.hdC,
+    required this.hdFC,
+    required this.hdPhi,
     required this.inCount,
+    required this.inC,
+    required this.inFC,
+    required this.inPhi,
     required this.atCount,
+    required this.atC,
+    required this.atFC,
+    required this.atPhi,
   });
 }

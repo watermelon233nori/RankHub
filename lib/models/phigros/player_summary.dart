@@ -76,6 +76,9 @@ class PhigrosPlayerSummary {
     return '$challengeRankName $challengeDifficulty';
   }
 
+  /// 头像名称
+  late String avatarName;
+
   /// 最后更新时间
   late DateTime lastUpdated;
 
@@ -85,8 +88,9 @@ class PhigrosPlayerSummary {
   factory PhigrosPlayerSummary.calculate(
     String accountId,
     List<PhigrosGameRecord> records,
-    int challengeModeRank,
-  ) {
+    int challengeModeRank, {
+    String avatarName = '',
+  }) {
     // 计算B19（Best 19，取RKS最高的19首）
     final sortedRecords = List<PhigrosGameRecord>.from(records)
       ..sort((a, b) => b.rks.compareTo(a.rks));
@@ -158,6 +162,7 @@ class PhigrosPlayerSummary {
       ..bCount = bCount
       ..cCount = cCount
       ..challengeModeRank = challengeModeRank
+      ..avatarName = avatarName
       ..lastUpdated = DateTime.now();
   }
 
@@ -173,6 +178,7 @@ class PhigrosPlayerSummary {
     int? inCount,
     int? atCount,
     int? fcCount,
+    String avatarName = '',
   }) {
     // 计算B19（Best 19，取RKS最高的19首）
     final sortedRecords = List<PhigrosGameRecord>.from(records)
@@ -257,6 +263,7 @@ class PhigrosPlayerSummary {
       ..cCount = cCount
       ..challengeModeRank =
           apiChallengeModeRank // 使用 API 返回的课题模式排名
+      ..avatarName = avatarName
       ..lastUpdated = DateTime.now();
   }
 }

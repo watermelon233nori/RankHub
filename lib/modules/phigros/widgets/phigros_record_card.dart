@@ -169,11 +169,7 @@ class _InfoCard extends StatelessWidget {
             child: Center(
               child: Text(
                 songName,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontFamily: 'SourceHanSans',
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -232,7 +228,11 @@ class _Image extends StatelessWidget {
             child: const Icon(Icons.error),
           ),
           imageBuilder: (context, imageProvider) {
-            onImageLoaded?.call();
+            if (onImageLoaded != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                onImageLoaded?.call();
+              });
+            }
             return Image(image: imageProvider, fit: BoxFit.cover);
           },
         ),
