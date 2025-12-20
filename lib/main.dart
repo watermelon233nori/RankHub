@@ -1,3 +1,4 @@
+import 'package:amap_map/amap_map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/routes/app_pages.dart';
@@ -9,6 +10,7 @@ import 'package:rank_hub/services/mai_party_qr_handler.dart';
 import 'package:rank_hub/services/mai_net_qr_handler.dart';
 import 'package:rank_hub/services/queue_status_manager.dart';
 import 'package:rank_hub/services/live_activity_service.dart';
+import 'package:x_amap_base/x_amap_base.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,8 +38,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 初始化主题控制器
     final themeController = Get.put(ThemeController());
+
+    AMapInitializer.updatePrivacyAgree(
+      AMapPrivacyStatement(hasContains: true, hasShow: true, hasAgree: true),
+    );
+
+    AMapInitializer.init(
+      context,
+      apiKey: AMapApiKey(
+        iosKey: '808f8cff67cf6e0af5d1718a9d3b6a6b',
+        androidKey: '9d203d41e9a4e6f41f16845a56ccec81',
+      ),
+    );
 
     return Obx(
       () => GetMaterialApp(

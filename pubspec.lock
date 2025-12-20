@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "85.0.0"
+  amap_map:
+    dependency: "direct main"
+    description:
+      name: amap_map
+      sha256: ee106071450bb109e36d7ae600ef44976ed4d70ea94b1849690535f8337fc7a6
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.15"
   analyzer:
     dependency: transitive
     description:
@@ -161,6 +169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  carousel_slider:
+    dependency: "direct main"
+    description:
+      name: carousel_slider
+      sha256: bcc61735345c9ab5cb81073896579e735f81e35fd588907a393143ea986be8ff
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.1"
   characters:
     dependency: transitive
     description:
@@ -462,6 +478,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_adaptive_scaffold:
+    dependency: transitive
+    description:
+      name: flutter_adaptive_scaffold
+      sha256: a464b74540401cade07af0ae84d19f210534cac67651a150fb413507040b74f6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.12"
   flutter_app_group_directory:
     dependency: transitive
     description:
@@ -558,6 +582,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      sha256: ee8068e0e1cd16c4a82714119918efdeed33b3ba7772c54b5d094ab53f9b7fd1
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.33"
   flutter_riverpod:
     dependency: "direct main"
     description:
@@ -608,6 +640,54 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  geolocator:
+    dependency: "direct main"
+    description:
+      name: geolocator
+      sha256: f62bcd90459e63210bbf9c35deb6a51c521f992a78de19a1fe5c11704f9530e2
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.0.4"
+  geolocator_android:
+    dependency: transitive
+    description:
+      name: geolocator_android
+      sha256: fcb1760a50d7500deca37c9a666785c047139b5f9ee15aa5469fae7dbbe3170d
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.6.2"
+  geolocator_apple:
+    dependency: transitive
+    description:
+      name: geolocator_apple
+      sha256: dbdd8789d5aaf14cf69f74d4925ad1336b4433a6efdf2fce91e8955dc921bf22
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.13"
+  geolocator_platform_interface:
+    dependency: transitive
+    description:
+      name: geolocator_platform_interface
+      sha256: "30cb64f0b9adcc0fb36f628b4ebf4f731a2961a0ebd849f4b56200205056fe67"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.6"
+  geolocator_web:
+    dependency: transitive
+    description:
+      name: geolocator_web
+      sha256: b1ae9bdfd90f861fde8fd4f209c37b953d65e92823cb73c7dee1fa021b06f172
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.3"
+  geolocator_windows:
+    dependency: transitive
+    description:
+      name: geolocator_windows
+      sha256: "175435404d20278ffd220de83c2ca293b73db95eafbdc8131fe8609be1421eb6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.5"
   get:
     dependency: "direct main"
     description:
@@ -633,6 +713,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "14.8.1"
+  gradient_blur:
+    dependency: "direct main"
+    description:
+      name: gradient_blur
+      sha256: "72f5e2fabfa876cad9d0fc38817f82452c75313902b88785435391afabdbb919"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2+1"
   graphs:
     dependency: transitive
     description:
@@ -682,7 +770,7 @@ packages:
     source: hosted
     version: "4.5.4"
   intl:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: intl
       sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
@@ -786,6 +874,14 @@ packages:
       url: "https://github.com/qianmo2233/flutter_live_activities.git"
     source: git
     version: "2.4.3"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: a7967e31b703831a893bbc3c3dd11db08126fe5f369b5c648a36f821979f5be3
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.2"
   logging:
     dependency: transitive
     description:
@@ -794,6 +890,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  map_launcher:
+    dependency: "direct main"
+    description:
+      name: map_launcher
+      sha256: "7436d6ef9ae57ff15beafcedafe0a8f0604006cbecd2d26024c4cfb0158c2b9a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.5.0"
   matcher:
     dependency: transitive
     description:
@@ -1231,6 +1335,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  soft_edge_blur:
+    dependency: "direct main"
+    description:
+      name: soft_edge_blur
+      sha256: "3e9a6c981d298d6aa2bf98716bc521fb043708833a570cd9f559a7d523973c51"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.3"
   source_gen:
     dependency: transitive
     description:
@@ -1591,6 +1703,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.3"
+  x_amap_base:
+    dependency: transitive
+    description:
+      name: x_amap_base
+      sha256: "0affc5a3e40c12f717d53554afb3655359435b89f77e5ff5db6730d82f2ba8f5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
+  x_common:
+    dependency: transitive
+    description:
+      name: x_common
+      sha256: e69ad76b0aea9a6687b6ce5cc71fdb881fcdb21a59db1719d95b38d7494dcf0f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   xdg_directories:
     dependency: transitive
     description:
