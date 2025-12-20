@@ -1,6 +1,6 @@
 name: rank_hub
 description: "A Otoge Ranking explorer app"
-version: 1.0.2+3
+version: 1.0.3+4
 publish_to: "none"
 
 environment:
@@ -40,13 +40,25 @@ dependencies:
   share_plus: ^10.1.3
   pointycastle: ^3.6.2
   archive: ^4.0.7
-  live_activities: 
+  live_activities:
     git:
       url: https://github.com/qianmo2233/flutter_live_activities.git
   mobile_scanner: ^7.1.3
   techno_kitchen_dart: ^1.0.1
   qr_flutter: ^4.1.0
   device_info_plus: ^11.2.0
+  jwt_decoder: ^2.0.1
+  pinput: ^5.0.0
+  flutter_riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.3
+  go_router: ^14.6.2
+  amap_map: ^1.0.15
+  carousel_slider: ^5.0.0
+  soft_edge_blur: ^0.1.3
+  gradient_blur: ^1.0.2+1
+  geolocator: ^13.0.2
+  map_launcher: ^3.5.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +68,8 @@ dev_dependencies:
   isar_community_generator: ^3.3.0
   build_runner: any
   flutter_launcher_icons: ^0.14.4
+  riverpod_generator: ^3.0.3
+  riverpod_lint: ^3.0.3
 
 flutter:
   uses-material-design: true
@@ -63,7 +77,6 @@ flutter:
   assets:
     - icon-1024.png
     - assets/images/
-
 
 flutter_launcher_icons:
   android: true

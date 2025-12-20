@@ -403,104 +403,99 @@ class _SessionTokenLoginTabState extends State<_SessionTokenLoginTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    '使用 Session Token\n绑定账号',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 64),
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                '使用 Session Token\n绑定账号',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 64),
 
-                  // Session Token 输入框
-                  TextFormField(
-                    controller: _sessionTokenController,
-                    decoration: InputDecoration(
-                      labelText: 'Session Token',
-                      hintText: '粘贴您的 Session Token',
-                      prefixIcon: const Icon(Icons.vpn_key),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      errorText: _errorMessage,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return '请输入 Session Token';
-                      }
-                      return null;
-                    },
+              // Session Token 输入框
+              TextFormField(
+                controller: _sessionTokenController,
+                decoration: InputDecoration(
+                  labelText: 'Session Token',
+                  hintText: '粘贴您的 Session Token',
+                  prefixIcon: const Icon(Icons.vpn_key),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 24),
+                  errorText: _errorMessage,
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return '请输入 Session Token';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
 
-                  // 登录按钮
-                  FilledButton(
-                    onPressed: _isLoading ? null : _handleLogin,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('绑定账号', style: TextStyle(fontSize: 16)),
+              // 登录按钮
+              FilledButton(
+                onPressed: _isLoading ? null : _handleLogin,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(height: 24),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('绑定账号', style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(height: 24),
 
-                  // 帮助说明
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              // 帮助说明
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.help_outline, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                '如何获取 Session Token？',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            '1. 使用抓包工具（如 HttpCanary）监听网络请求\n'
-                            '2. 在 Phigros 中登录并同步数据\n'
-                            '3. 在抓包记录中找到请求头\n'
-                            '4. 复制 "X-LC-Session" 字段的值',
-                            style: TextStyle(fontSize: 13),
-                          ),
-                          const SizedBox(height: 8),
+                          Icon(Icons.help_outline, size: 20),
+                          const SizedBox(width: 8),
                           Text(
-                            '⚠️ 请勿泄露您的 Session Token',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.orange[700],
-                              fontWeight: FontWeight.w500,
-                            ),
+                            '如何获取 Session Token？',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        '1. 使用抓包工具（如 HttpCanary）监听网络请求\n'
+                        '2. 在 Phigros 中登录并同步数据\n'
+                        '3. 在抓包记录中找到请求头\n'
+                        '4. 复制 "X-LC-Session" 字段的值',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '⚠️ 请勿泄露您的 Session Token',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.orange[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

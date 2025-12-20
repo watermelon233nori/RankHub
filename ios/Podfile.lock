@@ -1,4 +1,10 @@
 PODS:
+  - AMap3DMap (10.1.600):
+    - AMapFoundation (>= 1.8.0)
+  - amap_map (1.0.8):
+    - AMap3DMap
+    - Flutter
+  - AMapFoundation (1.8.2)
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
@@ -13,9 +19,14 @@ PODS:
     - OrderedSet (~> 6.0.3)
   - flutter_web_auth_2 (3.0.0):
     - Flutter
+  - geolocator_apple (1.2.0):
+    - Flutter
+    - FlutterMacOS
   - isar_community_flutter_libs (1.0.0):
     - Flutter
   - live_activities (0.0.1):
+    - Flutter
+  - map_launcher (0.0.1):
     - Flutter
   - mobile_scanner (7.0.0):
     - Flutter
@@ -37,13 +48,16 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - amap_map (from `.symlinks/plugins/amap_map/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_app_group_directory (from `.symlinks/plugins/flutter_app_group_directory/ios`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - flutter_web_auth_2 (from `.symlinks/plugins/flutter_web_auth_2/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
   - isar_community_flutter_libs (from `.symlinks/plugins/isar_community_flutter_libs/ios`)
   - live_activities (from `.symlinks/plugins/live_activities/ios`)
+  - map_launcher (from `.symlinks/plugins/map_launcher/ios`)
   - mobile_scanner (from `.symlinks/plugins/mobile_scanner/darwin`)
   - objective_c (from `.symlinks/plugins/objective_c/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -54,9 +68,13 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AMap3DMap
+    - AMapFoundation
     - OrderedSet
 
 EXTERNAL SOURCES:
+  amap_map:
+    :path: ".symlinks/plugins/amap_map/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
@@ -67,10 +85,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
   flutter_web_auth_2:
     :path: ".symlinks/plugins/flutter_web_auth_2/ios"
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/darwin"
   isar_community_flutter_libs:
     :path: ".symlinks/plugins/isar_community_flutter_libs/ios"
   live_activities:
     :path: ".symlinks/plugins/live_activities/ios"
+  map_launcher:
+    :path: ".symlinks/plugins/map_launcher/ios"
   mobile_scanner:
     :path: ".symlinks/plugins/mobile_scanner/darwin"
   objective_c:
@@ -87,13 +109,18 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
+  AMap3DMap: e67fc1a66bd83b82b44a06b601864d9fb3db3de0
+  amap_map: 5be213f350872f6ea406be964031572ab9a0d6e1
+  AMapFoundation: 9885c48fc3a78fdfb84a0299a2293e56ea3c9fec
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_app_group_directory: d2c3337f424828558953172f9378d00df9b7756d
   flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
   flutter_web_auth_2: 06d500582775790a0d4c323222fcb6d7990f9603
+  geolocator_apple: 66b711889fd333205763b83c9dcf0a57a28c7afd
   isar_community_flutter_libs: cf478bdca01f7fb2bde0320930a785456748f1ad
   live_activities: 5a5313d5bf801bbbbe80d51eab80aed6d6df376b
+  map_launcher: 5fde49ac9a52672bf99da746599f507b4490d7b5
   mobile_scanner: 77265f3dc8d580810e91849d4a0811a90467ed5e
   objective_c: 77e887b5ba1827970907e10e832eec1683f3431d
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94

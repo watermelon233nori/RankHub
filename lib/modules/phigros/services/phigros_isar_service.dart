@@ -308,6 +308,7 @@ class PhigrosIsarService extends BaseIsarService {
     double rks,
     int challengeModeRank,
     List<int> levelRecords,
+    String avatarName,
   ) async {
     // 获取成绩用于计算其他统计数据
     final records = await getGameRecords(accountId);
@@ -333,6 +334,7 @@ class PhigrosIsarService extends BaseIsarService {
       inCount: inCount,
       atCount: atCount,
       fcCount: fcCount,
+      avatarName: avatarName,
     );
 
     // 保存摘要

@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import 'package:rank_hub/pages/main_page.dart';
+import 'package:rank_hub/pages/nearcade.dart';
+import 'package:rank_hub/pages/shop_detail_page.dart';
+import 'package:rank_hub/pages/all_shops_page.dart';
 import 'package:rank_hub/pages/wiki.dart';
 import 'package:rank_hub/pages/rank.dart';
 import 'package:rank_hub/pages/mine.dart';
@@ -62,6 +65,21 @@ class AppPages {
     GetPage(
       name: AppRoutes.logs,
       page: () => const LogPage(),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.nearcade,
+      page: () => const NearcadePage(),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.shopDetail,
+      page: () => const ShopDetailPage(),
+      transition: Transition.native,
+    ),
+    GetPage(
+      name: AppRoutes.allShops,
+      page: () => const AllShopsPage(),
       transition: Transition.native,
     ),
   ];

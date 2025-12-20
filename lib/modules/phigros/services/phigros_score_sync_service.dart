@@ -159,6 +159,7 @@ class PhigrosScoreSyncService {
         summaryData['rks'],
         summaryData['challengeModeRank'],
         summaryData['levelRecords'],
+        summaryData['avatarName'] ?? '',
       );
 
       onProgress(100, 100, '所有数据同步完成');

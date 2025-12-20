@@ -10,4 +10,7 @@ class AppRoutes {
   static const privacyPolicy = '/privacy-policy';
   static const about = '/about';
   static const logs = '/logs';
+  static const nearcade = '/nearcade';
+  static const shopDetail = '/shop-detail';
+  static const allShops = '/all-shops';
 }

@@ -25,36 +25,41 @@ const PhigrosPlayerSummarySchema = CollectionSchema(
       type: IsarType.string,
     ),
     r'atCount': PropertySchema(id: 2, name: r'atCount', type: IsarType.long),
-    r'b19AverageRks': PropertySchema(
+    r'avatarName': PropertySchema(
       id: 3,
+      name: r'avatarName',
+      type: IsarType.string,
+    ),
+    r'b19AverageRks': PropertySchema(
+      id: 4,
       name: r'b19AverageRks',
       type: IsarType.double,
     ),
-    r'bCount': PropertySchema(id: 4, name: r'bCount', type: IsarType.long),
-    r'cCount': PropertySchema(id: 5, name: r'cCount', type: IsarType.long),
+    r'bCount': PropertySchema(id: 5, name: r'bCount', type: IsarType.long),
+    r'cCount': PropertySchema(id: 6, name: r'cCount', type: IsarType.long),
     r'challengeModeRank': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'challengeModeRank',
       type: IsarType.long,
     ),
-    r'ezCount': PropertySchema(id: 7, name: r'ezCount', type: IsarType.long),
-    r'fcCount': PropertySchema(id: 8, name: r'fcCount', type: IsarType.long),
-    r'hdCount': PropertySchema(id: 9, name: r'hdCount', type: IsarType.long),
-    r'inCount': PropertySchema(id: 10, name: r'inCount', type: IsarType.long),
+    r'ezCount': PropertySchema(id: 8, name: r'ezCount', type: IsarType.long),
+    r'fcCount': PropertySchema(id: 9, name: r'fcCount', type: IsarType.long),
+    r'hdCount': PropertySchema(id: 10, name: r'hdCount', type: IsarType.long),
+    r'inCount': PropertySchema(id: 11, name: r'inCount', type: IsarType.long),
     r'lastUpdated': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'lastUpdated',
       type: IsarType.dateTime,
     ),
-    r'phiCount': PropertySchema(id: 12, name: r'phiCount', type: IsarType.long),
-    r'sCount': PropertySchema(id: 13, name: r'sCount', type: IsarType.long),
+    r'phiCount': PropertySchema(id: 13, name: r'phiCount', type: IsarType.long),
+    r'sCount': PropertySchema(id: 14, name: r'sCount', type: IsarType.long),
     r'totalRks': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'totalRks',
       type: IsarType.double,
     ),
     r'totalSongsPlayed': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'totalSongsPlayed',
       type: IsarType.long,
     ),
@@ -96,6 +101,7 @@ int _phigrosPlayerSummaryEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.accountId.length * 3;
+  bytesCount += 3 + object.avatarName.length * 3;
   return bytesCount;
 }
 
@@ -108,19 +114,20 @@ void _phigrosPlayerSummarySerialize(
   writer.writeLong(offsets[0], object.aCount);
   writer.writeString(offsets[1], object.accountId);
   writer.writeLong(offsets[2], object.atCount);
-  writer.writeDouble(offsets[3], object.b19AverageRks);
-  writer.writeLong(offsets[4], object.bCount);
-  writer.writeLong(offsets[5], object.cCount);
-  writer.writeLong(offsets[6], object.challengeModeRank);
-  writer.writeLong(offsets[7], object.ezCount);
-  writer.writeLong(offsets[8], object.fcCount);
-  writer.writeLong(offsets[9], object.hdCount);
-  writer.writeLong(offsets[10], object.inCount);
-  writer.writeDateTime(offsets[11], object.lastUpdated);
-  writer.writeLong(offsets[12], object.phiCount);
-  writer.writeLong(offsets[13], object.sCount);
-  writer.writeDouble(offsets[14], object.totalRks);
-  writer.writeLong(offsets[15], object.totalSongsPlayed);
+  writer.writeString(offsets[3], object.avatarName);
+  writer.writeDouble(offsets[4], object.b19AverageRks);
+  writer.writeLong(offsets[5], object.bCount);
+  writer.writeLong(offsets[6], object.cCount);
+  writer.writeLong(offsets[7], object.challengeModeRank);
+  writer.writeLong(offsets[8], object.ezCount);
+  writer.writeLong(offsets[9], object.fcCount);
+  writer.writeLong(offsets[10], object.hdCount);
+  writer.writeLong(offsets[11], object.inCount);
+  writer.writeDateTime(offsets[12], object.lastUpdated);
+  writer.writeLong(offsets[13], object.phiCount);
+  writer.writeLong(offsets[14], object.sCount);
+  writer.writeDouble(offsets[15], object.totalRks);
+  writer.writeLong(offsets[16], object.totalSongsPlayed);
 }
 
 PhigrosPlayerSummary _phigrosPlayerSummaryDeserialize(
@@ -133,20 +140,21 @@ PhigrosPlayerSummary _phigrosPlayerSummaryDeserialize(
   object.aCount = reader.readLong(offsets[0]);
   object.accountId = reader.readString(offsets[1]);
   object.atCount = reader.readLong(offsets[2]);
-  object.b19AverageRks = reader.readDouble(offsets[3]);
-  object.bCount = reader.readLong(offsets[4]);
-  object.cCount = reader.readLong(offsets[5]);
-  object.challengeModeRank = reader.readLong(offsets[6]);
-  object.ezCount = reader.readLong(offsets[7]);
-  object.fcCount = reader.readLong(offsets[8]);
-  object.hdCount = reader.readLong(offsets[9]);
+  object.avatarName = reader.readString(offsets[3]);
+  object.b19AverageRks = reader.readDouble(offsets[4]);
+  object.bCount = reader.readLong(offsets[5]);
+  object.cCount = reader.readLong(offsets[6]);
+  object.challengeModeRank = reader.readLong(offsets[7]);
+  object.ezCount = reader.readLong(offsets[8]);
+  object.fcCount = reader.readLong(offsets[9]);
+  object.hdCount = reader.readLong(offsets[10]);
   object.id = id;
-  object.inCount = reader.readLong(offsets[10]);
-  object.lastUpdated = reader.readDateTime(offsets[11]);
-  object.phiCount = reader.readLong(offsets[12]);
-  object.sCount = reader.readLong(offsets[13]);
-  object.totalRks = reader.readDouble(offsets[14]);
-  object.totalSongsPlayed = reader.readLong(offsets[15]);
+  object.inCount = reader.readLong(offsets[11]);
+  object.lastUpdated = reader.readDateTime(offsets[12]);
+  object.phiCount = reader.readLong(offsets[13]);
+  object.sCount = reader.readLong(offsets[14]);
+  object.totalRks = reader.readDouble(offsets[15]);
+  object.totalSongsPlayed = reader.readLong(offsets[16]);
   return object;
 }
 
@@ -164,9 +172,9 @@ P _phigrosPlayerSummaryDeserializeProp<P>(
     case 2:
       return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 5:
       return (reader.readLong(offset)) as P;
     case 6:
@@ -180,14 +188,16 @@ P _phigrosPlayerSummaryDeserializeProp<P>(
     case 10:
       return (reader.readLong(offset)) as P;
     case 11:
-      return (reader.readDateTime(offset)) as P;
-    case 12:
       return (reader.readLong(offset)) as P;
+    case 12:
+      return (reader.readDateTime(offset)) as P;
     case 13:
       return (reader.readLong(offset)) as P;
     case 14:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 15:
+      return (reader.readDouble(offset)) as P;
+    case 16:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -731,6 +741,187 @@ extension PhigrosPlayerSummaryQueryFilter
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'avatarName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'avatarName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'avatarName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'avatarName',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'avatarName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'avatarName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'avatarName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'avatarName',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'avatarName', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    PhigrosPlayerSummary,
+    PhigrosPlayerSummary,
+    QAfterFilterCondition
+  >
+  avatarNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'avatarName', value: ''),
       );
     });
   }
@@ -1831,6 +2022,20 @@ extension PhigrosPlayerSummaryQuerySortBy
   }
 
   QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QAfterSortBy>
+  sortByAvatarName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatarName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QAfterSortBy>
+  sortByAvatarNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatarName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QAfterSortBy>
   sortByB19AverageRks() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'b19AverageRks', Sort.asc);
@@ -2058,6 +2263,20 @@ extension PhigrosPlayerSummaryQuerySortThenBy
   }
 
   QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QAfterSortBy>
+  thenByAvatarName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatarName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QAfterSortBy>
+  thenByAvatarNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatarName', Sort.desc);
+    });
+  }
+
+  QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QAfterSortBy>
   thenByB19AverageRks() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'b19AverageRks', Sort.asc);
@@ -2278,6 +2497,13 @@ extension PhigrosPlayerSummaryQueryWhereDistinct
   }
 
   QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QDistinct>
+  distinctByAvatarName({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'avatarName', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<PhigrosPlayerSummary, PhigrosPlayerSummary, QDistinct>
   distinctByB19AverageRks() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'b19AverageRks');
@@ -2398,6 +2624,13 @@ extension PhigrosPlayerSummaryQueryProperty
   QueryBuilder<PhigrosPlayerSummary, int, QQueryOperations> atCountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'atCount');
+    });
+  }
+
+  QueryBuilder<PhigrosPlayerSummary, String, QQueryOperations>
+  avatarNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'avatarName');
     });
   }
 
