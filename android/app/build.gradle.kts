@@ -37,16 +37,18 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(keyProperties["storeFile"] as String)
-            storePassword = keyProperties["storePassword"] as String
-            keyAlias = keyProperties["keyAlias"] as String
-            keyPassword = keyProperties["keyPassword"] as String
+            storeFile = project.findProperty("storeFile")?.let { file(it) }
+            storePassword = project.findProperty("storePassword")?.toString()
+            keyAlias = project.findProperty("keyAlias")?.toString()
+            keyPassword = project.findProperty("keyPassword")?.toString()
         }
     }
 
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            minifyEnabled = false
+            shrinkResources = false
         }
     }
 }
