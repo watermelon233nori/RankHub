@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_NAME#v}
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag: $TAG_NAME, Version: $VERSION"
+
+      - name: Download latest nightly build artifacts
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: nightly_build.yml
+          branch: main
+          path: ./artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          ls -R ./artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release_assets
+
+          # Find and move iOS IPA
+          find ./artifacts -name "*.ipa" -exec cp {} release_assets/ \;
+
+          # Find and move Android APKs
+          find ./artifacts -name "*.apk" -exec cp {} release_assets/ \;
+
+          echo "Release assets prepared:"
+          ls -lh release_assets/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            release_assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

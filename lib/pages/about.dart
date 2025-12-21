@@ -7,7 +7,10 @@ class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
   static const String appVersion = '1.0.3';
-  static const String buildNumber = '4';
+  static const String buildNumber = String.fromEnvironment(
+    'BUILD_NUMBER',
+    defaultValue: '0',
+  );
   static const String githubRepo = 'https://github.com/qianmo2233/RankHub';
 
   @override
