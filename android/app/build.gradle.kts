@@ -37,10 +37,10 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = project.findProperty("storeFile")?.let { file(it) }
-            storePassword = project.findProperty("storePassword")?.toString()
-            keyAlias = project.findProperty("keyAlias")?.toString()
-            keyPassword = project.findProperty("keyPassword")?.toString()
+            storeFile = file(keyProperties["storeFile"] as String)
+            storePassword = keyProperties["storePassword"] as String
+            keyAlias = keyProperties["keyAlias"] as String
+            keyPassword = keyProperties["keyPassword"] as String
         }
     }
 
