@@ -3,6 +3,7 @@ class AppRoutes {
   static const wiki = '/wiki';
   static const rank = '/rank';
   static const mine = '/mine';
+  static const library = '/library';
   static const detail = '/detail';
   static const settings = '/settings';
   static const themeSettings = '/theme-settings';
