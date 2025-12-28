@@ -151,7 +151,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        record?.score.toString()??"000000",
+                        record?.score.toString() ?? "000000",
                         style: textTheme.bodyMedium?.copyWith(
                           color: Colors.white70,
                         ),
