@@ -78,6 +78,7 @@ flutter:
   assets:
     - icon-1024.png
     - assets/images/
+    - shorebird.yaml
 
 flutter_launcher_icons:
   android: true

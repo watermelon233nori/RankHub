@@ -167,10 +167,10 @@ class PhigrosGameSave {
   }
 
   /// 解析 summary 数据
-  /// 使用算法: summary = struct.unpack("=BHfBx%ds12H" % summary[8], summary)
+  /// 版本格式已更新，version 字段使用 varint 编码
   ///
   /// 返回 Map 包含:
-  /// - version: 版本号 (B: unsigned char)
+  /// - version: 版本号 (varint 编码)
   /// - challengeModeRank: 课题模式排名 (H: unsigned short)
   /// - rks: RKS值 (f: float)
   /// - gameProgress: 游戏进度 (B: unsigned char)
@@ -184,13 +184,15 @@ class PhigrosGameSave {
     try {
       // Base64 解码
       final bytes = base64.decode(summary);
-      final data = ByteData.sublistView(Uint8List.fromList(bytes));
 
       int offset = 0;
 
-      // B: unsigned char (1 byte) - version
-      final version = data.getUint8(offset);
-      offset += 1;
+      // varint - version
+      final versionResult = _decodeVarint(bytes, offset);
+      final version = versionResult['value'] as int;
+      offset = versionResult['offset'] as int;
+
+      final data = ByteData.sublistView(Uint8List.fromList(bytes));
 
       // H: unsigned short (2 bytes) - challengeModeRank
       final challengeModeRank = data.getUint16(offset, Endian.little);
@@ -232,6 +234,47 @@ class PhigrosGameSave {
       print('❌ 解析 summary 失败: $e');
       rethrow;
     }
+  }
+
+  /// 解码 varint 格式的整数
+  ///
+  /// Varint 是一种可变长度编码方式:
+  /// - 每个字节的最高位（MSB）用于指示是否还有更多字节
+  /// - 如果 MSB 为 1，表示后面还有字节
+  /// - 如果 MSB 为 0，表示这是最后一个字节
+  /// - 剩余的 7 位用于存储实际数据
+  ///
+  /// 返回包含解码后的值和新的偏移量
+  Map<String, int> _decodeVarint(List<int> bytes, int offset) {
+    int value = 0;
+    int shift = 0;
+    int currentOffset = offset;
+
+    while (true) {
+      if (currentOffset >= bytes.length) {
+        throw Exception('Varint 解码失败: 数据不完整');
+      }
+
+      final byte = bytes[currentOffset];
+      currentOffset++;
+
+      // 提取低 7 位并添加到结果中
+      value |= (byte & 0x7F) << shift;
+
+      // 如果最高位为 0，说明这是最后一个字节
+      if ((byte & 0x80) == 0) {
+        break;
+      }
+
+      shift += 7;
+
+      // 防止无限循环或溢出
+      if (shift > 63) {
+        throw Exception('Varint 解码失败: 值过大');
+      }
+    }
+
+    return {'value': value, 'offset': currentOffset};
   }
 }
 
