@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rank_hub/modules/phigros/phigros_controller.dart';
-import 'package:rank_hub/modules/phigros/widgets/phigros_record_list_item.dart';
-import 'package:rank_hub/modules/phigros/pages/phigros_b30_export_page.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:rank_hub/models/phigros/game_record.dart';
+import 'package:rank_hub/modules/phigros/pages/phigros_b30_export_page.dart';
+import 'package:rank_hub/modules/phigros/phigros_controller.dart';
+import 'package:rank_hub/modules/phigros/widgets/phigros_record_list_item.dart';
 
 /// Phigros B30成绩视图
 class PhigrosB30View extends StatefulWidget {
@@ -40,9 +40,13 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
       }
 
       final b30Records = controller.getB30Records();
+      final phis = b30Records['phi'] ?? [];
+      final b30s = b30Records['best'] ?? [];
+      final filledPhis = List.generate(3, (i) => phis.elementAtOrNull(i));
+      final filledB30s = List.generate(27, (i) => b30s.elementAtOrNull(i));
 
       Widget mainContent;
-      if (b30Records.isEmpty) {
+      if (phis.isEmpty && b30s.isEmpty) {
         mainContent = RefreshIndicator(
           onRefresh: () async {
             final accountController = Get.find<AccountController>();
@@ -88,119 +92,84 @@ class _PhigrosB30ViewState extends State<PhigrosB30View> {
               );
             }
           },
-          child: ListView.builder(
+          child: ListView(
             padding: const EdgeInsets.only(bottom: 200),
-            itemCount:
-                1 + // player info card
-                2 + // 2 section headers
-                (b30Records['phi']?.length ?? 0) +
-                (b30Records['best']?.length ?? 0),
-            itemBuilder: (context, index) {
-              // Player info card
-              if (index == 0) {
-                return _buildPlayerInfoCard(context, controller.records);
-              }
-
+            children: [
+              _buildPlayerInfoCard(context, controller.records),
               // P1-P3 section
-              if (index == 1) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.amber),
-                        ),
-                        child: const Text(
-                          'P1-P3',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber,
-                          ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.amber),
+                      ),
+                      child: const Text(
+                        'P1-P3',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Phi评级歌曲前三',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: colorScheme.onSurfaceVariant),
-                        ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Phi评级歌曲前三',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                       ),
-                    ],
-                  ),
-                );
-              }
+                    ),
+                  ],
+                ),
+              ),
 
               // P1, P2, P3
-              if (index >= 2 && index <= 4) {
-                final recordIndex = index - 2;
-                if (recordIndex < (b30Records['phi']?.length ?? 0)) {
-                  return PhigrosRecordListItem(
-                    record: b30Records['phi']![recordIndex],
-                  );
-                }
-                return const SizedBox.shrink();
-              }
+              ...filledPhis.map((it) => PhigrosRecordListItem(record: it)),
 
-              // B1-B27 section header
-              final phiCount = b30Records['phi']?.length ?? 0;
-              if (index == 2 + phiCount) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.purple),
-                        ),
-                        child: const Text(
-                          'B1-B27',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.purple,
-                          ),
+              // B1-B27 section
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.purple),
+                      ),
+                      child: const Text(
+                        'B1-B27',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '剩余最佳成绩',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: colorScheme.onSurfaceVariant),
-                        ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '剩余最佳成绩',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                       ),
-                    ],
-                  ),
-                );
-              }
+                    ),
+                  ],
+                ),
+              ),
 
               // B1-B27
-              if (index >= 3 + phiCount) {
-                final recordIndex = index - 3 - phiCount;
-                if (recordIndex < (b30Records['best']?.length ?? 0)) {
-                  return PhigrosRecordListItem(
-                    record: b30Records['best']![recordIndex],
-                  );
-                }
-              }
-
-              return const SizedBox.shrink();
-            },
+              ...filledB30s.map((it) => PhigrosRecordListItem(record: it)),
+            ],
           ),
         );
       }
