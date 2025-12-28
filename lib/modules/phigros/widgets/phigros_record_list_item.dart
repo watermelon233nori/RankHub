@@ -50,7 +50,7 @@ class PhigrosRecordListItem extends StatelessWidget {
               context,
             ).showSnackBar(const SnackBar(content: Text('未找到对应的歌曲信息')));
           }
-        }:null,
+        } : null,
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           clipBehavior: Clip.hardEdge,
