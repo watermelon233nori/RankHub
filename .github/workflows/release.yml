@@ -5,12 +5,13 @@ on:
     tags:
       - "v*.*.*"
 
+env:
+  SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+
 jobs:
   build_ios:
     name: Build iOS IPA with Shorebird
     runs-on: macos-15
-    env:
-      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
     steps:
       - name: Checkout Repository
@@ -71,23 +72,28 @@ jobs:
 
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
 
-      - name: Build iOS Release with Shorebird
-        run: |
-          shorebird release ios --force \
-            --build-number=${{ github.run_number }} \
-            --no-codesign \
-            -- \
-            --dart-define="BUILD_VERSION=${{ steps.get_version.outputs.version }}" \
-            --dart-define="BUILD_NUMBER=${{ github.run_number }}" \
-            --dart-define="COMMIT_HASH=${{ steps.get_commit.outputs.hash }}" \
-            --dart-define="MAIMAI_NET_API_AES_KEY=${{ secrets.MAIMAI_NET_API_AES_KEY }}" \
-            --dart-define="MAIMAI_NET_API_AES_IV=${{ secrets.MAIMAI_NET_API_AES_IV }}" \
-            --dart-define="MAIMAI_NET_API_OBFUSCATE_PARAM=${{ secrets.MAIMAI_NET_API_OBFUSCATE_PARAM }}" \
-            --dart-define="MAIMAI_NET_API_KEYCHIP_ID=${{ secrets.MAIMAI_NET_API_KEYCHIP_ID }}" \
-            --dart-define="MAIMAI_NET_API_SALT=${{ secrets.MAIMAI_NET_API_SALT }}" \
-            --dart-define="MAIMAI_NET_API_OPEN_GAME_ID=${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}" \
-            --dart-define="MAIMAI_NET_API_CHIME_ENDPOINT=${{ secrets.MAIMAI_NET_API_CHIME_ENDPOINT }}" \
+      - name: Shorebird Release iOS
+        uses: shorebirdtech/shorebird-release@v1
+        with:
+          platform: ios
+          flutter-version: 3.38.5
+          args: >
+            --no-codesign
+            --build-number=${{ github.run_number }}
+            --
+            --dart-define="BUILD_VERSION=${{ steps.get_version.outputs.version }}"
+            --dart-define="BUILD_NUMBER=${{ github.run_number }}"
+            --dart-define="COMMIT_HASH=${{ steps.get_commit.outputs.hash }}"
+            --dart-define="MAIMAI_NET_API_AES_KEY=${{ secrets.MAIMAI_NET_API_AES_KEY }}"
+            --dart-define="MAIMAI_NET_API_AES_IV=${{ secrets.MAIMAI_NET_API_AES_IV }}"
+            --dart-define="MAIMAI_NET_API_OBFUSCATE_PARAM=${{ secrets.MAIMAI_NET_API_OBFUSCATE_PARAM }}"
+            --dart-define="MAIMAI_NET_API_KEYCHIP_ID=${{ secrets.MAIMAI_NET_API_KEYCHIP_ID }}"
+            --dart-define="MAIMAI_NET_API_SALT=${{ secrets.MAIMAI_NET_API_SALT }}"
+            --dart-define="MAIMAI_NET_API_OPEN_GAME_ID=${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}"
+            --dart-define="MAIMAI_NET_API_CHIME_ENDPOINT=${{ secrets.MAIMAI_NET_API_CHIME_ENDPOINT }}"
             --dart-define="MAIMAI_NET_API_TITLE_ENDPOINT=${{ secrets.MAIMAI_NET_API_TITLE_ENDPOINT }}"
 
       - name: Package Unsigned IPA
@@ -106,8 +112,6 @@ jobs:
   build_android:
     name: Build Android APK with Shorebird
     runs-on: ubuntu-latest
-    env:
-      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
     steps:
       - name: Checkout Repository
@@ -174,23 +178,34 @@ jobs:
 
       - name: Setup Shorebird
         uses: shorebirdtech/setup-shorebird@v1
+        with:
+          cache: true
 
-      - name: Build Android Release with Shorebird
-        run: |
-          shorebird release android --force \
-            --build-number=${{ github.run_number }} \
-            -- \
-            --split-per-abi \
-            --dart-define="BUILD_VERSION=${{ steps.get_version.outputs.version }}" \
-            --dart-define="BUILD_NUMBER=${{ github.run_number }}" \
-            --dart-define="COMMIT_HASH=${{ steps.get_commit.outputs.hash }}" \
-            --dart-define="MAIMAI_NET_API_AES_KEY=${{ secrets.MAIMAI_NET_API_AES_KEY }}" \
-            --dart-define="MAIMAI_NET_API_AES_IV=${{ secrets.MAIMAI_NET_API_AES_IV }}" \
-            --dart-define="MAIMAI_NET_API_OBFUSCATE_PARAM=${{ secrets.MAIMAI_NET_API_OBFUSCATE_PARAM }}" \
-            --dart-define="MAIMAI_NET_API_KEYCHIP_ID=${{ secrets.MAIMAI_NET_API_KEYCHIP_ID }}" \
-            --dart-define="MAIMAI_NET_API_SALT=${{ secrets.MAIMAI_NET_API_SALT }}" \
-            --dart-define="MAIMAI_NET_API_OPEN_GAME_ID=${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}" \
-            --dart-define="MAIMAI_NET_API_CHIME_ENDPOINT=${{ secrets.MAIMAI_NET_API_CHIME_ENDPOINT }}" \
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Shorebird Release Android
+        uses: shorebirdtech/shorebird-release@v1
+        with:
+          platform: android
+          flutter-version: 3.38.5
+          args: >
+            --build-number=${{ github.run_number }}
+            --
+            --split-per-abi
+            --dart-define="BUILD_VERSION=${{ steps.get_version.outputs.version }}"
+            --dart-define="BUILD_NUMBER=${{ github.run_number }}"
+            --dart-define="COMMIT_HASH=${{ steps.get_commit.outputs.hash }}"
+            --dart-define="MAIMAI_NET_API_AES_KEY=${{ secrets.MAIMAI_NET_API_AES_KEY }}"
+            --dart-define="MAIMAI_NET_API_AES_IV=${{ secrets.MAIMAI_NET_API_AES_IV }}"
+            --dart-define="MAIMAI_NET_API_OBFUSCATE_PARAM=${{ secrets.MAIMAI_NET_API_OBFUSCATE_PARAM }}"
+            --dart-define="MAIMAI_NET_API_KEYCHIP_ID=${{ secrets.MAIMAI_NET_API_KEYCHIP_ID }}"
+            --dart-define="MAIMAI_NET_API_SALT=${{ secrets.MAIMAI_NET_API_SALT }}"
+            --dart-define="MAIMAI_NET_API_OPEN_GAME_ID=${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}"
+            --dart-define="MAIMAI_NET_API_CHIME_ENDPOINT=${{ secrets.MAIMAI_NET_API_CHIME_ENDPOINT }}"
             --dart-define="MAIMAI_NET_API_TITLE_ENDPOINT=${{ secrets.MAIMAI_NET_API_TITLE_ENDPOINT }}"
         env:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
