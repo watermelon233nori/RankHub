@@ -143,7 +143,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        '${(record?.acc??0).toStringAsFixed(2)}%',
+                        '${(record?.acc ?? 0).toStringAsFixed(2)}%',
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
