@@ -79,7 +79,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          record?.songName??"暂无成绩信息",
+                          record?.songName ?? "暂无成绩信息",
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
