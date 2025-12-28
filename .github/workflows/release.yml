@@ -101,14 +101,14 @@ jobs:
         run: |
           mkdir -p Payload
           cp -r build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app Payload/
-          zip -r RankHub-${{ steps.get_version.outputs.version }}+${{ github.run_number }}.ipa Payload
+          zip -r RankHub-${{ steps.get_version.outputs.version }}.ipa Payload
           rm -rf Payload
 
       - name: Upload iOS IPA
         uses: actions/upload-artifact@v4.3.3
         with:
-          name: RankHub-iOS-${{ steps.get_version.outputs.version }}+${{ github.run_number }}
-          path: RankHub-${{ steps.get_version.outputs.version }}+${{ github.run_number }}.ipa
+          name: RankHub-iOS-${{ steps.get_version.outputs.version }}
+          path: RankHub-${{ steps.get_version.outputs.version }}.ipa
 
   build_android:
     name: Build Android APK with Shorebird
@@ -217,13 +217,13 @@ jobs:
       - name: Rename APK file with version
         run: |
           mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/RankHub-${{ steps.get_version.outputs.version }}+${{ github.run_number }}.apk
+             build/app/outputs/flutter-apk/RankHub-${{ steps.get_version.outputs.version }}.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4.3.3
         with:
-          name: RankHub-Android-${{ steps.get_version.outputs.version }}+${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/RankHub-${{ steps.get_version.outputs.version }}+${{ github.run_number }}.apk
+          name: RankHub-Android-${{ steps.get_version.outputs.version }}
+          path: build/app/outputs/flutter-apk/RankHub-${{ steps.get_version.outputs.version }}.apk
 
   create_release:
     name: Create Release
