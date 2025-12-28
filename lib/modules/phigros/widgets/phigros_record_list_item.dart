@@ -13,7 +13,7 @@ class PhigrosRecordListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final record=this.record;
+    final record = this.record;
     // 强制使用深色主题
     final colorScheme = ColorScheme.dark();
     final textTheme = Theme.of(context).textTheme;
