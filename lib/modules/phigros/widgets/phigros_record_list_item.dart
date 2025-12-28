@@ -7,12 +7,13 @@ import 'package:rank_hub/modules/phigros/pages/song_detail_page.dart';
 
 /// Phigros 成绩列表项
 class PhigrosRecordListItem extends StatelessWidget {
-  final PhigrosGameRecord record;
+  final PhigrosGameRecord? record;
 
   const PhigrosRecordListItem({super.key, required this.record});
 
   @override
   Widget build(BuildContext context) {
+    final record = this.record;
     // 强制使用深色主题
     final colorScheme = ColorScheme.dark();
     final textTheme = Theme.of(context).textTheme;
@@ -20,14 +21,16 @@ class PhigrosRecordListItem extends StatelessWidget {
 
     // 获取曲绘URL
     final illustrationUrl =
-        'https://ghfast.top/https://raw.githubusercontent.com/7aGiven/Phigros_Resource/refs/heads/illustrationLowRes/${record.songId}.png';
+      record!=null
+          ? 'https://ghfast.top/https://raw.githubusercontent.com/7aGiven/Phigros_Resource/refs/heads/illustrationLowRes/${record.songId}.png'
+          :null;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       clipBehavior: Clip.hardEdge,
       color: colorScheme.surface, // 使用深色主题的surface颜色
       child: InkWell(
-        onTap: () {
+        onTap: record!=null? () {
           // 从 controller 查找对应的 song
           final controller = Get.find<PhigrosController>();
           final song = controller.songs.firstWhereOrNull(
@@ -47,15 +50,15 @@ class PhigrosRecordListItem extends StatelessWidget {
               context,
             ).showSnackBar(const SnackBar(content: Text('未找到对应的歌曲信息')));
           }
-        },
+        } : null,
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
             // 曲绘背景 - 最底层
-            _buildIllustrationBackground(illustrationUrl),
+            if(illustrationUrl!=null)_buildIllustrationBackground(illustrationUrl),
             // 大字评级背景
-            _buildRatingBackground(record, isDark),
+            if(record!=null)_buildRatingBackground(record, isDark),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
@@ -65,7 +68,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                     width: 4,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: _getDifficultyColor(record.level, isDark),
+                      color: _getDifficultyColor(record?.level??"", isDark),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -76,7 +79,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          record.songName,
+                          record?.songName ?? "暂无成绩信息",
                           style: textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -86,7 +89,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          record.artist,
+                          record?.artist??"",
                           style: textTheme.bodySmall?.copyWith(
                             color: Colors.white70,
                           ),
@@ -94,41 +97,42 @@ class PhigrosRecordListItem extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: [
-                            _buildDifficultyRksChip(
-                              record.level,
-                              record.constant,
-                              record.rks,
-                              _getDifficultyColor(record.level, isDark),
-                            ),
-                            if (record.fc)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: Colors.amber.withOpacity(0.3),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'FC',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.amber,
-                                  ),
-                                ),
+                        if(record!=null)
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: [
+                              _buildDifficultyRksChip(
+                                record.level,
+                                record.constant,
+                                record.rks,
+                                _getDifficultyColor(record.level, isDark),
                               ),
-                            _buildRksIncreaseChip(context),
-                          ],
-                        ),
+                              if (record.fc)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: Colors.amber.withOpacity(0.3),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'FC',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.amber,
+                                    ),
+                                  ),
+                                ),
+                              _buildRksIncreaseChip(context),
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -139,7 +143,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        '${record.acc.toStringAsFixed(2)}%',
+                        '${(record?.acc ?? 0).toStringAsFixed(2)}%',
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -147,7 +151,7 @@ class PhigrosRecordListItem extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        record.score.toString(),
+                        record?.score.toString() ?? "000000",
                         style: textTheme.bodyMedium?.copyWith(
                           color: Colors.white70,
                         ),
@@ -250,12 +254,12 @@ class PhigrosRecordListItem extends StatelessWidget {
       final controller = Get.find<PhigrosController>();
       final b30 = controller.getB30Records();
       final allB30 = [...(b30['phi'] ?? []), ...(b30['best'] ?? [])];
-      final isInB30 = allB30.any((r) => r.id == record.id);
+      final isInB30 = allB30.any((r) => r.id == record!.id);
 
       if (!isInB30) return const SizedBox.shrink();
 
       final requiredAcc = controller.calculateRequiredAccForRksIncrease(
-        record,
+        record!,
         true,
       );
 
