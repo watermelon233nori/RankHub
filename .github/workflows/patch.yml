@@ -2,15 +2,8 @@ name: Patch
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - "README.md"
-      - ".github/**"
-      - ".vscode/**"
-      - ".idea/**"
-      - "test/**"
-      - ".gitignore"
+    tags:
+      - "patch/v[0-9]+.[0-9]+.[0-9]+*"
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -172,8 +165,8 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Shorebird Patch Android
         uses: shorebirdtech/shorebird-patch@v1
