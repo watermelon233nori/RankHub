@@ -3,14 +3,14 @@ name: Release
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - "v[0-9]+.[0-9]+.[0-9]+*"
 
 env:
   SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
 
 jobs:
   build_ios:
-    name: Build iOS IPA with Shorebird
+    name: Build iOS IPA
     runs-on: macos-15
 
     steps:
@@ -91,7 +91,7 @@ jobs:
           path: RankHub-${{ steps.get_version.outputs.version }}.ipa
 
   build_android:
-    name: Build Android APK with Shorebird
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
