@@ -50,6 +50,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
+      - name: Update pubspec.yaml version
+        run: |
+          sed -i.bak "s/^version: .*/version: ${{ steps.get_version.outputs.version }}+${{ github.run_number }}/" pubspec.yaml
+          echo "Updated pubspec.yaml version to ${{ steps.get_version.outputs.version }}+${{ github.run_number }}"
+          cat pubspec.yaml | grep "^version:"
+
       - name: Install Flutter Dependencies
         run: flutter pub get
 
@@ -141,6 +147,12 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Update pubspec.yaml version
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.get_version.outputs.version }}+${{ github.run_number }}/" pubspec.yaml
+          echo "Updated pubspec.yaml version to ${{ steps.get_version.outputs.version }}+${{ github.run_number }}"
+          cat pubspec.yaml | grep "^version:"
 
       - name: Install Flutter Dependencies
         run: flutter pub get
