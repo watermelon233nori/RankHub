@@ -14,10 +14,7 @@ RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支
 
 [![下载 iOS IPA](https://img.shields.io/badge/下载-iOS%20IPA-blue?style=for-the-badge&logo=apple)](https://github.com/qianmo2233/RankHub/releases/latest)
 
-1. 访问 [GitHub Actions](https://github.com/qianmo2233/RankHub/actions/workflows/build_app.yml)
-2. 点击最新的成功构建（绿色勾号）
-3. 在 Artifacts 部分下载 `Unsigned-iOS-IPA`
-4. 解压后使用 [AltStore](https://altstore.io/)、[Sideloadly](https://sideloadly.io/) 或其他签名工具安装到设备
+使用 [AltStore](https://altstore.io/)、[Sideloadly](https://sideloadly.io/) 或其他签名工具安装到设备
 
 > **注意**：未签名的 IPA 需要自行签名才能安装到 iOS 设备。推荐使用 AltStore 或 Sideloadly 进行侧载安装。
 
@@ -29,13 +26,11 @@ RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支
 
 [![下载 Android APK](https://img.shields.io/badge/下载-Android%20APK-green?style=for-the-badge&logo=android)](https://github.com/qianmo2233/RankHub/releases/latest)
 
-1. 访问 [GitHub Actions](https://github.com/qianmo2233/RankHub/actions/workflows/build_app.yml)
-2. 点击最新的成功构建（绿色勾号）
-3. 在 Artifacts 部分根据设备架构下载对应的 APK：
+根据设备架构下载对应的 APK：
    - **arm64-v8a**：适用于大多数现代 Android 设备（推荐）
    - **armeabi-v7a**：适用于较旧的 32 位 ARM 设备
    - **x86_64**：适用于模拟器或 x86 架构设备
-4. 传输到 Android 设备并安装
+传输到 Android 设备并安装
 
 > **提示**：如果不确定选择哪个版本，优先下载 **arm64-v8a** 版本。安装前需要在设备设置中允许"安装未知来源应用"。
 
