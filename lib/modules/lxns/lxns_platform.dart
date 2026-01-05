@@ -15,6 +15,7 @@ import 'package:rank_hub/modules/lxns/services/maimai_export_service.dart';
 import 'package:rank_hub/modules/lxns/services/lxns_api_response.dart';
 import 'package:rank_hub/modules/lxns/maimai_dx_game.dart';
 import 'package:rank_hub/modules/lxns/pages/net_sync_page.dart';
+import 'package:rank_hub/modules/lxns/pages/random_song_picker_page.dart';
 
 /// 落雪咖啡屋平台（LXNS）
 /// 提供舞萌DX数据查询服务
@@ -207,6 +208,16 @@ class LxnsPlatform extends BasePlatform {
         icon: Icons.download,
         onTap: () {
           MaimaiExportService.instance.showExportDialog(context);
+        },
+      ),
+
+      // 随机选曲
+      PlatformFeatureItem(
+        title: '随机选曲',
+        description: '根据条件随机选择曲目，支持多种筛选',
+        icon: Icons.casino,
+        onTap: () {
+          Get.to(() => const RandomSongPickerPage());
         },
       ),
 

@@ -90,6 +90,8 @@ class _SongInfoTabState extends State<SongInfoTab> {
                   colorScheme: colorScheme,
                 ),
                 const Divider(height: 24),
+                _buildSongIdRow(context, colorScheme: colorScheme),
+                const Divider(height: 24),
                 _buildInfoRow(
                   context,
                   icon: Icons.speed,
@@ -259,61 +261,150 @@ class _SongInfoTabState extends State<SongInfoTab> {
     );
   }
 
+  /// 构建曲目ID信息行
+  Widget _buildSongIdRow(
+    BuildContext context, {
+    required ColorScheme colorScheme,
+  }) {
+    final hasDx = widget.song.difficulties.dx.isNotEmpty;
+    final standardId = widget.song.songId.toString();
+    final dxId = (widget.song.songId + 10000).toString();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.tag, size: 20, color: colorScheme.primary),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 80,
+            child: Text(
+              '曲目ID',
+              style: TextStyle(
+                fontSize: 14,
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildIdChip(standardId, hasDx ? '标准' : null, colorScheme),
+                if (hasDx) _buildIdChip(dxId, 'DX', colorScheme),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建ID chip
+  Widget _buildIdChip(String id, String? label, ColorScheme colorScheme) {
+    return InkWell(
+      onTap: () => _copyToClipboard(id),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: colorScheme.secondaryContainer.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colorScheme.outline.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (label != null) ...[
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: colorScheme.onSecondaryContainer.withOpacity(0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              id,
+              style: TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSecondaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// 构建别名信息行
   Widget _buildAliasRow(
     BuildContext context, {
     required List<String> aliases,
     required ColorScheme colorScheme,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(Icons.subtitles, size: 20, color: colorScheme.primary),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 80,
-          child: Text(
-            '别名',
-            style: TextStyle(
-              fontSize: 14,
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.subtitles, size: 20, color: colorScheme.primary),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 80,
+            child: Text(
+              '别名',
+              style: TextStyle(
+                fontSize: 14,
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: aliases
-                .map(
-                  (alias) => InkWell(
-                    onTap: () => _copyToClipboard(alias),
-                    borderRadius: BorderRadius.circular(4),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        alias,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: colorScheme.onPrimaryContainer,
+          const SizedBox(width: 8),
+          Expanded(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: aliases
+                  .map(
+                    (alias) => InkWell(
+                      onTap: () => _copyToClipboard(alias),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          alias,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                )
-                .toList(),
+                  )
+                  .toList(),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

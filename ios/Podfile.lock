@@ -5,6 +5,9 @@ PODS:
     - AMap3DMap
     - Flutter
   - AMapFoundation (1.8.2)
+  - audioplayers_darwin (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
@@ -49,6 +52,7 @@ PODS:
 
 DEPENDENCIES:
   - amap_map (from `.symlinks/plugins/amap_map/ios`)
+  - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/darwin`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_app_group_directory (from `.symlinks/plugins/flutter_app_group_directory/ios`)
@@ -75,6 +79,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   amap_map:
     :path: ".symlinks/plugins/amap_map/ios"
+  audioplayers_darwin:
+    :path: ".symlinks/plugins/audioplayers_darwin/darwin"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
@@ -112,6 +118,7 @@ SPEC CHECKSUMS:
   AMap3DMap: e67fc1a66bd83b82b44a06b601864d9fb3db3de0
   amap_map: 5be213f350872f6ea406be964031572ab9a0d6e1
   AMapFoundation: 9885c48fc3a78fdfb84a0299a2293e56ea3c9fec
+  audioplayers_darwin: 4027b33a8f471d996c13f71cb77f0b1583b5d923
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_app_group_directory: d2c3337f424828558953172f9378d00df9b7756d

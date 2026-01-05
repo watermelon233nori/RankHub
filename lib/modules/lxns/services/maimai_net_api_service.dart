@@ -13,32 +13,35 @@ class MaimaiNetApiService {
 
   MaimaiNetApiService._internal() {
     _requestAdapter = RequestAdapter(
-      aesKey: String.fromEnvironment(
+      aesKey: const String.fromEnvironment(
         'MAIMAI_NET_API_AES_KEY',
         defaultValue: 'SBGA',
       ),
-      aesIv: String.fromEnvironment(
+      aesIv: const String.fromEnvironment(
         'MAIMAI_NET_API_AES_IV',
         defaultValue: 'SBGA',
       ),
-      obfuscateParam: String.fromEnvironment(
+      obfuscateParam: const String.fromEnvironment(
         'MAIMAI_NET_API_OBFUSCATE_PARAM',
         defaultValue: 'SBGA',
       ),
-      keychipID: String.fromEnvironment(
+      keychipID: const String.fromEnvironment(
         'MAIMAI_NET_API_KEYCHIP_ID',
         defaultValue: 'SBGA',
       ),
-      salt: String.fromEnvironment('MAIMAI_NET_API_SALT', defaultValue: 'SBGA'),
-      openGameID: String.fromEnvironment(
+      salt: const String.fromEnvironment(
+        'MAIMAI_NET_API_SALT',
+        defaultValue: 'SBGA',
+      ),
+      openGameID: const String.fromEnvironment(
         'MAIMAI_NET_API_OPEN_GAME_ID',
         defaultValue: 'SBGA',
       ),
-      chimeEndpoint: String.fromEnvironment(
+      chimeEndpoint: const String.fromEnvironment(
         'MAIMAI_NET_API_CHIME_ENDPOINT',
         defaultValue: 'SBGA',
       ),
-      titleEndpoint: String.fromEnvironment(
+      titleEndpoint: const String.fromEnvironment(
         'MAIMAI_NET_API_TITLE_ENDPOINT',
         defaultValue: 'SBGA',
       ),

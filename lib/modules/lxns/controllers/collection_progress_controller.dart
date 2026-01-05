@@ -303,17 +303,17 @@ class CollectionProgressController extends GetxController {
   /// 判断成绩是否满足要求
   bool _meetsRequirement(Score score, CollectionRequired req) {
     // 检查评级要求
-    if (req.rate != null && (score.rate?.index ?? -1) > req.rate!.index) {
+    if (req.rate != null && (score.rate?.index ?? 999) > req.rate!.index) {
       return false;
     }
 
     // 检查 FC 要求
-    if (req.fc != null && (score.fc?.index ?? -1) > req.fc!.index) {
+    if (req.fc != null && (score.fc?.index ?? 999) > req.fc!.index) {
       return false;
     }
 
     // 检查 FS 要求
-    if (req.fs != null && (score.fs?.index ?? -1) > req.fs!.index) {
+    if (req.fs != null && (score.fs?.index ?? 999) > req.fs!.index) {
       return false;
     }
 
