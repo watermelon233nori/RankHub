@@ -12,7 +12,7 @@ RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支
 
 ### iOS
 
-[![下载 iOS IPA](https://img.shields.io/badge/下载-iOS%20IPA-blue?style=for-the-badge&logo=apple)](https://github.com/qianmo2233/RankHub/actions/workflows/build_app.yml)
+[![下载 iOS IPA](https://img.shields.io/badge/下载-iOS%20IPA-blue?style=for-the-badge&logo=apple)](https://github.com/qianmo2233/RankHub/releases/latest)
 
 1. 访问 [GitHub Actions](https://github.com/qianmo2233/RankHub/actions/workflows/build_app.yml)
 2. 点击最新的成功构建（绿色勾号）
@@ -27,7 +27,7 @@ RankHub 是一个基于 Flutter 开发的跨平台音游数据管理应用，支
 
 ### Android
 
-[![下载 Android APK](https://img.shields.io/badge/下载-Android%20APK-green?style=for-the-badge&logo=android)](https://github.com/qianmo2233/RankHub/actions/workflows/build_app.yml)
+[![下载 Android APK](https://img.shields.io/badge/下载-Android%20APK-green?style=for-the-badge&logo=android)](https://github.com/qianmo2233/RankHub/releases/latest)
 
 1. 访问 [GitHub Actions](https://github.com/qianmo2233/RankHub/actions/workflows/build_app.yml)
 2. 点击最新的成功构建（绿色勾号）
