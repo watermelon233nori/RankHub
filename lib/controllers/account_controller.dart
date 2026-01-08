@@ -6,6 +6,7 @@ import 'package:rank_hub/modules/musedash/services/musedash_credential_provider.
 import 'package:rank_hub/modules/phigros/services/phigros_credential_provider.dart';
 import 'package:rank_hub/services/account_service.dart';
 import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
+import 'package:rank_hub/modules/osu/services/osu_credential_provider.dart';
 import 'package:rank_hub/services/log_service.dart';
 import 'package:rank_hub/services/platform_login_manager.dart';
 import 'package:rank_hub/services/credential_provider.dart';
@@ -44,6 +45,7 @@ class AccountController extends GetxController {
     _accountService.registerProvider(MuseDashCredentialProvider());
     _accountService.registerProvider(PhigrosCredentialProvider());
     _accountService.registerProvider(DivingFishCredentialProvider());
+    _accountService.registerProvider(OsuCredentialProvider());
 
     // 加载账号列表
     loadAccounts();
