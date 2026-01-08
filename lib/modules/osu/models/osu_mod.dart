@@ -45,7 +45,8 @@ class OsuMod {
       name: json['Name'] as String,
       description: json['Description'] as String,
       type: json['Type'] as String,
-      settings: (json['Settings'] as List?)
+      settings:
+          (json['Settings'] as List?)
               ?.map((e) => OsuModSetting.fromJson(e))
               .toList() ??
           [],
