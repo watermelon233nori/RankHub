@@ -32,7 +32,7 @@ class OsuLoginHandler extends PlatformLoginHandler {
   String get platformIconUrl => 'https://osu.ppy.sh/favicon.ico';
 
   @override
-  String get platformDescription => 'osu! 查分器 - 使用 OAuth2 授权登录';
+  String get platformDescription => 'osu! 官服 - 使用 OAuth2 授权登录';
 
   @override
   Future<PlatformLoginResult?> showLoginPage(BuildContext context) async {
