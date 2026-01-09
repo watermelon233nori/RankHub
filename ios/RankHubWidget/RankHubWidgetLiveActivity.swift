@@ -27,7 +27,7 @@ extension LiveActivitiesAppAttributes {
 }
 
 // 创建共享的 UserDefaults 以访问 Flutter 数据
-let sharedDefault = UserDefaults(suiteName: "group.space.fukakai.rankhub")!
+let sharedDefault = UserDefaults(suiteName: "group.cn.tjhzzc.rankhubios")!
 
 struct RankHubWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
