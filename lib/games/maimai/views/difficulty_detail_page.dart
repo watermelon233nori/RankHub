@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rank_hub/games/maimai/maimai_providers.dart';
-import 'package:rank_hub/games/maimai/models/maimai_score.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';

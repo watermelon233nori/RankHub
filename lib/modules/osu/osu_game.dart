@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/game.dart';
+import 'package:rank_hub/modules/osu/pages/osu_beatmap_list_page.dart';
 import 'package:rank_hub/modules/osu/services/osu_isar_service.dart';
 import 'package:rank_hub/modules/osu/widgets/osu_player_info_card.dart';
 
@@ -48,9 +49,9 @@ class OsuGame extends IGame {
   List<GameContentView> buildWikiViews(BuildContext context) {
     return [
       GameContentView(
-        label: '谱面',
-        icon: Icons.library_music_outlined,
-        builder: (context) => const _OsuBeatmapsTab(),
+        label: '谱面商店',
+        icon: Icons.storefront,
+        builder: (context) => const OsuBeatmapListPage(),
       ),
     ];
   }
@@ -120,26 +121,6 @@ class OsuGame extends IGame {
 }
 
 // ========== Placeholder Widgets ==========
-
-class _OsuBeatmapsTab extends StatelessWidget {
-  const _OsuBeatmapsTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.library_music_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('谱面'),
-          SizedBox(height: 8),
-          Text('开发中...', style: TextStyle(color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-}
 
 class _OsuRecentPlaysTab extends StatelessWidget {
   const _OsuRecentPlaysTab();
