@@ -34,7 +34,7 @@ class _DifficultyDetailPageState extends ConsumerState<DifficultyDetailPage>
   int _calculateMode = 1; // 0: 绝对值, 1: CRITICAL差值, 2: PERFECT差值
   final ChromeSafariBrowser browser = ChromeSafariBrowser();
   List<Map<String, dynamic>>? _historyData;
-  bool _isLoadingHistory = false;
+  final bool _isLoadingHistory = false;
   String? _historyError;
   late TabController _tabController;
 
@@ -232,7 +232,7 @@ class _DifficultyDetailPageState extends ConsumerState<DifficultyDetailPage>
                         // 当前成绩卡片
                         if (currentScore != null)
                           CurrentScoreCard(
-                            score: currentScore!,
+                            score: currentScore,
                             maxDxScore: widget.difficulty.notes!.total * 3,
                           ),
                         if (currentScore != null) const SizedBox(height: 16),
@@ -416,7 +416,7 @@ class _DifficultyDetailPageState extends ConsumerState<DifficultyDetailPage>
                                           ),
                                         ),
                                         child: Text(
-                                          '${currentScore!.achievements.toStringAsFixed(4)}% → ${currentScore!.dxRating.toInt()}',
+                                          '${currentScore.achievements.toStringAsFixed(4)}% → ${currentScore.dxRating.toInt()}',
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,

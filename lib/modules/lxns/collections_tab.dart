@@ -110,7 +110,7 @@ class CollectionsTab extends StatelessWidget {
               children: [
                 // 类型选择下拉框
                 DropdownButtonFormField<String>(
-                  value: controller.selectedCollectionType,
+                  initialValue: controller.selectedCollectionType,
                   decoration: const InputDecoration(
                     labelText: '收藏品类型',
                     border: OutlineInputBorder(),

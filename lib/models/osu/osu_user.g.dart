@@ -32,150 +32,155 @@ const OsuUserSchema = CollectionSchema(
       name: r'countryCode',
       type: IsarType.string,
     ),
-    r'countryRank': PropertySchema(
+    r'countryName': PropertySchema(
       id: 3,
+      name: r'countryName',
+      type: IsarType.string,
+    ),
+    r'countryRank': PropertySchema(
+      id: 4,
       name: r'countryRank',
       type: IsarType.long,
     ),
     r'coverUrl': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'coverUrl',
       type: IsarType.string,
     ),
     r'currentLevel': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'currentLevel',
       type: IsarType.long,
     ),
     r'favouriteBeatmapsetCount': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'favouriteBeatmapsetCount',
       type: IsarType.long,
     ),
     r'followerCount': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'followerCount',
       type: IsarType.long,
     ),
     r'globalRank': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'globalRank',
       type: IsarType.long,
     ),
     r'graveyardBeatmapsetCount': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'graveyardBeatmapsetCount',
       type: IsarType.long,
     ),
     r'hitAccuracy': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'hitAccuracy',
       type: IsarType.double,
     ),
-    r'isActive': PropertySchema(id: 11, name: r'isActive', type: IsarType.bool),
-    r'isBot': PropertySchema(id: 12, name: r'isBot', type: IsarType.bool),
+    r'isActive': PropertySchema(id: 12, name: r'isActive', type: IsarType.bool),
+    r'isBot': PropertySchema(id: 13, name: r'isBot', type: IsarType.bool),
     r'isDeleted': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'isDeleted',
       type: IsarType.bool,
     ),
-    r'isOnline': PropertySchema(id: 14, name: r'isOnline', type: IsarType.bool),
+    r'isOnline': PropertySchema(id: 15, name: r'isOnline', type: IsarType.bool),
     r'isSupporter': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'isSupporter',
       type: IsarType.bool,
     ),
     r'joinDate': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'joinDate',
       type: IsarType.dateTime,
     ),
     r'lastVisit': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'lastVisit',
       type: IsarType.dateTime,
     ),
     r'levelProgress': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'levelProgress',
       type: IsarType.long,
     ),
     r'lovedBeatmapsetCount': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'lovedBeatmapsetCount',
       type: IsarType.long,
     ),
     r'maniaStatisticsJson': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'maniaStatisticsJson',
       type: IsarType.string,
     ),
     r'mappingFollowerCount': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'mappingFollowerCount',
       type: IsarType.long,
     ),
     r'maximumCombo': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'maximumCombo',
       type: IsarType.long,
     ),
     r'nominatedBeatmapsetCount': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'nominatedBeatmapsetCount',
       type: IsarType.long,
     ),
     r'pendingBeatmapsetCount': PropertySchema(
-      id: 24,
+      id: 25,
       name: r'pendingBeatmapsetCount',
       type: IsarType.long,
     ),
     r'playCount': PropertySchema(
-      id: 25,
+      id: 26,
       name: r'playCount',
       type: IsarType.long,
     ),
-    r'playTime': PropertySchema(id: 26, name: r'playTime', type: IsarType.long),
+    r'playTime': PropertySchema(id: 27, name: r'playTime', type: IsarType.long),
     r'playmode': PropertySchema(
-      id: 27,
+      id: 28,
       name: r'playmode',
       type: IsarType.string,
     ),
-    r'pp': PropertySchema(id: 28, name: r'pp', type: IsarType.double),
+    r'pp': PropertySchema(id: 29, name: r'pp', type: IsarType.double),
     r'profileColour': PropertySchema(
-      id: 29,
+      id: 30,
       name: r'profileColour',
       type: IsarType.string,
     ),
     r'rankedBeatmapsetCount': PropertySchema(
-      id: 30,
+      id: 31,
       name: r'rankedBeatmapsetCount',
       type: IsarType.long,
     ),
-    r'rawJson': PropertySchema(id: 31, name: r'rawJson', type: IsarType.string),
+    r'rawJson': PropertySchema(id: 32, name: r'rawJson', type: IsarType.string),
     r'stdStatisticsJson': PropertySchema(
-      id: 32,
+      id: 33,
       name: r'stdStatisticsJson',
       type: IsarType.string,
     ),
     r'taikoStatisticsJson': PropertySchema(
-      id: 33,
+      id: 34,
       name: r'taikoStatisticsJson',
       type: IsarType.string,
     ),
     r'totalScore': PropertySchema(
-      id: 34,
+      id: 35,
       name: r'totalScore',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 35,
+      id: 36,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
-    r'userId': PropertySchema(id: 36, name: r'userId', type: IsarType.long),
+    r'userId': PropertySchema(id: 37, name: r'userId', type: IsarType.long),
     r'username': PropertySchema(
-      id: 37,
+      id: 38,
       name: r'username',
       type: IsarType.string,
     ),
@@ -248,6 +253,12 @@ int _osuUserEstimateSize(
     }
   }
   {
+    final value = object.countryName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.coverUrl;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -302,41 +313,42 @@ void _osuUserSerialize(
   writer.writeString(offsets[0], object.avatarUrl);
   writer.writeString(offsets[1], object.catchStatisticsJson);
   writer.writeString(offsets[2], object.countryCode);
-  writer.writeLong(offsets[3], object.countryRank);
-  writer.writeString(offsets[4], object.coverUrl);
-  writer.writeLong(offsets[5], object.currentLevel);
-  writer.writeLong(offsets[6], object.favouriteBeatmapsetCount);
-  writer.writeLong(offsets[7], object.followerCount);
-  writer.writeLong(offsets[8], object.globalRank);
-  writer.writeLong(offsets[9], object.graveyardBeatmapsetCount);
-  writer.writeDouble(offsets[10], object.hitAccuracy);
-  writer.writeBool(offsets[11], object.isActive);
-  writer.writeBool(offsets[12], object.isBot);
-  writer.writeBool(offsets[13], object.isDeleted);
-  writer.writeBool(offsets[14], object.isOnline);
-  writer.writeBool(offsets[15], object.isSupporter);
-  writer.writeDateTime(offsets[16], object.joinDate);
-  writer.writeDateTime(offsets[17], object.lastVisit);
-  writer.writeLong(offsets[18], object.levelProgress);
-  writer.writeLong(offsets[19], object.lovedBeatmapsetCount);
-  writer.writeString(offsets[20], object.maniaStatisticsJson);
-  writer.writeLong(offsets[21], object.mappingFollowerCount);
-  writer.writeLong(offsets[22], object.maximumCombo);
-  writer.writeLong(offsets[23], object.nominatedBeatmapsetCount);
-  writer.writeLong(offsets[24], object.pendingBeatmapsetCount);
-  writer.writeLong(offsets[25], object.playCount);
-  writer.writeLong(offsets[26], object.playTime);
-  writer.writeString(offsets[27], object.playmode);
-  writer.writeDouble(offsets[28], object.pp);
-  writer.writeString(offsets[29], object.profileColour);
-  writer.writeLong(offsets[30], object.rankedBeatmapsetCount);
-  writer.writeString(offsets[31], object.rawJson);
-  writer.writeString(offsets[32], object.stdStatisticsJson);
-  writer.writeString(offsets[33], object.taikoStatisticsJson);
-  writer.writeLong(offsets[34], object.totalScore);
-  writer.writeDateTime(offsets[35], object.updatedAt);
-  writer.writeLong(offsets[36], object.userId);
-  writer.writeString(offsets[37], object.username);
+  writer.writeString(offsets[3], object.countryName);
+  writer.writeLong(offsets[4], object.countryRank);
+  writer.writeString(offsets[5], object.coverUrl);
+  writer.writeLong(offsets[6], object.currentLevel);
+  writer.writeLong(offsets[7], object.favouriteBeatmapsetCount);
+  writer.writeLong(offsets[8], object.followerCount);
+  writer.writeLong(offsets[9], object.globalRank);
+  writer.writeLong(offsets[10], object.graveyardBeatmapsetCount);
+  writer.writeDouble(offsets[11], object.hitAccuracy);
+  writer.writeBool(offsets[12], object.isActive);
+  writer.writeBool(offsets[13], object.isBot);
+  writer.writeBool(offsets[14], object.isDeleted);
+  writer.writeBool(offsets[15], object.isOnline);
+  writer.writeBool(offsets[16], object.isSupporter);
+  writer.writeDateTime(offsets[17], object.joinDate);
+  writer.writeDateTime(offsets[18], object.lastVisit);
+  writer.writeLong(offsets[19], object.levelProgress);
+  writer.writeLong(offsets[20], object.lovedBeatmapsetCount);
+  writer.writeString(offsets[21], object.maniaStatisticsJson);
+  writer.writeLong(offsets[22], object.mappingFollowerCount);
+  writer.writeLong(offsets[23], object.maximumCombo);
+  writer.writeLong(offsets[24], object.nominatedBeatmapsetCount);
+  writer.writeLong(offsets[25], object.pendingBeatmapsetCount);
+  writer.writeLong(offsets[26], object.playCount);
+  writer.writeLong(offsets[27], object.playTime);
+  writer.writeString(offsets[28], object.playmode);
+  writer.writeDouble(offsets[29], object.pp);
+  writer.writeString(offsets[30], object.profileColour);
+  writer.writeLong(offsets[31], object.rankedBeatmapsetCount);
+  writer.writeString(offsets[32], object.rawJson);
+  writer.writeString(offsets[33], object.stdStatisticsJson);
+  writer.writeString(offsets[34], object.taikoStatisticsJson);
+  writer.writeLong(offsets[35], object.totalScore);
+  writer.writeDateTime(offsets[36], object.updatedAt);
+  writer.writeLong(offsets[37], object.userId);
+  writer.writeString(offsets[38], object.username);
 }
 
 OsuUser _osuUserDeserialize(
@@ -349,42 +361,43 @@ OsuUser _osuUserDeserialize(
   object.avatarUrl = reader.readStringOrNull(offsets[0]);
   object.catchStatisticsJson = reader.readStringOrNull(offsets[1]);
   object.countryCode = reader.readStringOrNull(offsets[2]);
-  object.countryRank = reader.readLongOrNull(offsets[3]);
-  object.coverUrl = reader.readStringOrNull(offsets[4]);
-  object.currentLevel = reader.readLongOrNull(offsets[5]);
-  object.favouriteBeatmapsetCount = reader.readLongOrNull(offsets[6]);
-  object.followerCount = reader.readLongOrNull(offsets[7]);
-  object.globalRank = reader.readLongOrNull(offsets[8]);
-  object.graveyardBeatmapsetCount = reader.readLongOrNull(offsets[9]);
-  object.hitAccuracy = reader.readDoubleOrNull(offsets[10]);
+  object.countryName = reader.readStringOrNull(offsets[3]);
+  object.countryRank = reader.readLongOrNull(offsets[4]);
+  object.coverUrl = reader.readStringOrNull(offsets[5]);
+  object.currentLevel = reader.readLongOrNull(offsets[6]);
+  object.favouriteBeatmapsetCount = reader.readLongOrNull(offsets[7]);
+  object.followerCount = reader.readLongOrNull(offsets[8]);
+  object.globalRank = reader.readLongOrNull(offsets[9]);
+  object.graveyardBeatmapsetCount = reader.readLongOrNull(offsets[10]);
+  object.hitAccuracy = reader.readDoubleOrNull(offsets[11]);
   object.id = id;
-  object.isActive = reader.readBool(offsets[11]);
-  object.isBot = reader.readBool(offsets[12]);
-  object.isDeleted = reader.readBool(offsets[13]);
-  object.isOnline = reader.readBool(offsets[14]);
-  object.isSupporter = reader.readBool(offsets[15]);
-  object.joinDate = reader.readDateTimeOrNull(offsets[16]);
-  object.lastVisit = reader.readDateTimeOrNull(offsets[17]);
-  object.levelProgress = reader.readLongOrNull(offsets[18]);
-  object.lovedBeatmapsetCount = reader.readLongOrNull(offsets[19]);
-  object.maniaStatisticsJson = reader.readStringOrNull(offsets[20]);
-  object.mappingFollowerCount = reader.readLongOrNull(offsets[21]);
-  object.maximumCombo = reader.readLongOrNull(offsets[22]);
-  object.nominatedBeatmapsetCount = reader.readLongOrNull(offsets[23]);
-  object.pendingBeatmapsetCount = reader.readLongOrNull(offsets[24]);
-  object.playCount = reader.readLongOrNull(offsets[25]);
-  object.playTime = reader.readLongOrNull(offsets[26]);
-  object.playmode = reader.readStringOrNull(offsets[27]);
-  object.pp = reader.readDoubleOrNull(offsets[28]);
-  object.profileColour = reader.readStringOrNull(offsets[29]);
-  object.rankedBeatmapsetCount = reader.readLongOrNull(offsets[30]);
-  object.rawJson = reader.readStringOrNull(offsets[31]);
-  object.stdStatisticsJson = reader.readStringOrNull(offsets[32]);
-  object.taikoStatisticsJson = reader.readStringOrNull(offsets[33]);
-  object.totalScore = reader.readLongOrNull(offsets[34]);
-  object.updatedAt = reader.readDateTime(offsets[35]);
-  object.userId = reader.readLong(offsets[36]);
-  object.username = reader.readString(offsets[37]);
+  object.isActive = reader.readBool(offsets[12]);
+  object.isBot = reader.readBool(offsets[13]);
+  object.isDeleted = reader.readBool(offsets[14]);
+  object.isOnline = reader.readBool(offsets[15]);
+  object.isSupporter = reader.readBool(offsets[16]);
+  object.joinDate = reader.readDateTimeOrNull(offsets[17]);
+  object.lastVisit = reader.readDateTimeOrNull(offsets[18]);
+  object.levelProgress = reader.readLongOrNull(offsets[19]);
+  object.lovedBeatmapsetCount = reader.readLongOrNull(offsets[20]);
+  object.maniaStatisticsJson = reader.readStringOrNull(offsets[21]);
+  object.mappingFollowerCount = reader.readLongOrNull(offsets[22]);
+  object.maximumCombo = reader.readLongOrNull(offsets[23]);
+  object.nominatedBeatmapsetCount = reader.readLongOrNull(offsets[24]);
+  object.pendingBeatmapsetCount = reader.readLongOrNull(offsets[25]);
+  object.playCount = reader.readLongOrNull(offsets[26]);
+  object.playTime = reader.readLongOrNull(offsets[27]);
+  object.playmode = reader.readStringOrNull(offsets[28]);
+  object.pp = reader.readDoubleOrNull(offsets[29]);
+  object.profileColour = reader.readStringOrNull(offsets[30]);
+  object.rankedBeatmapsetCount = reader.readLongOrNull(offsets[31]);
+  object.rawJson = reader.readStringOrNull(offsets[32]);
+  object.stdStatisticsJson = reader.readStringOrNull(offsets[33]);
+  object.taikoStatisticsJson = reader.readStringOrNull(offsets[34]);
+  object.totalScore = reader.readLongOrNull(offsets[35]);
+  object.updatedAt = reader.readDateTime(offsets[36]);
+  object.userId = reader.readLong(offsets[37]);
+  object.username = reader.readString(offsets[38]);
   return object;
 }
 
@@ -402,11 +415,11 @@ P _osuUserDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readLongOrNull(offset)) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readLongOrNull(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
       return (reader.readLongOrNull(offset)) as P;
     case 7:
@@ -416,9 +429,9 @@ P _osuUserDeserializeProp<P>(
     case 9:
       return (reader.readLongOrNull(offset)) as P;
     case 10:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 11:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 12:
       return (reader.readBool(offset)) as P;
     case 13:
@@ -428,17 +441,17 @@ P _osuUserDeserializeProp<P>(
     case 15:
       return (reader.readBool(offset)) as P;
     case 16:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 17:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 18:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 19:
       return (reader.readLongOrNull(offset)) as P;
     case 20:
-      return (reader.readStringOrNull(offset)) as P;
-    case 21:
       return (reader.readLongOrNull(offset)) as P;
+    case 21:
+      return (reader.readStringOrNull(offset)) as P;
     case 22:
       return (reader.readLongOrNull(offset)) as P;
     case 23:
@@ -450,26 +463,28 @@ P _osuUserDeserializeProp<P>(
     case 26:
       return (reader.readLongOrNull(offset)) as P;
     case 27:
-      return (reader.readStringOrNull(offset)) as P;
-    case 28:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 29:
-      return (reader.readStringOrNull(offset)) as P;
-    case 30:
       return (reader.readLongOrNull(offset)) as P;
-    case 31:
+    case 28:
       return (reader.readStringOrNull(offset)) as P;
+    case 29:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 30:
+      return (reader.readStringOrNull(offset)) as P;
+    case 31:
+      return (reader.readLongOrNull(offset)) as P;
     case 32:
       return (reader.readStringOrNull(offset)) as P;
     case 33:
       return (reader.readStringOrNull(offset)) as P;
     case 34:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 35:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 36:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 37:
+      return (reader.readLong(offset)) as P;
+    case 38:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1291,6 +1306,169 @@ extension OsuUserQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'countryCode', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'countryName'),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'countryName'),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'countryName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'countryName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'countryName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'countryName',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'countryName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'countryName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'countryName',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'countryName',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition> countryNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'countryName', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterFilterCondition>
+  countryNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'countryName', value: ''),
       );
     });
   }
@@ -4381,6 +4559,18 @@ extension OsuUserQuerySortBy on QueryBuilder<OsuUser, OsuUser, QSortBy> {
     });
   }
 
+  QueryBuilder<OsuUser, OsuUser, QAfterSortBy> sortByCountryName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterSortBy> sortByCountryNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.desc);
+    });
+  }
+
   QueryBuilder<OsuUser, OsuUser, QAfterSortBy> sortByCountryRank() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countryRank', Sort.asc);
@@ -4847,6 +5037,18 @@ extension OsuUserQuerySortThenBy
   QueryBuilder<OsuUser, OsuUser, QAfterSortBy> thenByCountryCodeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'countryCode', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterSortBy> thenByCountryName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OsuUser, OsuUser, QAfterSortBy> thenByCountryNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'countryName', Sort.desc);
     });
   }
 
@@ -5322,6 +5524,14 @@ extension OsuUserQueryWhereDistinct
     });
   }
 
+  QueryBuilder<OsuUser, OsuUser, QDistinct> distinctByCountryName({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'countryName', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<OsuUser, OsuUser, QDistinct> distinctByCountryRank() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'countryRank');
@@ -5588,6 +5798,12 @@ extension OsuUserQueryProperty
   QueryBuilder<OsuUser, String?, QQueryOperations> countryCodeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'countryCode');
+    });
+  }
+
+  QueryBuilder<OsuUser, String?, QQueryOperations> countryNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'countryName');
     });
   }
 

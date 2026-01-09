@@ -25,6 +25,9 @@ class OsuUser {
   /// 国家代码 (ISO 3166-1 alpha-2)
   String? countryCode;
 
+  /// 国家名称 (from country.name)
+  String? countryName;
+
   /// 个人简介颜色 (Hex)
   String? profileColour;
 
@@ -194,6 +197,12 @@ class OsuUser {
       ..isSupporter = json['is_supporter'] as bool? ?? false
       ..updatedAt = DateTime.now();
 
+    // 解析国家名称
+    if (json.containsKey('country')) {
+      final country = json['country'] as Map<String, dynamic>;
+      user.countryName = country['name'] as String?;
+    }
+
     // 处理 UserExtended 字段
     if (json.containsKey('cover')) {
       final cover = json['cover'] as Map<String, dynamic>?;
@@ -246,6 +255,23 @@ class OsuUser {
         // 兼容扁平结构
         user.globalRank = stats['global_rank'] as int?;
         // country_rank 可能不在扁平结构中
+      }
+    }
+
+    // 处理 statistics_rulesets 以更新各个模式的数据
+    if (json.containsKey('statistics_rulesets')) {
+      final rulesets = json['statistics_rulesets'] as Map<String, dynamic>;
+      if (rulesets.containsKey('osu')) {
+        user.updateModeStatistics('osu', rulesets['osu'] as Map<String, dynamic>);
+      }
+      if (rulesets.containsKey('taiko')) {
+        user.updateModeStatistics('taiko', rulesets['taiko'] as Map<String, dynamic>);
+      }
+      if (rulesets.containsKey('fruits')) {
+        user.updateModeStatistics('fruits', rulesets['fruits'] as Map<String, dynamic>);
+      }
+      if (rulesets.containsKey('mania')) {
+        user.updateModeStatistics('mania', rulesets['mania'] as Map<String, dynamic>);
       }
     }
 

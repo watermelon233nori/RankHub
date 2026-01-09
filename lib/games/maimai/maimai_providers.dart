@@ -4,7 +4,6 @@ import 'package:rank_hub/core/resource_provider.dart';
 import 'package:rank_hub/games/maimai/maimai_resources.dart';
 import 'package:rank_hub/games/maimai/models/maimai_score.dart';
 import 'package:rank_hub/games/maimai/models/maimai_song.dart';
-import 'package:rank_hub/modules/lxns/services/maimai_api_service.dart';
 
 final maimaiSongByIdProvider = Provider.family<MaimaiSong?, int>((ref, songId) {
   return ref.watch(

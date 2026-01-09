@@ -242,7 +242,7 @@ class PlayerInfoCard extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: colorScheme.surfaceVariant,
+        color: colorScheme.surfaceContainerHighest,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
@@ -252,7 +252,7 @@ class PlayerInfoCard extends StatelessWidget {
                     'https://assets2.lxns.net/maimai/icon/${player.icon!.id}.png',
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
-                  color: colorScheme.surfaceVariant,
+                  color: colorScheme.surfaceContainerHighest,
                   child: const Center(child: CircularProgressIndicator()),
                 ),
                 errorWidget: (context, url, error) => Icon(
@@ -279,7 +279,7 @@ class PlayerInfoCard extends StatelessWidget {
         placeholder: (context, url) => Container(
           height: 32,
           width: 32,
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: const Center(
             child: SizedBox(
               width: 20,
@@ -309,7 +309,7 @@ class PlayerInfoCard extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(

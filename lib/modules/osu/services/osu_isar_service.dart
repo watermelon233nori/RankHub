@@ -1,5 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:rank_hub/models/osu/osu_user.dart';
+import 'package:rank_hub/models/osu/osu_score.dart';
 import 'package:rank_hub/services/base_isar_service.dart';
 
 /// osu! 数据库服务
@@ -18,7 +19,7 @@ class OsuIsarService extends BaseIsarService {
   String get databaseName => 'osu_db';
 
   @override
-  List<CollectionSchema> get schemas => [OsuUserSchema];
+  List<CollectionSchema> get schemas => [OsuUserSchema, OsuScoreSchema];
 
   /// 保存 osu! 用户信息
   /// 如果用户已存在，则更新信息
@@ -51,6 +52,38 @@ class OsuIsarService extends BaseIsarService {
     final isar = await db;
     await isar.writeTxn(() async {
       await isar.osuUsers.filter().userIdEqualTo(userId).deleteAll();
+      await isar.osuScores.filter().userIdEqualTo(userId).deleteAll();
     });
+  }
+
+  /// 保存 osu! 成绩列表 (Best 100)
+  /// 会覆盖该用户在该模式下的所有旧成绩
+  Future<void> saveScores(List<OsuScore> scores) async {
+    if (scores.isEmpty) return;
+    
+    final isar = await db;
+    final userId = scores.first.userId;
+    final mode = scores.first.mode;
+
+    await isar.writeTxn(() async {
+      // 删除该用户在该模式下的旧成绩
+      await isar.osuScores
+          .filter()
+          .userIdEqualTo(userId)
+          .modeEqualTo(mode)
+          .deleteAll();
+      
+      await isar.osuScores.putAll(scores);
+    });
+  }
+
+  /// 获取用户的 Best 成绩
+  Future<List<OsuScore>> getBestScores(int userId) async {
+    final isar = await db;
+    return await isar.osuScores
+        .filter()
+        .userIdEqualTo(userId)
+        .sortByPpDesc() // 默认按 PP 排序
+        .findAll();
   }
 }

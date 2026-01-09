@@ -924,7 +924,7 @@ class _NearcadePageState extends State<NearcadePage> {
                         map.showMarker(coords: coords, title: title);
                       },
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -978,7 +978,7 @@ class _NearcadePageState extends State<NearcadePage> {
                     _loadShops();
                   },
                 );
-              }).toList(),
+              }),
               const SizedBox(height: 16),
             ],
           ),

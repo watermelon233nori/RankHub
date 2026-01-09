@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:rank_hub/models/osu/osu_user.dart';
+import 'package:rank_hub/models/osu/osu_score.dart';
+import 'package:rank_hub/services/account_service.dart';
 import 'package:rank_hub/services/isar_service.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
@@ -112,7 +114,7 @@ class OsuLoginHandler extends PlatformLoginHandler {
                     Text('正在同步 osu! 数据...'),
                     SizedBox(height: 8),
                     Text(
-                      '正在获取不同模式的成绩信息',
+                      '正在获取用户详细信息',
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
@@ -123,8 +125,8 @@ class OsuLoginHandler extends PlatformLoginHandler {
         );
       }
 
-      // 触发全量模式数据同步（等待执行完成）
-      await _syncAllModes(
+      // 触发数据同步（等待执行完成）
+      await _syncUser(
         tokenData['access_token'] as String,
         accountInfo.externalId,
       );
@@ -333,52 +335,111 @@ class OsuLoginHandler extends PlatformLoginHandler {
     }
   }
 
-  /// 后台同步所有模式的数据
-  Future<void> _syncAllModes(String accessToken, String userIdStr) async {
-    print('🔄 开始同步 osu! 所有模式数据...');
-    final modes = ['osu', 'taiko', 'fruits', 'mania'];
+  /// 同步用户数据
+  /// 优化：只请求 /me 并解析 statistics_rulesets
+  Future<void> _syncUser(String accessToken, String userIdStr) async {
+    print('🔄 开始同步 osu! 用户数据...');
     final userId = int.tryParse(userIdStr);
     if (userId == null) return;
 
-    // 先获取或创建用户对象
-    OsuUser? osuUser = await IsarService.instance.osu.getUser(userId);
+    try {
+      print('📤 获取用户详细信息 (/me)...');
+      final response = await _dio.get(
+        '$baseUrl/api/v2/me',
+        queryParameters: {'key': 'id'}, // 使用 ID 查找
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Accept': 'application/json',
+          },
+        ),
+      );
 
-    // 遍历四种模式获取数据
-    for (final mode in modes) {
-      try {
-        print('📤 获取 $mode 模式数据...');
-        final response = await _dio.get(
-          '$baseUrl/api/v2/me/$mode',
-          options: Options(
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-              'Accept': 'application/json',
-            },
-          ),
-        );
+      if (response.statusCode == 200) {
+        final data = response.data as Map<String, dynamic>;
 
-        if (response.statusCode == 200) {
-          final data = response.data as Map<String, dynamic>;
+        // 直接解析并保存 OsuUser
+        // OsuUser.fromJson 已经包含了对 statistics_rulesets 的处理逻辑
+        final osuUser = OsuUser.fromJson(data);
 
-          if (osuUser == null) {
-            // 如果是第一次获取，初始化用户对象
-            osuUser = OsuUser.fromJson(data);
-          }
+        await IsarService.instance.osu.saveUser(osuUser);
+        print('✅ osu! 用户数据同步完成');
 
-          // 更新该模式的统计信息（增量更新）
-          if (data.containsKey('statistics')) {
-            osuUser.updateModeStatistics(mode, data['statistics']);
-          }
-
-          // 保存更新
-          await IsarService.instance.osu.saveUser(osuUser);
-          print('✅ $mode 模式数据同步完成');
+        // 同步所有模式的 Best Scores
+        final modes = ['osu', 'taiko', 'fruits', 'mania'];
+        for (final mode in modes) {
+          // 检查该模式是否有数据（可选，这里简单起见全部尝试同步，或者检查 play_count > 0）
+          // API 如果该模式没玩过可能会返回空列表，符合预期
+          await syncBestScores(accessToken, userId, mode);
         }
-      } catch (e) {
-        print('❌ 同步 $mode 模式失败: $e');
-        // 继续同步下一个模式，不中断流程
       }
+    } catch (e) {
+      print('❌ 同步 osu! 用户数据失败: $e');
     }
-    print('✅ osu! 数据同步流程结束');
+  }
+
+  /// 同步用户的 Best 100 成绩
+  Future<void> syncBestScores(
+    String accessToken,
+    int userId,
+    String mode,
+  ) async {
+    print('🔄 同步 $mode Best 100 成绩...');
+    try {
+      final response = await _dio.get(
+        '$baseUrl/api/v2/users/$userId/scores/best',
+        queryParameters: {'mode': mode, 'limit': 100},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        final scores = data.map((e) => OsuScore.fromJson(e)).toList();
+
+        await IsarService.instance.osu.saveScores(scores);
+        print('✅ $mode Best 100 同步完成: ${scores.length} 条');
+      }
+    } catch (e) {
+      print('❌ 同步 $mode 成绩失败: $e');
+    }
+  }
+
+  /// 手动刷新用户数据
+  Future<void> refreshUser(Account account) async {
+    print('🔄 刷新 osu! 用户数据 (ID: ${account.externalId})');
+
+    // 1. 获取有效 Token (自动处理刷新)
+    // 使用 AccountService 来获取最新的凭据，而不是直接在 handler 中实现
+    final updatedAccount = await AccountService.instance.getCredential(account);
+    final accessToken = updatedAccount.accessToken;
+
+    if (accessToken == null) {
+      print('❌ 无法获取有效凭证，请重新登录');
+      Get.snackbar('刷新失败', '登录凭证已过期，请重新登录');
+      return;
+    }
+
+    // 2. 显示 Loading (如果是手动触发)
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    try {
+      // 3. 执行同步
+      await _syncUser(accessToken, account.externalId);
+
+      Get.back(); // 关闭 Loading
+      Get.snackbar('刷新成功', 'osu! 数据已更新');
+    } catch (e) {
+      Get.back();
+      print('❌ 刷新失败: $e');
+      Get.snackbar('刷新失败', e.toString());
+    }
   }
 }

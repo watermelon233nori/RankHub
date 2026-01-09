@@ -4,7 +4,6 @@ import 'package:rank_hub/modules/musedash/services/musedash_isar_service.dart';
 import 'package:rank_hub/modules/phigros/services/phigros_isar_service.dart';
 import 'package:rank_hub/modules/osu/services/osu_isar_service.dart';
 import 'package:rank_hub/services/account_isar_service.dart';
-import 'package:rank_hub/services/log_service.dart';
 
 /// Isar 数据库服务统一入口
 /// 提供对各游戏数据库服务的访问

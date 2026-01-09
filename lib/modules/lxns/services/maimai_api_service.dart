@@ -693,7 +693,7 @@ class MaimaiApiService {
     final totalCount = scores.length;
 
     try {
-      onProgress?.call(0, totalCount, '正在上传 ${totalCount} 条成绩...');
+      onProgress?.call(0, totalCount, '正在上传 $totalCount 条成绩...');
 
       // 转换为API要求的格式
       final scoresData = scores
