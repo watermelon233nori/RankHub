@@ -142,7 +142,7 @@ class OsuPlayerInfoCard extends StatelessWidget {
   Widget _buildUserInfoHeader(BuildContext context) {
     final joinDateStr = user.joinDate != null
         ? DateFormat('yyyy-MM-dd').format(user.joinDate!)
-        : 'Unknown';
+        : '未知';
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -220,7 +220,7 @@ class OsuPlayerInfoCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Joined: $joinDateStr',
+                    '加入时间: $joinDateStr',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.outline,
                     ),
@@ -242,7 +242,7 @@ class OsuPlayerInfoCard extends StatelessWidget {
                 );
                 OsuLoginHandler().refreshUser(account);
               },
-              tooltip: 'Refresh Data',
+              tooltip: '刷新数据',
             ),
           ],
         ),
@@ -385,12 +385,9 @@ class OsuPlayerInfoCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildStatItem('PP', stats.pp?.toStringAsFixed(0) ?? "-"),
+                      _buildStatItem('全球排名', '#${stats.globalRank ?? "-"}'),
                       _buildStatItem(
-                        'Global Rank',
-                        '#${stats.globalRank ?? "-"}',
-                      ),
-                      _buildStatItem(
-                        'Accuracy',
+                        '准确率',
                         '${stats.hitAccuracy?.toStringAsFixed(2) ?? "-"}%',
                       ),
                     ],
@@ -404,7 +401,7 @@ class OsuPlayerInfoCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Lv.${stats.currentLevel}',
+                          '等级 ${stats.currentLevel}',
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 12,

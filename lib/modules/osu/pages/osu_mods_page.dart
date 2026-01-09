@@ -59,9 +59,17 @@ class _OsuModsPageState extends State<OsuModsPage>
   String _getModTypeName(String type) {
     switch (type) {
       case 'DifficultyReduction':
-        return 'Difficulty Reduction';
+        return '降低难度';
       case 'DifficultyIncrease':
-        return 'Difficulty Increase';
+        return '增加难度';
+      case 'Automation':
+        return '自动化';
+      case 'Conversion':
+        return '转换';
+      case 'Fun':
+        return '娱乐';
+      case 'System':
+        return '系统';
       default:
         return type;
     }
@@ -71,7 +79,7 @@ class _OsuModsPageState extends State<OsuModsPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('osu! Mods'),
+        title: const Text('osu! 模组一览'),
         actions: [
           if (_loadedData != null)
             IconButton(
@@ -97,10 +105,10 @@ class _OsuModsPageState extends State<OsuModsPage>
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error loading mods: ${snapshot.error}'));
+            return Center(child: Text('加载模组失败: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No mods found'));
+            return const Center(child: Text('未找到模组'));
           }
 
           final rulesets = snapshot.data!;
@@ -301,19 +309,13 @@ class _OsuModsPageState extends State<OsuModsPage>
                     ],
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    'Description',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                  Text('描述', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   Text(mod.description),
 
                   if (mod.settings.isNotEmpty) ...[
                     const SizedBox(height: 24),
-                    Text(
-                      'Settings',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                    Text('设置', style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     ...mod.settings.map(
                       (setting) => Card(
@@ -356,7 +358,7 @@ class _OsuModsPageState extends State<OsuModsPage>
                   if (mod.incompatibleMods.isNotEmpty) ...[
                     const SizedBox(height: 24),
                     Text(
-                      'Incompatible Mods',
+                      '互斥模组',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
@@ -430,7 +432,7 @@ class _OsuModSearchDelegate extends SearchDelegate {
 
   Widget _buildSearchResults() {
     if (query.isEmpty) {
-      return const Center(child: Text('Search for mods...'));
+      return const Center(child: Text('搜索模组...'));
     }
 
     final results = <Map<String, dynamic>>[];
@@ -445,7 +447,7 @@ class _OsuModSearchDelegate extends SearchDelegate {
     }
 
     if (results.isEmpty) {
-      return const Center(child: Text('No mods found'));
+      return const Center(child: Text('未找到模组'));
     }
 
     return ListView.builder(

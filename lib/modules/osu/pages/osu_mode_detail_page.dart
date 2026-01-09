@@ -27,7 +27,7 @@ class OsuModeDetailPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text('$modeName Stats'),
+        title: Text('$modeName 数据'),
         backgroundColor: modeColor.withOpacity(0.1),
         foregroundColor: modeColor,
         elevation: 0,
@@ -89,8 +89,8 @@ class OsuModeDetailPage extends StatelessWidget {
               Text(
                 username,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 4),
               Container(
@@ -131,21 +131,65 @@ class OsuModeDetailPage extends StatelessWidget {
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       children: [
-        _buildStatCard(context, 'PP', pp.toStringAsFixed(0), Icons.emoji_events, modeColor),
-        _buildStatCard(context, 'Global Rank', rank != null ? '#$rank' : '-', Icons.public, modeColor),
-        _buildStatCard(context, 'Accuracy', '${accuracy.toStringAsFixed(2)}%', Icons.show_chart, modeColor),
-        _buildStatCard(context, 'Play Count', NumberFormat.compact().format(playCount), Icons.play_arrow, modeColor),
-        _buildStatCard(context, 'Max Combo', '$maxCombo x', Icons.numbers, modeColor),
-        _buildStatCard(context, 'Total Score', NumberFormat.compact().format(totalScore), Icons.score, modeColor),
+        _buildStatCard(
+          context,
+          'PP',
+          pp.toStringAsFixed(0),
+          Icons.emoji_events,
+          modeColor,
+        ),
+        _buildStatCard(
+          context,
+          '全球排名',
+          rank != null ? '#$rank' : '-',
+          Icons.public,
+          modeColor,
+        ),
+        _buildStatCard(
+          context,
+          '准确率',
+          '${accuracy.toStringAsFixed(2)}%',
+          Icons.show_chart,
+          modeColor,
+        ),
+        _buildStatCard(
+          context,
+          '游玩次数',
+          NumberFormat.compact().format(playCount),
+          Icons.play_arrow,
+          modeColor,
+        ),
+        _buildStatCard(
+          context,
+          '最大连击',
+          '$maxCombo x',
+          Icons.numbers,
+          modeColor,
+        ),
+        _buildStatCard(
+          context,
+          '总分',
+          NumberFormat.compact().format(totalScore),
+          Icons.score,
+          modeColor,
+        ),
       ],
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.1)),
       ),
@@ -157,15 +201,15 @@ class OsuModeDetailPage extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -201,7 +245,7 @@ class OsuModeDetailPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Level $currentLevel',
+                '等级 $currentLevel',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -248,14 +292,22 @@ class OsuModeDetailPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Grades',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          '评价统计',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildGradeItem(context, 'SS', totalSS, Colors.grey, Colors.amber), // Silver/Gold merged visual
+            _buildGradeItem(
+              context,
+              'SS',
+              totalSS,
+              Colors.grey,
+              Colors.amber,
+            ), // Silver/Gold merged visual
             _buildGradeItem(context, 'S', totalS, Colors.orange, Colors.amber),
             _buildGradeItem(context, 'A', a, Colors.green, Colors.greenAccent),
           ],
@@ -264,7 +316,13 @@ class OsuModeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGradeItem(BuildContext context, String label, int count, Color color1, Color color2) {
+  Widget _buildGradeItem(
+    BuildContext context,
+    String label,
+    int count,
+    Color color1,
+    Color color2,
+  ) {
     return Column(
       children: [
         ShaderMask(
@@ -278,14 +336,16 @@ class OsuModeDetailPage extends StatelessWidget {
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w900,
-              color: Colors.white, 
+              color: Colors.white,
             ),
           ),
         ),
         const SizedBox(height: 4),
         Text(
           count.toString(),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -296,14 +356,17 @@ class OsuModeDetailPage extends StatelessWidget {
     final count100 = stats['count_100'] as int? ?? 0;
     final count50 = stats['count_50'] as int? ?? 0;
     final countMiss = stats['count_miss'] as int? ?? 0;
-    final totalHits = stats['total_hits'] as int? ?? 1; // Avoid division by zero
+    final totalHits =
+        stats['total_hits'] as int? ?? 1; // Avoid division by zero
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Hit Distribution',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          '判定分布',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         AspectRatio(
@@ -319,7 +382,11 @@ class OsuModeDetailPage extends StatelessWidget {
                     value: count300.toDouble(),
                     title: '300',
                     radius: 50,
-                    titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                    titleStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 if (count100 > 0)
                   PieChartSectionData(
@@ -327,7 +394,11 @@ class OsuModeDetailPage extends StatelessWidget {
                     value: count100.toDouble(),
                     title: '100',
                     radius: 45,
-                    titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                    titleStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 if (count50 > 0)
                   PieChartSectionData(
@@ -335,7 +406,11 @@ class OsuModeDetailPage extends StatelessWidget {
                     value: count50.toDouble(),
                     title: '50',
                     radius: 40,
-                    titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                    titleStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 if (countMiss > 0)
                   PieChartSectionData(
@@ -343,7 +418,11 @@ class OsuModeDetailPage extends StatelessWidget {
                     value: countMiss.toDouble(),
                     title: 'Miss',
                     radius: 35,
-                    titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                    titleStyle: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
               ],
             ),
@@ -358,7 +437,12 @@ class OsuModeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHitLegend(BuildContext context, String label, int value, Color color) {
+  Widget _buildHitLegend(
+    BuildContext context,
+    String label,
+    int value,
+    Color color,
+  ) {
     if (value == 0) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -372,7 +456,12 @@ class OsuModeDetailPage extends StatelessWidget {
           const SizedBox(width: 8),
           Text(label, style: Theme.of(context).textTheme.bodyMedium),
           const Spacer(),
-          Text(NumberFormat.compact().format(value), style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(
+            NumberFormat.compact().format(value),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

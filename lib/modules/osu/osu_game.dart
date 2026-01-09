@@ -48,7 +48,7 @@ class OsuGame extends IGame {
   List<GameContentView> buildWikiViews(BuildContext context) {
     return [
       GameContentView(
-        label: 'Beatmaps',
+        label: '谱面',
         icon: Icons.library_music_outlined,
         builder: (context) => const _OsuBeatmapsTab(),
       ),
@@ -59,17 +59,17 @@ class OsuGame extends IGame {
   List<GameContentView> buildRankViews(BuildContext context) {
     return [
       GameContentView(
-        label: 'Recent',
+        label: '最近游玩',
         icon: Icons.history,
         builder: (context) => const _OsuRecentPlaysTab(),
       ),
       GameContentView(
-        label: 'Best',
+        label: '最佳表现',
         icon: Icons.emoji_events_outlined,
         builder: (context) => const _OsuBestPlaysTab(),
       ),
       GameContentView(
-        label: 'First',
+        label: '第一名排行',
         icon: Icons.looks_one_outlined,
         builder: (context) => const _OsuFirstPlaysTab(),
       ),
@@ -103,7 +103,7 @@ class OsuGame extends IGame {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Text('Error loading user data: ${snapshot.error}'),
+              child: Text('加载用户数据失败: ${snapshot.error}'),
             ),
           );
         }
@@ -132,9 +132,9 @@ class _OsuBeatmapsTab extends StatelessWidget {
         children: [
           Icon(Icons.library_music_outlined, size: 64, color: Colors.grey),
           SizedBox(height: 16),
-          Text('Beatmaps'),
+          Text('谱面'),
           SizedBox(height: 8),
-          Text('Work in Progress...', style: TextStyle(color: Colors.grey)),
+          Text('开发中...', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -152,9 +152,9 @@ class _OsuRecentPlaysTab extends StatelessWidget {
         children: [
           Icon(Icons.history, size: 64, color: Colors.grey),
           SizedBox(height: 16),
-          Text('Recent Plays'),
+          Text('最近游玩'),
           SizedBox(height: 8),
-          Text('Work in Progress...', style: TextStyle(color: Colors.grey)),
+          Text('开发中...', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -172,9 +172,9 @@ class _OsuBestPlaysTab extends StatelessWidget {
         children: [
           Icon(Icons.emoji_events_outlined, size: 64, color: Colors.grey),
           SizedBox(height: 16),
-          Text('Best Performance'),
+          Text('最佳表现'),
           SizedBox(height: 8),
-          Text('Work in Progress...', style: TextStyle(color: Colors.grey)),
+          Text('开发中...', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
@@ -192,9 +192,9 @@ class _OsuFirstPlaysTab extends StatelessWidget {
         children: [
           Icon(Icons.looks_one_outlined, size: 64, color: Colors.grey),
           SizedBox(height: 16),
-          Text('First Place Ranks'),
+          Text('第一名排行'),
           SizedBox(height: 8),
-          Text('Work in Progress...', style: TextStyle(color: Colors.grey)),
+          Text('开发中...', style: TextStyle(color: Colors.grey)),
         ],
       ),
     );
