@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/game.dart';
+import 'package:rank_hub/modules/osu/services/osu_isar_service.dart';
+import 'package:rank_hub/modules/osu/widgets/osu_player_info_card.dart';
 
 class OsuGame extends IGame {
   @override
@@ -76,25 +78,43 @@ class OsuGame extends IGame {
 
   @override
   Widget? buildPlayerInfoCard(BuildContext context, Account account) {
-    // TODO: Implement player info card for osu!
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Player Info', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            const Text('osu!'),
-            Text(
-              'Account: ${account.displayName ?? account.username ?? "Unknown"}',
+    final externalId = account.externalId;
+    final userId = int.tryParse(externalId);
+
+    if (userId == null) {
+      return const SizedBox.shrink();
+    }
+
+    return FutureBuilder(
+      future: OsuIsarService.instance.getUser(userId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Card(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
             ),
-            if (account.isTokenExpired)
-              const Text('Token Expired', style: TextStyle(color: Colors.red)),
-          ],
-        ),
-      ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Error loading user data: ${snapshot.error}'),
+            ),
+          );
+        }
+
+        final user = snapshot.data;
+        if (user == null) {
+          return const SizedBox.shrink();
+        }
+
+        return OsuPlayerInfoCard(user: user);
+      },
     );
   }
 }

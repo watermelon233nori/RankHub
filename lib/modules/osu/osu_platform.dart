@@ -46,6 +46,15 @@ class OsuPlatform extends BasePlatform {
   List<IGame> getGames() => _games;
 
   @override
+  Widget? buildPlayerInfoCard(BuildContext context, Account account) {
+    // 委托给 OsuGame 实现
+    if (_games.isNotEmpty) {
+      return _games.first.buildPlayerInfoCard(context, account);
+    }
+    return null;
+  }
+
+  @override
   List<PlatformFeatureItem> getCustomFeatures(
     BuildContext context,
     Account account,
