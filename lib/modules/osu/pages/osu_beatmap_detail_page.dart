@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rank_hub/modules/osu/models/sayobot_beatmap.dart';
 import 'package:rank_hub/modules/osu/models/sayobot_beatmap_detail.dart';
+import 'package:rank_hub/modules/osu/previewer/osu_preview_page.dart';
 import 'package:rank_hub/modules/osu/services/sayobot_api_service.dart';
 import 'package:rank_hub/modules/osu/widgets/osu_radar_chart.dart';
 import 'package:rank_hub/modules/osu/services/beatmap_preview_manager.dart';
@@ -74,6 +78,114 @@ class _OsuBeatmapDetailPageState extends State<OsuBeatmapDetailPage>
         }
       } finally {
         if (mounted) setState(() => _isDownloadingPreview = false);
+      }
+    }
+  }
+
+  Future<void> _downloadAndPreview(SayobotBeatmapDetail detail) async {
+    if (_selectedDifficulty == null) return;
+    final mode = _selectedDifficulty!.mode;
+    if (mode != 0 && mode != 3) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('预览仅支持 osu! 和 mania 模式')));
+      return;
+    }
+
+    // Stop audio preview if playing
+    if (BeatmapPreviewManager.isPlaying(widget.sid)) {
+      BeatmapPreviewManager.stop();
+      if (mounted) setState(() => _isPlaying = false);
+    }
+
+    final progressNotifier = ValueNotifier<double>(0.0);
+    final cancelToken = CancelToken();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: ValueListenableBuilder<double>(
+              valueListenable: progressNotifier,
+              builder: (context, value, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(value: value > 0 ? value : null),
+                    const SizedBox(height: 16),
+                    Text(
+                      value > 0
+                          ? '正在下载: ${(value * 100).toStringAsFixed(1)}%'
+                          : '正在准备下载...',
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () {
+                        cancelToken.cancel();
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('取消'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final savePath = '${tempDir.path}/${detail.sid}.osz';
+      final file = File(savePath);
+
+      final dio = Dio();
+      final url =
+          'https://dl.sayobot.cn/beatmaps/download/novideo/${detail.sid}';
+      debugPrint('Downloading beatmap from: $url');
+
+      await dio.download(
+        url,
+        savePath,
+        cancelToken: cancelToken,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            progressNotifier.value = received / total;
+          }
+        },
+        options: Options(
+          headers: {
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Referer': 'https://sayobot.cn/',
+          },
+        ),
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading dialog
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OsuBeatmapPreviewPage(
+            oszFile: file,
+            diffName: _selectedDifficulty!.version,
+            bgFilename: _selectedDifficulty!.bg,
+            audioFilename: _selectedDifficulty!.audio,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted && !cancelToken.isCancelled) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('下载失败: $e')));
       }
     }
   }
@@ -588,16 +700,9 @@ class _OsuBeatmapDetailPageState extends State<OsuBeatmapDetailPage>
           const SizedBox(width: 16),
           Expanded(
             child: OutlinedButton.icon(
-              onPressed: () async {
-                final url = Uri.parse(
-                  'https://sayobot.cn/beatmap/${detail.sid}',
-                );
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
-              },
-              icon: const Icon(Icons.open_in_browser),
-              label: const Text('在 Sayobot 打开'),
+              onPressed: () => _downloadAndPreview(detail),
+              icon: const Icon(Icons.remove_red_eye),
+              label: const Text('预览铺面'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.white,
                 side: const BorderSide(color: Colors.white54),

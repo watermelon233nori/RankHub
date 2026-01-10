@@ -1,16 +1,15 @@
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import '../models/beatmap.dart';
-import '../services/beatmap_parser.dart';
-import '../services/beatmap_processor.dart';
-import '../renderers/osu_renderer.dart';
-import '../renderers/mania_renderer.dart';
+import 'beatmap_model.dart';
+import 'beatmap_parser.dart';
+import 'beatmap_processor.dart';
+import 'renderers/osu_renderer.dart';
+import 'renderers/mania_renderer.dart';
 
 class OsuPreviewController extends GetxController {
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -38,8 +37,6 @@ class OsuPreviewController extends GetxController {
       duration.value = d;
     });
     _audioPlayer.onPositionChanged.listen((p) {
-      // We might not want to update this too often for UI if we use Ticker for smooth animation
-      // But it's good for slider
       if ((p - position.value).abs() > const Duration(milliseconds: 100)) {
         position.value = p;
       }
@@ -70,30 +67,12 @@ class OsuPreviewController extends GetxController {
     }
   }
 
-  Future<void> pickOsz() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
-
-    if (result != null) {
-      final filePath = result.files.single.path!;
-      if (!filePath.toLowerCase().endsWith('.osz') &&
-          !filePath.toLowerCase().endsWith('.zip')) {
-        Get.snackbar('Error', 'Please select an .osz or .zip file');
-        return;
-      }
-
-      await _processOszFile(File(filePath));
-    }
+  Future<void> startPreview(File oszFile, {String? targetDiffName, String? bgFilename, String? audioFilename}) async {
+    await _processOszFile(oszFile, targetDiffName: targetDiffName, bgFilename: bgFilename, audioFilename: audioFilename);
   }
 
-  Future<void> _processOszFile(File oszFile) async {
+  Future<void> _processOszFile(File oszFile, {String? targetDiffName, String? bgFilename, String? audioFilename}) async {
     try {
-      Get.dialog(
-        const Center(child: CircularProgressIndicator()),
-        barrierDismissible: false,
-      );
-
       // 1. Unzip
       final bytes = await oszFile.readAsBytes();
       final archive = ZipDecoder().decodeBytes(bytes);
@@ -109,13 +88,11 @@ class OsuPreviewController extends GetxController {
         final filename = file.name;
         if (file.isFile) {
           final data = file.content as List<int>;
-          File(path.join(extractPath, filename))
-            ..createSync(recursive: true)
-            ..writeAsBytesSync(data);
+          final fileOut = File(path.join(extractPath, filename));
+          await fileOut.create(recursive: true);
+          await fileOut.writeAsBytes(data);
         }
       }
-
-      Get.back(); // Close loading
 
       // 2. Find .osu files
       final dir = Directory(extractPath);
@@ -129,76 +106,67 @@ class OsuPreviewController extends GetxController {
         return;
       }
 
-      // 3. Sort and Select Difficulty
-      // "按文件大小顺序从低到高排序"
-      osuFiles.sort(
-        (a, b) => (a as File).lengthSync().compareTo((b as File).lengthSync()),
-      );
+      // 3. Select Difficulty
+      File? selectedFile;
 
-      await _showDifficultySelectionDialog(osuFiles);
+      if (targetDiffName != null) {
+        // Try to match difficulty name exactly or partially
+        // osu file format: Artist - Title (Creator) [Difficulty].osu
+        // We look for [Difficulty]
+        selectedFile = osuFiles.firstWhereOrNull((f) {
+           final filename = path.basename(f.path);
+           // Simple check: does filename contain the version?
+           // The version string usually appears in [] at the end.
+           // But user provided targetDiffName might be just the version string.
+           return filename.contains('[$targetDiffName]');
+        }) as File?;
+      }
+
+      if (selectedFile == null) {
+        // Fallback: sort by size and pick the largest (usually hardest) or show dialog if we were in debug mode
+        // But here we must pick one. Let's pick the one that matches targetDiffName loosely if possible
+        if (targetDiffName != null) {
+             selectedFile = osuFiles.firstWhereOrNull((f) {
+                return path.basename(f.path).contains(targetDiffName);
+             }) as File?;
+        }
+      }
+
+      // If still null, just pick the first one or the one with most objects (largest size)
+      if (selectedFile == null) {
+         osuFiles.sort(
+            (a, b) => (b as File).lengthSync().compareTo((a as File).lengthSync()), // Largest first
+          );
+         selectedFile = osuFiles.first as File;
+      }
+
+      await _loadOsuFromExtract(selectedFile, bgFilename: bgFilename, audioFilename: audioFilename);
+
     } catch (e) {
-      if (Get.isDialogOpen ?? false) Get.back();
       Get.snackbar('Error', 'Failed to process osz: $e');
+      debugPrint(e.toString());
     }
   }
 
-  Future<void> _showDifficultySelectionDialog(
-    List<FileSystemEntity> osuFiles,
-  ) async {
-    await Get.dialog(
-      AlertDialog(
-        title: const Text('Select Difficulty'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: osuFiles.length,
-            itemBuilder: (context, index) {
-              final file = osuFiles[index] as File;
-              final filename = path.basename(file.path);
-              // Extract difficulty name: [DifficultyName].osu
-              String diffName = filename;
-              final match = RegExp(r'\[(.*?)\]\.osu$').firstMatch(filename);
-              if (match != null) {
-                diffName = match.group(1) ?? filename;
-              }
-
-              final size = (file.lengthSync() / 1024).toStringAsFixed(1);
-
-              return ListTile(
-                title: Text(diffName),
-                subtitle: Text('Size: ${size}KB'),
-                onTap: () {
-                  Get.back();
-                  _loadOsuFromExtract(file);
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _loadOsuFromExtract(File osuFile) async {
+  Future<void> _loadOsuFromExtract(File osuFile, {String? bgFilename, String? audioFilename}) async {
     await loadBeatmap(osuFile);
 
-    // 4. Load Audio & Background
     if (beatmap.value != null && _tempUnzipPath != null) {
       final map = beatmap.value!;
 
       // Audio
-      if (map.audioFilename.isNotEmpty) {
-        final audioPath = path.join(_tempUnzipPath!, map.audioFilename);
+      String? audioToLoad = audioFilename;
+      if (audioToLoad == null || audioToLoad.isEmpty) {
+        audioToLoad = map.audioFilename;
+      }
+      
+      if (audioToLoad.isNotEmpty) {
+        final audioPath = path.join(_tempUnzipPath!, audioToLoad);
         final file = File(audioPath);
         if (file.existsSync()) {
           audioFile.value = file;
           await _audioPlayer.setSourceDeviceFile(file.path);
         } else {
-          // Fallback generic search
           _searchAndLoadAudio();
         }
       } else {
@@ -206,8 +174,13 @@ class OsuPreviewController extends GetxController {
       }
 
       // Background
-      if (map.backgroundFilename.isNotEmpty) {
-        final bgPath = path.join(_tempUnzipPath!, map.backgroundFilename);
+      String? bgToLoad = bgFilename;
+      if (bgToLoad == null || bgToLoad.isEmpty) {
+         bgToLoad = map.backgroundFilename;
+      }
+
+      if (bgToLoad.isNotEmpty) {
+        final bgPath = path.join(_tempUnzipPath!, bgToLoad);
         final file = File(bgPath);
         if (file.existsSync()) {
           backgroundFile.value = file;
@@ -245,14 +218,12 @@ class OsuPreviewController extends GetxController {
     final dir = Directory(_tempUnzipPath!);
     try {
       final files = dir.listSync();
-      // Filter for images, prioritize bg.jpg/png if multiple
       final images = files.where((f) {
         final ext = path.extension(f.path).toLowerCase();
         return ['.jpg', '.jpeg', '.png'].contains(ext);
       }).toList();
 
       if (images.isNotEmpty) {
-        // Prefer "bg" in name
         final best =
             images.firstWhereOrNull(
               (f) => path.basename(f.path).toLowerCase().contains('bg'),
@@ -263,24 +234,6 @@ class OsuPreviewController extends GetxController {
       }
     } catch (e) {
       debugPrint('BG search failed: $e');
-    }
-  }
-
-  Future<void> pickBeatmap() async {
-    // On iOS, using FileType.custom with 'osu' extension might fail because it's not a standard UTI.
-    // We use FileType.any and manually check the extension.
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
-
-    if (result != null) {
-      final path = result.files.single.path!;
-      if (!path.toLowerCase().endsWith('.osu')) {
-        Get.snackbar('Error', 'Please select a .osu file');
-        return;
-      }
-      final file = File(path);
-      await loadBeatmap(file);
     }
   }
 
@@ -302,45 +255,17 @@ class OsuPreviewController extends GetxController {
       }
 
       beatmap.value = newBeatmap;
-
-      // Reset audio if new map
-      // But user might want to reuse audio? No, usually map specific.
-      // But requirement says "select beatmap then select audio".
     } catch (e) {
       Get.snackbar('Error', 'Failed to parse beatmap: $e');
     }
   }
 
-  Future<void> pickAudio() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
-
-    if (result != null) {
-      final path = result.files.single.path!;
-      final ext = path.split('.').last.toLowerCase();
-      if (!['mp3', 'ogg', 'wav', 'm4a', 'aac'].contains(ext)) {
-        Get.snackbar(
-          'Error',
-          'Please select an audio file (mp3, ogg, wav, m4a)',
-        );
-        return;
-      }
-
-      final file = File(path);
-      audioFile.value = file;
-      await _audioPlayer.setSourceDeviceFile(file.path);
-    }
-  }
-
   void togglePlay() async {
     if (beatmap.value == null) {
-      Get.snackbar('Tip', 'Please select a beatmap first');
       return;
     }
 
     if (audioFile.value == null) {
-      Get.snackbar('Tip', 'Please select an audio file');
       return;
     }
 

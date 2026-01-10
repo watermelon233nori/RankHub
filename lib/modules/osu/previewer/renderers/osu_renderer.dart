@@ -1,7 +1,7 @@
 
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../models/beatmap.dart';
+import '../beatmap_model.dart';
 import '../utils/math_utils.dart';
 
 class OsuRenderer {

@@ -1,4 +1,4 @@
-import '../models/beatmap.dart';
+import 'beatmap_model.dart';
 
 class BeatmapParser {
   Beatmap map = Beatmap();

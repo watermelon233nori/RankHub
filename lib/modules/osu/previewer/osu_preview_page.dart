@@ -1,19 +1,31 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
-import '../controllers/osu_preview_controller.dart';
-import '../models/beatmap.dart';
-import '../renderers/mania_renderer.dart';
-import '../renderers/osu_renderer.dart';
+import 'osu_preview_controller.dart';
+import 'beatmap_model.dart';
+import 'renderers/mania_renderer.dart';
+import 'renderers/osu_renderer.dart';
 
-class OsuPreviewPage extends StatefulWidget {
-  const OsuPreviewPage({super.key});
+class OsuBeatmapPreviewPage extends StatefulWidget {
+  final File oszFile;
+  final String? diffName;
+  final String? audioFilename;
+  final String? bgFilename;
+
+  const OsuBeatmapPreviewPage({
+    super.key,
+    required this.oszFile,
+    this.diffName,
+    this.audioFilename,
+    this.bgFilename,
+  });
 
   @override
-  State<OsuPreviewPage> createState() => _OsuPreviewPageState();
+  State<OsuBeatmapPreviewPage> createState() => _OsuBeatmapPreviewPageState();
 }
 
-class _OsuPreviewPageState extends State<OsuPreviewPage>
+class _OsuBeatmapPreviewPageState extends State<OsuBeatmapPreviewPage>
     with SingleTickerProviderStateMixin {
   late final OsuPreviewController controller;
   late final Ticker _ticker;
@@ -74,21 +86,31 @@ class _OsuPreviewPageState extends State<OsuPreviewPage>
         });
       }
     });
+
+    // Start preview automatically
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.startPreview(
+        widget.oszFile,
+        targetDiffName: widget.diffName,
+        audioFilename: widget.audioFilename,
+        bgFilename: widget.bgFilename,
+      );
+    });
   }
 
   @override
   void dispose() {
     _ticker.dispose();
+    Get.delete<OsuPreviewController>(); // Clean up controller
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('osu! Preview Debug')),
+      appBar: AppBar(title: const Text('Beatmap Preview')),
       body: Column(
         children: [
-          _buildControls(),
           Expanded(
             child: Center(
               child: AspectRatio(
@@ -100,10 +122,7 @@ class _OsuPreviewPageState extends State<OsuPreviewPage>
                       final beatmap = controller.beatmap.value;
                       if (beatmap == null) {
                         return const Center(
-                          child: Text(
-                            'Select a .osu or .osz file',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          child: CircularProgressIndicator(),
                         );
                       }
 
@@ -140,29 +159,6 @@ class _OsuPreviewPageState extends State<OsuPreviewPage>
     );
   }
 
-  Widget _buildControls() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          ElevatedButton(
-            onPressed: controller.pickBeatmap,
-            child: const Text('Select .osu'),
-          ),
-          ElevatedButton(
-            onPressed: controller.pickOsz,
-            child: const Text('Select .osz'),
-          ),
-          ElevatedButton(
-            onPressed: controller.pickAudio,
-            child: const Text('Select Audio'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPlaybackControls() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -173,8 +169,11 @@ class _OsuPreviewPageState extends State<OsuPreviewPage>
             () => Text(
               controller.beatmap.value != null
                   ? '${controller.beatmap.value!.artist} - ${controller.beatmap.value!.title} [${controller.beatmap.value!.version}]'
-                  : 'No beatmap loaded',
+                  : 'Loading...',
               style: const TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Row(

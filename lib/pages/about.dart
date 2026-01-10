@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
-import '../modules/osu_preview/pages/osu_preview_page.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -202,14 +201,6 @@ class AboutPage extends StatelessWidget {
             title: const Text('隐私政策'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Get.toNamed(AppRoutes.privacyPolicy),
-          ),
-          const Divider(indent: 16, endIndent: 16),
-          ListTile(
-            leading: const Icon(Icons.bug_report_outlined),
-            title: const Text('调试功能'),
-            subtitle: const Text('osu! Preview'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Get.to(() => const OsuPreviewPage()),
           ),
 
           const SizedBox(height: 32),
