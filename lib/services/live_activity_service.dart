@@ -12,7 +12,7 @@ class LiveActivityService {
   LiveActivityService._();
 
   // App Group ID，用于主应用和 Widget Extension 间共享数据
-  static const String appGroupId = 'group.space.fukakai.rankhub';
+  static const String appGroupId = 'group.cn.tjhzzc.rankhubios';
 
   // 存储实时活动开关的键
   static const String _enabledKey = 'live_activity_enabled';
