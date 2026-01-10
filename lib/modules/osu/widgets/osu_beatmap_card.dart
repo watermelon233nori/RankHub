@@ -1,46 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:rank_hub/modules/osu/pages/osu_beatmap_detail_page.dart';
 import 'package:rank_hub/modules/osu/models/sayobot_beatmap.dart';
+import 'package:rank_hub/modules/osu/services/beatmap_preview_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// 全局音频播放管理器，确保同一时间只有一个播放
-class _BeatmapPreviewManager {
-  static final AudioPlayer _player = AudioPlayer();
-  static int? _currentPlayingSid;
-  static Function(int)? _onStopCallback;
-
-  static Future<void> play(int sid, String url, VoidCallback onStop) async {
-    if (_currentPlayingSid != null && _currentPlayingSid != sid) {
-      await stop();
-    }
-
-    _currentPlayingSid = sid;
-    _onStopCallback = (stoppedSid) {
-      if (stoppedSid == sid) onStop();
-    };
-    
-    // 设置播放完成回调
-    _player.onPlayerComplete.listen((_) {
-       if (_currentPlayingSid == sid) {
-         stop();
-       }
-    });
-
-    await _player.play(UrlSource(url));
-  }
-
-  static Future<void> stop() async {
-    await _player.stop();
-    if (_currentPlayingSid != null && _onStopCallback != null) {
-      _onStopCallback!(_currentPlayingSid!);
-    }
-    _currentPlayingSid = null;
-    _onStopCallback = null;
-  }
-  
-  static bool isPlaying(int sid) => _currentPlayingSid == sid;
-}
 
 class OsuBeatmapCard extends StatefulWidget {
   final SayobotBeatmap beatmap;
@@ -57,20 +21,20 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
 
   @override
   void dispose() {
-    if (_BeatmapPreviewManager.isPlaying(widget.beatmap.sid)) {
-      _BeatmapPreviewManager.stop();
+    if (BeatmapPreviewManager.isPlaying(widget.beatmap.sid)) {
+      BeatmapPreviewManager.stop();
     }
     super.dispose();
   }
 
   Future<void> _togglePreview() async {
     if (_isPlaying) {
-      await _BeatmapPreviewManager.stop();
+      await BeatmapPreviewManager.stop();
       if (mounted) setState(() => _isPlaying = false);
     } else {
       setState(() => _isDownloadingPreview = true);
       try {
-        await _BeatmapPreviewManager.play(
+        await BeatmapPreviewManager.play(
           widget.beatmap.sid,
           widget.beatmap.previewUrl,
           () {
@@ -80,9 +44,9 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
         if (mounted) setState(() => _isPlaying = true);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('试听播放失败: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('试听播放失败: $e')));
         }
       } finally {
         if (mounted) setState(() => _isDownloadingPreview = false);
@@ -96,9 +60,9 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('无法打开下载链接')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('无法打开下载链接')));
       }
     }
   }
@@ -112,142 +76,184 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
       clipBehavior: Clip.antiAlias,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Stack(
-        children: [
-          // 背景图
-          Positioned.fill(
-            child: CachedNetworkImage(
-              imageUrl: widget.beatmap.coverUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(color: colorScheme.surfaceVariant),
-              errorWidget: (context, url, error) => Container(
-                color: colorScheme.surfaceVariant,
-                child: const Icon(Icons.broken_image),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OsuBeatmapDetailPage(
+                sid: widget.beatmap.sid,
+                coverUrl: widget.beatmap.coverUrl,
+                title: widget.beatmap.preferredTitle,
+                artist: widget.beatmap.preferredArtist,
               ),
             ),
-          ),
-          // 渐变遮罩
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.8),
-                  ],
+          );
+        },
+        child: Stack(
+          children: [
+            // 背景图
+            Positioned.fill(
+              child: CachedNetworkImage(
+                imageUrl: widget.beatmap.coverUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) =>
+                    Container(color: colorScheme.surfaceVariant),
+                errorWidget: (context, url, error) => Container(
+                  color: colorScheme.surfaceVariant,
+                  child: const Icon(Icons.broken_image),
                 ),
               ),
             ),
-          ),
-          // 内容
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 顶部状态标签
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildStatusChip(colorScheme),
-                    Row(
-                      children: [
-                        const Icon(Icons.play_circle_outline, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.beatmap.playCount.toString(),
-                          style: textTheme.labelSmall?.copyWith(color: Colors.white),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.favorite_border, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.beatmap.favouriteCount.toString(),
-                          style: textTheme.labelSmall?.copyWith(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Spacer(), // 占据中间空间，把内容推到底部
-                
-                // 标题
-                Text(
-                  widget.beatmap.preferredTitle,
-                  style: textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+            // 渐变遮罩
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.3),
+                      Colors.black.withOpacity(0.8),
+                    ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                // 创作者信息
-                Text(
-                  '创作者: ${widget.beatmap.creator}',
-                  style: textTheme.bodySmall?.copyWith(color: Colors.white70),
-                ),
-                Text(
-                  '艺术家: ${widget.beatmap.preferredArtist}',
-                  style: textTheme.bodySmall?.copyWith(color: Colors.white70),
-                ),
-                const SizedBox(height: 12),
-                // 底部操作栏
-                Row(
-                  children: [
-                    // 模式图标（简单处理，显示第一个模式）
-                    if (widget.beatmap.modes & 1 != 0) _buildModeIcon(Icons.circle_outlined), // osu
-                    if (widget.beatmap.modes & 2 != 0) _buildModeIcon(Icons.trip_origin), // taiko (mock icon)
-                    if (widget.beatmap.modes & 4 != 0) _buildModeIcon(Icons.catching_pokemon), // ctb (mock icon)
-                    if (widget.beatmap.modes & 8 != 0) _buildModeIcon(Icons.piano), // mania
-                    
-                    const Spacer(),
-                    
-                    // 试听按钮
-                    IconButton(
-                      onPressed: _togglePreview,
-                      icon: _isDownloadingPreview
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Icon(
-                              _isPlaying ? Icons.stop : Icons.play_arrow,
+              ),
+            ),
+            // 内容
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 顶部状态标签
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildStatusChip(colorScheme),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.play_circle_outline,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.beatmap.playCount.toString(),
+                            style: textTheme.labelSmall?.copyWith(
                               color: Colors.white,
                             ),
-                      tooltip: _isPlaying ? '停止试听' : '试听预览',
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.favorite_border,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            widget.beatmap.favouriteCount.toString(),
+                            style: textTheme.labelSmall?.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const Spacer(), // 占据中间空间，把内容推到底部
+                  // 标题
+                  Text(
+                    widget.beatmap.preferredTitle,
+                    style: textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    
-                    // 下载按钮
-                    IconButton(
-                      onPressed: _downloadBeatmap,
-                      icon: const Icon(Icons.cloud_download, color: Colors.white),
-                      tooltip: '下载铺面',
-                    ),
-                    
-                    // 详情链接（如果有详情页的话，暂时留空或用外部链接）
-                    IconButton(
-                      onPressed: () async {
-                         final url = Uri.parse('https://sayobot.cn/beatmap/${widget.beatmap.sid}');
-                         if (await canLaunchUrl(url)) {
-                           await launchUrl(url, mode: LaunchMode.externalApplication);
-                         }
-                      },
-                      icon: const Icon(Icons.open_in_new, color: Colors.white),
-                      tooltip: '在 Sayobot 查看',
-                    ),
-                  ],
-                ),
-              ],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // 创作者信息
+                  Text(
+                    '创作者: ${widget.beatmap.creator}',
+                    style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                  ),
+                  Text(
+                    '艺术家: ${widget.beatmap.preferredArtist}',
+                    style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 12),
+                  // 底部操作栏
+                  Row(
+                    children: [
+                      // 模式图标
+                      if (widget.beatmap.modes & 1 != 0)
+                        _buildModeIcon(Icons.circle_outlined, 1, 'Standard'),
+                      if (widget.beatmap.modes & 2 != 0)
+                        _buildModeIcon(Icons.adjust, 2, 'Taiko'),
+                      if (widget.beatmap.modes & 4 != 0)
+                        _buildModeIcon(Icons.catching_pokemon, 4, 'Catch'),
+                      if (widget.beatmap.modes & 8 != 0)
+                        _buildModeIcon(Icons.piano, 8, 'Mania'),
+
+                      const Spacer(),
+
+                      // 试听按钮
+                      IconButton(
+                        onPressed: _togglePreview,
+                        icon: _isDownloadingPreview
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Icon(
+                                _isPlaying ? Icons.stop : Icons.play_arrow,
+                                color: Colors.white,
+                              ),
+                        tooltip: _isPlaying ? '停止试听' : '试听预览',
+                      ),
+
+                      // 下载按钮
+                      IconButton(
+                        onPressed: _downloadBeatmap,
+                        icon: const Icon(
+                          Icons.cloud_download,
+                          color: Colors.white,
+                        ),
+                        tooltip: '下载铺面',
+                      ),
+
+                      // 详情链接（如果有详情页的话，暂时留空或用外部链接）
+                      IconButton(
+                        onPressed: () async {
+                          final url = Uri.parse(
+                            'https://sayobot.cn/beatmap/${widget.beatmap.sid}',
+                          );
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.open_in_new,
+                          color: Colors.white,
+                        ),
+                        tooltip: '在 Sayobot 查看',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -255,7 +261,7 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
   Widget _buildStatusChip(ColorScheme colorScheme) {
     String label;
     Color color;
-    
+
     // 状态判断
     if (widget.beatmap.approved == 1) {
       label = 'RANKED';
@@ -269,10 +275,12 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
     } else if (widget.beatmap.approved == 4) {
       label = 'LOVED';
       color = Colors.pinkAccent;
-    } else if (widget.beatmap.approved == -2) { // Graveyard
+    } else if (widget.beatmap.approved == -2) {
+      // Graveyard
       label = 'GRAVEYARD';
       color = Colors.grey;
-    } else if (widget.beatmap.approved == -1) { // WIP
+    } else if (widget.beatmap.approved == -1) {
+      // WIP
       label = 'WIP';
       color = Colors.orange;
     } else {
@@ -297,10 +305,13 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
     );
   }
 
-  Widget _buildModeIcon(IconData icon) {
+  Widget _buildModeIcon(IconData icon, int mode, String tooltip) {
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
-      child: Icon(icon, color: Colors.pinkAccent, size: 20),
+      child: Tooltip(
+        message: '$tooltip 模式',
+        child: Icon(icon, color: Colors.pinkAccent, size: 20),
+      ),
     );
   }
 }

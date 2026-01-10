@@ -38,7 +38,7 @@ class _OsuBeatmapListPageState extends State<OsuBeatmapListPage> {
         0, // Not sending mode param means all? Or 0? Doc says "1=std...". If omit, maybe all. Doc says default 0xffffffff
     'Standard': 1,
     'Taiko': 2,
-    'Catch the Beat': 4,
+    'Catch': 4,
     'Mania': 8,
   };
 
@@ -145,70 +145,71 @@ class _OsuBeatmapListPageState extends State<OsuBeatmapListPage> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        minChildSize: 0.4,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('筛选器', style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 16),
-                _buildFilterSection(
-                  '模式',
-                  _modes,
-                  _selectedMode ?? 0,
-                  (val) => setState(() => _selectedMode = val),
-                ),
-                const Divider(),
-                _buildFilterSection(
-                  '状态',
-                  _statuses,
-                  _selectedStatus ?? 0,
-                  (val) => setState(() => _selectedStatus = val),
-                ),
-                const Divider(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '难度星级: ${_starRange.start.toStringAsFixed(1)} - ${_starRange.end.toStringAsFixed(1)}',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    RangeSlider(
-                      values: _starRange,
-                      min: 0,
-                      max: 10,
-                      divisions: 100,
-                      labels: RangeLabels(
-                        _starRange.start.toStringAsFixed(1),
-                        _starRange.end.toStringAsFixed(1),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) => SingleChildScrollView(
+            controller: scrollController,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('筛选器', style: Theme.of(context).textTheme.headlineSmall),
+                  const SizedBox(height: 16),
+                  _buildFilterSection('模式', _modes, _selectedMode ?? 0, (val) {
+                    setState(() => _selectedMode = val);
+                    setSheetState(() {});
+                  }),
+                  const Divider(),
+                  _buildFilterSection('状态', _statuses, _selectedStatus ?? 0, (
+                    val,
+                  ) {
+                    setState(() => _selectedStatus = val);
+                    setSheetState(() {});
+                  }),
+                  const Divider(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '难度星级: ${_starRange.start.toStringAsFixed(1)} - ${_starRange.end.toStringAsFixed(1)}',
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      onChanged: (values) {
-                        setState(() {
-                          _starRange = values;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _loadBeatmaps(refresh: true);
-                    },
-                    child: const Text('应用筛选'),
+                      RangeSlider(
+                        values: _starRange,
+                        min: 0,
+                        max: 10,
+                        divisions: 100,
+                        labels: RangeLabels(
+                          _starRange.start.toStringAsFixed(1),
+                          _starRange.end.toStringAsFixed(1),
+                        ),
+                        onChanged: (values) {
+                          setState(() {
+                            _starRange = values;
+                          });
+                          setSheetState(() {});
+                        },
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _loadBeatmaps(refresh: true);
+                      },
+                      child: const Text('应用筛选'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
