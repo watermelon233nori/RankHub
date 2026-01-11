@@ -258,7 +258,7 @@ class _SongDetailPageState extends State<SongDetailPage>
         final maxArtistWidth = constraints.maxWidth - 16;
 
         // 计算文本宽度
-        double _textWidth(String text, TextStyle style) {
+        double textWidth(String text, TextStyle style) {
           final tp = TextPainter(
             text: TextSpan(text: text, style: style),
             maxLines: 1,
@@ -268,9 +268,9 @@ class _SongDetailPageState extends State<SongDetailPage>
         }
 
         final needTitleMarquee =
-            _textWidth(widget.song.title, titleStyle) > maxTitleWidth;
+            textWidth(widget.song.title, titleStyle) > maxTitleWidth;
         final needArtistMarquee =
-            _textWidth(widget.song.artist, artistStyle) > maxArtistWidth;
+            textWidth(widget.song.artist, artistStyle) > maxArtistWidth;
 
         return Container(
           padding: const EdgeInsets.all(16),

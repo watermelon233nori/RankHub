@@ -549,7 +549,7 @@ class ShopDetailPage extends StatelessWidget {
                         map.showMarker(coords: coords, title: title);
                       },
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rank_hub/games/maimai/maimai_providers.dart';
-import 'package:rank_hub/games/maimai/models/maimai_score.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -34,7 +33,7 @@ class _DifficultyDetailPageState extends ConsumerState<DifficultyDetailPage>
   int _calculateMode = 1; // 0: 绝对值, 1: CRITICAL差值, 2: PERFECT差值
   final ChromeSafariBrowser browser = ChromeSafariBrowser();
   List<Map<String, dynamic>>? _historyData;
-  bool _isLoadingHistory = false;
+  final bool _isLoadingHistory = false;
   String? _historyError;
   late TabController _tabController;
 
@@ -232,7 +231,7 @@ class _DifficultyDetailPageState extends ConsumerState<DifficultyDetailPage>
                         // 当前成绩卡片
                         if (currentScore != null)
                           CurrentScoreCard(
-                            score: currentScore!,
+                            score: currentScore,
                             maxDxScore: widget.difficulty.notes!.total * 3,
                           ),
                         if (currentScore != null) const SizedBox(height: 16),
@@ -416,7 +415,7 @@ class _DifficultyDetailPageState extends ConsumerState<DifficultyDetailPage>
                                           ),
                                         ),
                                         child: Text(
-                                          '${currentScore!.achievements.toStringAsFixed(4)}% → ${currentScore!.dxRating.toInt()}',
+                                          '${currentScore.achievements.toStringAsFixed(4)}% → ${currentScore.dxRating.toInt()}',
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,

@@ -7,7 +7,7 @@ import 'package:rank_hub/modules/musedash/services/musedash_player_api_service.d
 class PlayerInfoCard extends StatefulWidget {
   final MuseDashPlayer player;
 
-  const PlayerInfoCard({Key? key, required this.player}) : super(key: key);
+  const PlayerInfoCard({super.key, required this.player});
 
   @override
   State<PlayerInfoCard> createState() => _PlayerInfoCardState();
