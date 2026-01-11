@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/models/game.dart';
 import 'package:rank_hub/modules/divingfish/pages/divingfish_songs_tab.dart';
+import 'package:rank_hub/modules/divingfish/pages/divingfish_records_tab.dart';
+import 'package:rank_hub/modules/divingfish/pages/divingfish_best50_tab.dart';
 
 /// 水鱼查分器 - 舞萌DX 游戏
 class MaimaiDXDivingFishGame extends BaseGame {
@@ -35,24 +37,19 @@ class MaimaiDXDivingFishGame extends BaseGame {
       GameContentView(
         label: '全部成绩',
         icon: Icons.poll_outlined,
-        builder: (context) => const _MaimaiRecordsTab(),
+        builder: (context) => const DivingFishRecordsTab(),
       ),
       GameContentView(
         label: 'B50',
         icon: Icons.star_outlined,
-        builder: (context) => const _MaimaiBest50Tab(),
-      ),
-      GameContentView(
-        label: '藏品进度',
-        icon: Icons.emoji_events_outlined,
-        builder: (context) => const _MaimaiPlateProgressTab(),
+        builder: (context) => const DivingFishBest50Tab(),
       ),
     ];
   }
 
   @override
   Widget? buildPlayerInfoCard(BuildContext context, Account account) {
-    // TODO: 实现玩家信息卡片
+    // TODO: 实现更详细的玩家信息卡片
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Padding(
@@ -66,89 +63,6 @@ class MaimaiDXDivingFishGame extends BaseGame {
             Text('账号: ${account.username ?? "未知"}'),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ========== 临时占位 Widget ==========
-// TODO: 实现具体的 Tab 页面
-
-class _MaimaiRatingRankingTab extends StatelessWidget {
-  const _MaimaiRatingRankingTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.leaderboard_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Rating 排行'),
-          SizedBox(height: 8),
-          Text('开发中...', style: TextStyle(color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-}
-
-class _MaimaiBest50Tab extends StatelessWidget {
-  const _MaimaiBest50Tab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.star_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('B50'),
-          SizedBox(height: 8),
-          Text('开发中...', style: TextStyle(color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-}
-
-class _MaimaiRecordsTab extends StatelessWidget {
-  const _MaimaiRecordsTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.poll_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('全部成绩'),
-          SizedBox(height: 8),
-          Text('开发中...', style: TextStyle(color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-}
-
-class _MaimaiPlateProgressTab extends StatelessWidget {
-  const _MaimaiPlateProgressTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.emoji_events_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('牌子进度'),
-          SizedBox(height: 8),
-          Text('开发中...', style: TextStyle(color: Colors.grey)),
-        ],
       ),
     );
   }
