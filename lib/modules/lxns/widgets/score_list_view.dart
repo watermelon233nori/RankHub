@@ -96,7 +96,7 @@ class _ScoreListViewState extends State<ScoreListView> {
           }
           if (_selectedType.isNotEmpty) {
             scores = scores
-                .where((score) => score.type == _selectedType)
+                .where((score) => score.type.value == _selectedType)
                 .toList();
           }
           if (_minAchievement != null) {

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:rank_hub/models/account/account.dart';
+import 'package:rank_hub/models/divingfish/divingfish_alias.dart';
+import 'package:rank_hub/models/divingfish/divingfish_score.dart';
 import 'package:rank_hub/modules/divingfish/services/divingfish_credential_provider.dart';
 
 /// 水鱼查分器 API 服务
@@ -60,16 +62,30 @@ class DivingFishApiService {
   /// 获取用户的完整成绩信息
   /// 端点: GET /maimaidxprober/player/records
   /// 需要登录验证（JWT token cookie）
-  Future<Map<String, dynamic>> getPlayerRecords({
-    required Account account,
-  }) async {
+  /// 返回玩家信息和成绩列表
+  Future<({DivingFishPlayerData playerData, List<DivingFishScore> scores})>
+  getPlayerRecords({required Account account}) async {
     try {
       final dio = await _getAuthenticatedDio(account);
 
-      final response = await dio.get('/maimaidxprober/player/records');
+      final response = await dio.get('$baseUrl/maimaidxprober/player/records');
 
       if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
+        final data = response.data as Map<String, dynamic>;
+
+        // 解析玩家信息
+        final playerData = DivingFishPlayerData.fromJson(data);
+
+        // 解析成绩列表
+        final recordsJson = data['records'] as List<dynamic>? ?? [];
+        final scores = recordsJson
+            .map(
+              (json) => DivingFishScore.fromJson(json as Map<String, dynamic>),
+            )
+            .toList();
+
+        print('✅ 获取玩家成绩成功: ${scores.length} 条记录');
+        return (playerData: playerData, scores: scores);
       } else if (response.statusCode == 400) {
         final data = response.data;
         if (data is Map && data['message'] != null) {
@@ -171,6 +187,32 @@ class DivingFishApiService {
       }
     } catch (e) {
       print('❌ 获取谱面统计失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取曲目别名
+  Future<List<DivingFishAlias>> getAliasList() async {
+    try {
+      final response = await Dio().get(
+        'https://www.yuzuchan.moe/api/maimaidx/maimaidxalias',
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['content'];
+        if (data is List) {
+          final aliases = data
+              .whereType<Map<String, dynamic>>()
+              .map(DivingFishAlias.fromJson)
+              .toList();
+          print('✅ 获取曲目别名成功: ${aliases.length} 条');
+          return aliases;
+        }
+        throw Exception('别名数据格式不正确');
+      }
+      throw Exception('获取别名失败: ${response.statusCode}');
+    } catch (e) {
+      print('❌ 获取别名失败: $e');
       rethrow;
     }
   }

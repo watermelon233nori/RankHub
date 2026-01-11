@@ -27,7 +27,6 @@ class DivingFishMergedSongListItem extends StatelessWidget {
     }
   }
 
-  /// 构建单个版本的难度芯片
   Widget _buildVersionDifficultyChips(
     BuildContext context,
     DivingFishSong song,
@@ -35,28 +34,6 @@ class DivingFishMergedSongListItem extends StatelessWidget {
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final List<Widget> chips = [];
-
-    // 版本标签
-    chips.add(
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: Text(
-          versionLabel,
-          style: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-    chips.add(const SizedBox(width: 6));
-
-    // 难度芯片
     for (int i = 0; i < song.level.length; i++) {
       chips.add(
         Container(
