@@ -26,10 +26,7 @@ class LiveActivityService {
   Future<void> init() async {
     if (!Platform.isIOS) return;
 
-    await _liveActivitiesPlugin.init(
-      appGroupId: appGroupId,
-      requireNotificationPermission: false,
-    );
+    await _liveActivitiesPlugin.init(appGroupId: appGroupId);
 
     try {
       // 检查是否支持 Live Activities
@@ -127,6 +124,7 @@ class LiveActivityService {
         _activityId = await _liveActivitiesPlugin.createActivity(
           'queue_${DateTime.now().millisecondsSinceEpoch}', // 生成唯一 ID
           activityData,
+          iOSEnableRemoteUpdates: false,
         );
         print('✅ 创建 Live Activity: $_activityId');
       } else {
