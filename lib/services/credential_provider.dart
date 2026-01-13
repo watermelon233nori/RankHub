@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:rank_hub/models/account/account.dart';
 
 /// 凭据失效异常
@@ -57,6 +59,8 @@ abstract class ApiKeyCredentialProvider extends CredentialProvider {
 
 /// OAuth2 凭据提供者
 abstract class OAuth2CredentialProvider extends CredentialProvider {
+  static Future<void> _globalRefreshLock = Future.value();
+
   @override
   Future<Account> getCredential(Account account) async {
     if (account.accessToken == null || account.accessToken!.isEmpty) {
@@ -76,6 +80,11 @@ abstract class OAuth2CredentialProvider extends CredentialProvider {
     if (account.refreshToken == null || account.refreshToken!.isEmpty) {
       throw CredentialExpiredException(account, '缺少刷新令牌，请重新登录');
     }
+    
+    // 确保同一时间只有一个刷新操作在进行
+    await _globalRefreshLock.catchError((_) {});
+    final lockCompleter = Completer<void>();
+    _globalRefreshLock = lockCompleter.future;
 
     try {
       // 调用具体平台的刷新逻辑
@@ -99,6 +108,8 @@ abstract class OAuth2CredentialProvider extends CredentialProvider {
     } catch (e) {
       // 刷新失败，凭据已完全失效
       throw CredentialExpiredException(account, '刷新凭据失败: $e');
+    } finally {
+      lockCompleter.complete();
     }
   }
 
