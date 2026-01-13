@@ -97,8 +97,9 @@ class DivingFishCompactScoreCard extends StatelessWidget {
     final parts = achievementStr.split('.');
     final intPart = parts[0];
     final decimalPart = parts.length > 1 ? parts[1] : '0';
+    final coverId = score.songId.toString().padLeft(5, '0');
 
-    final imageUrl = "https://www.diving-fish.com/covers/${score.songId}.png";
+    final imageUrl = "https://www.diving-fish.com/covers/$coverId.png";
     final levelColor = _getLevelColor(score.levelIndex);
     final typeColor = _getTypeColor(score.type);
     final fcColor = _getFcColor(score.fc);
