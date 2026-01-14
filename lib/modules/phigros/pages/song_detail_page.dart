@@ -1,13 +1,15 @@
 import 'dart:ui';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:rank_hub/models/phigros/song.dart';
 import 'package:rank_hub/models/phigros/chart.dart';
 import 'package:rank_hub/models/phigros/chart_visualization.dart';
 import 'package:rank_hub/models/phigros/game_record.dart';
-import 'package:rank_hub/modules/phigros/services/phigros_resource_api_service.dart';
+import 'package:rank_hub/models/phigros/song.dart';
+import 'package:rank_hub/modules/phigros/pages/chart_preview_page.dart';
 import 'package:rank_hub/modules/phigros/phigros_controller.dart';
+import 'package:rank_hub/modules/phigros/services/phigros_resource_api_service.dart';
 
 /// Phigros 乐曲详情页面
 class PhigrosSongDetailPage extends StatefulWidget {
@@ -646,6 +648,26 @@ class _PhigrosSongDetailPageState extends State<PhigrosSongDetailPage>
               const SizedBox(height: 8),
               Center(
                 child: _buildInfoItem('谱师', _getChartDesigner(difficulty)!),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Material(child: PhigrosChartPreviewPage(
+                          song: widget.song,
+                          chart: chart,
+                          chartComposer: _getChartDesigner(difficulty) ?? "",
+                        ),)
+                      ),
+                    );
+                  },
+                  label: Text("铺面预览（实验性）"),
+                  icon: Icon(Icons.play_arrow_outlined),
+                ),
               ),
             ],
           ],

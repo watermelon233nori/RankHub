@@ -1,5 +1,6 @@
 import 'package:amap_map/amap_map.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_fullscreen/flutter_fullscreen.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/routes/app_pages.dart';
 import 'package:rank_hub/routes/app_routes.dart';
@@ -29,6 +30,8 @@ void main() async {
 
   // 初始化排队状态管理器
   Get.put(QueueStatusManager());
+
+  await FullScreen.ensureInitialized();
 
   runApp(const MyApp());
 }

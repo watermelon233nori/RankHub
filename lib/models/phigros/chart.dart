@@ -36,7 +36,7 @@ enum NoteType {
 /// 判定线上方的 Note
 class NotesAboveType {
   final int type;
-  final double time;
+  final int time;
   final double positionX;
   final double holdTime;
   final double speed;
@@ -55,7 +55,7 @@ class NotesAboveType {
     try {
       return NotesAboveType(
         type: json['type'] as int,
-        time: (json['time'] as num).toDouble(),
+        time: (json['time'] as num).toInt(),
         positionX: (json['positionX'] as num).toDouble(),
         holdTime: (json['holdTime'] as num).toDouble(),
         speed: (json['speed'] as num).toDouble(),
@@ -85,7 +85,7 @@ class NotesAboveType {
 /// 判定线下方的 Note
 class NotesBelowType {
   final int type;
-  final double time;
+  final int time;
   final double positionX;
   final double holdTime;
   final double speed;
@@ -104,7 +104,7 @@ class NotesBelowType {
     try {
       return NotesBelowType(
         type: json['type'] as int,
-        time: (json['time'] as num).toDouble(),
+        time: (json['time'] as num).toInt(),
         positionX: (json['positionX'] as num).toDouble(),
         holdTime: (json['holdTime'] as num).toDouble(),
         speed: (json['speed'] as num).toDouble(),
