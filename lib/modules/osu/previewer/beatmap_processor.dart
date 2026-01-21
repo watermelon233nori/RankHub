@@ -1,6 +1,5 @@
 
 import 'beatmap_model.dart';
-import 'utils/math_utils.dart';
 
 class BeatmapProcessor {
   static void process(Beatmap beatmap) {

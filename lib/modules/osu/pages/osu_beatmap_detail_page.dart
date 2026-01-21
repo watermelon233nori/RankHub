@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:rank_hub/modules/osu/models/sayobot_beatmap.dart';
 import 'package:rank_hub/modules/osu/models/sayobot_beatmap_detail.dart';
 import 'package:rank_hub/modules/osu/previewer/osu_preview_page.dart';
 import 'package:rank_hub/modules/osu/services/sayobot_api_service.dart';

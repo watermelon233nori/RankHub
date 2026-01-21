@@ -1,4 +1,3 @@
-import 'package:rank_hub/modules/osu/models/sayobot_beatmap.dart';
 
 class SayobotBeatmapDetail {
   final int sid;

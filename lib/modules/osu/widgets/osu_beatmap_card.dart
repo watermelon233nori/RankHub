@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rank_hub/modules/osu/pages/osu_beatmap_detail_page.dart';
@@ -98,9 +97,9 @@ class _OsuBeatmapCardState extends State<OsuBeatmapCard> {
                 imageUrl: widget.beatmap.coverUrl,
                 fit: BoxFit.cover,
                 placeholder: (context, url) =>
-                    Container(color: colorScheme.surfaceVariant),
+                    Container(color: colorScheme.surfaceContainerHighest),
                 errorWidget: (context, url, error) => Container(
-                  color: colorScheme.surfaceVariant,
+                  color: colorScheme.surfaceContainerHighest,
                   child: const Icon(Icons.broken_image),
                 ),
               ),

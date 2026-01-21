@@ -49,3 +49,4 @@ app.*.map.json
 # AI Coding
 .trae/
 dev_resources/
+schemas
