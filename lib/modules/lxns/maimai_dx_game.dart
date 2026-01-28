@@ -124,27 +124,17 @@ class MaimaiDXGame extends BaseGame {
 
       final apiService = MaimaiApiService.instance;
       return await apiService.getPlayerInfo(accessToken: accessToken);
-    } on CredentialExpiredException catch (e) {
-      print('凭据已失效: $e');
-      Get.snackbar(
-        '凭据已失效',
-        '请在账号管理页面重新登录',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return null;
     } on LxnsApiException catch (e) {
       if (e.isNotFound) {
         print('玩家档案不存在(404): $e');
         Get.snackbar(
           '玩家档案不存在',
           '请前往落雪咖啡屋官网同步一次数据来创建玩家档案',
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.TOP,
           duration: const Duration(seconds: 5),
         );
         return null;
       }
-      rethrow;
-    } catch (e) {
       rethrow;
     }
   }

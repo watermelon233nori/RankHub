@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'dart:convert';
+import 'package:brotli/brotli.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
@@ -12,6 +16,11 @@ import '../widgets/dx_rating_table.dart';
 import '../widgets/current_score_card.dart';
 import '../widgets/tolerance_calculator.dart';
 import 'package:rank_hub/models/maimai/score.dart';
+import 'package:simai_flutter/simai_flutter.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:dio/dio.dart' as dio;
+import 'package:fast_gbk/fast_gbk.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// 谱面详情页面
 class DifficultyDetailPage extends StatefulWidget {
@@ -39,11 +48,31 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage>
   String? _historyError;
   Score? _currentScore;
   late TabController _tabController;
+  late ScrollController _scrollController;
+  bool _isFabExtended = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        if (_isFabExtended) {
+          setState(() {
+            _isFabExtended = false;
+          });
+        }
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+        if (!_isFabExtended) {
+          setState(() {
+            _isFabExtended = true;
+          });
+        }
+      }
+    });
     _loadCurrentScore();
     _loadScoreHistory();
   }
@@ -51,6 +80,7 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -137,12 +167,133 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage>
     }
   }
 
+  Future<void> _openChartPreview() async {
+    if (!mounted) return;
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('正在加载谱面和音频...'),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      // 如果是 DX 谱面，ID 需要 +10000
+      final chartId = widget.difficulty.type.value == 'dx'
+          ? widget.songId + 10000
+          : widget.songId;
+      final chartUrl = 'https://assets2.lxns.net/maimai/chart/$chartId.txt';
+      final audioUrl =
+          'https://assets2.lxns.net/maimai/music/${widget.songId}.mp3';
+
+      final dioClient = dio.Dio();
+      final tempDir = await getTemporaryDirectory();
+      final audioPath = '${tempDir.path}/music_${widget.songId}.mp3';
+
+      // 并行请求：下载谱面和音频
+      final results = await Future.wait([
+        dioClient.get(
+          chartUrl,
+          options: dio.Options(
+            responseType: dio.ResponseType.bytes,
+            headers: {
+              'Host': 'assets2.lxns.net',
+              'User-Agent':
+                  'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+              'Accept-Encoding': 'gzip, deflate, br',
+              'Connection': 'keep-alive',
+              'Accept': '*/*',
+            },
+          ),
+        ),
+        dioClient.download(audioUrl, audioPath),
+      ]);
+
+      final chartResponse = results[0];
+
+      if (chartResponse.statusCode != 200) {
+        throw Exception('无法获取谱面文件 (${chartResponse.statusCode})');
+      }
+      List<int> decodedBytes;
+      decodedBytes = brotli.decode(chartResponse.data);
+
+      String content;
+      content = utf8.decode(decodedBytes);
+
+      final simaiFile = SimaiFile(content);
+
+      // Determine key: inote_2 (Basic) to inote_6 (Re:Master)
+      // LevelIndex: 0=Basic, 1=Adv, 2=Exp, 3=Mas, 4=ReMas
+      // Assuming widget.difficulty has a 'difficulty' property which is LevelIndex
+      final levelIndex = widget.difficulty.difficulty.value;
+      final key = 'inote_${levelIndex + 2}';
+
+      final chartStr = simaiFile.getValue(key);
+      if (chartStr == null) {
+        throw Exception('未找到对应难度的谱面 ($key)');
+      }
+
+      final chart = SimaiConvert.deserialize(chartStr);
+
+      if (!mounted) return;
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ChartPlayerPage(
+            chart: chart,
+            songId: widget.songId,
+            audioPath: audioPath,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      // Close loading dialog
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('加载失败: $e')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final difficultyColor = _getDifficultyColor();
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        extendedIconLabelSpacing: _isFabExtended ? 10 : 0,
+        extendedPadding: _isFabExtended ? null : const EdgeInsets.all(16),
+        onPressed: _openChartPreview,
+        label: AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCirc,
+          child: _isFabExtended ? const Text('谱面预览') : const SizedBox(),
+        ),
+        icon: const Icon(Icons.play_arrow),
+      ),
       appBar: AppBar(
         centerTitle: false,
         title: Row(
@@ -222,6 +373,7 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage>
                   ),
                 )
               : SingleChildScrollView(
+                  controller: _scrollController,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
@@ -522,6 +674,7 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage>
                             ),
                           ),
                         ),
+                        SizedBox(height: 96),
                       ],
                     ),
                   ),
@@ -598,5 +751,48 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage>
       default:
         return Colors.blue;
     }
+  }
+}
+
+class ChartPlayerPage extends StatefulWidget {
+  final MaiChart chart;
+  final int songId;
+  final String audioPath;
+
+  const ChartPlayerPage({
+    super.key,
+    required this.chart,
+    required this.songId,
+    required this.audioPath,
+  });
+
+  @override
+  State<ChartPlayerPage> createState() => _ChartPlayerPageState();
+}
+
+class _ChartPlayerPageState extends State<ChartPlayerPage> {
+  late SimaiPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = SimaiPlayerController(
+      chart: widget.chart,
+      audioSource: DeviceFileSource(widget.audioPath),
+      backgroundImageProvider: NetworkImage(
+        'https://assets2.lxns.net/maimai/jacket/${widget.songId}.png',
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SimaiPlayerPage(controller: _controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

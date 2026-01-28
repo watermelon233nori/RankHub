@@ -1,5 +1,5 @@
 <p>
-  <img src="icon-1024.png" alt="RankHub Logo" width="120" height="120">
+  <img src="icon.png" alt="RankHub Logo" width="120" height="120">
 </p>
 
 # RankHub - 音游数据管理平台
