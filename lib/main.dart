@@ -11,10 +11,18 @@ import 'package:rank_hub/services/mai_party_qr_handler.dart';
 import 'package:rank_hub/services/mai_net_qr_handler.dart';
 import 'package:rank_hub/services/queue_status_manager.dart';
 import 'package:rank_hub/services/live_activity_service.dart';
+import 'package:rank_hub/store/user_store.dart';
 import 'package:x_amap_base/x_amap_base.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 初始化 UserStore
+  await Get.putAsync(() async {
+    final store = UserStore();
+    await store.init();
+    return store;
+  });
 
   // 初始化日志服务
   final logService = LogService.instance;

@@ -18,6 +18,8 @@ class GameController extends GetxController {
   final Rx<IGame?> _selectedWikiGame = Rx<IGame?>(null);
   final Rx<IGame?> _selectedRankGame = Rx<IGame?>(null);
 
+  final RxBool isRankMode = false.obs;
+
   IGame? get selectedWikiGame => _selectedWikiGame.value;
   IGame? get selectedRankGame => _selectedRankGame.value;
 
@@ -32,6 +34,10 @@ class GameController extends GetxController {
 
     // 初始化
     _onAccountChanged(_accountController.currentAccount);
+  }
+
+  void SelectMode(bool isWikiMode) {
+    isRankMode.value = !isWikiMode;
   }
 
   /// 账号变化时的处理
