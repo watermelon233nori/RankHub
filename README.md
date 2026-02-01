@@ -1,6 +1,4 @@
-<p>
-  <img src="icon.png" alt="RankHub Logo" width="120" height="120">
-</p>
+<img width="2560" height="1280" alt="media_post" src="https://github.com/user-attachments/assets/7aa03e1a-c0ff-4662-9a04-ed88619c0614" />
 
 # RankHub - 音游数据管理平台
 
