@@ -200,9 +200,7 @@ class _DifficultyDetailPageState extends ConsumerState<DifficultyDetailPage>
                                   'bilibili://search?keyword=$keyword'; // 替换为目标应用的 URL Scheme
                               final Uri uri = Uri.parse(url);
 
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri);
-                              } else {
+                              if (!await launchUrl(uri)) {
                                 await browser.open(
                                   url: WebUri(
                                     "https://search.bilibili.com/video?keyword=$keyword",
