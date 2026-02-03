@@ -5,6 +5,7 @@ import 'package:rank_hub/models/game.dart';
 import 'package:rank_hub/modules/lxns/maimai_lxns.dart';
 import 'package:rank_hub/modules/lxns/records_tab.dart';
 import 'package:rank_hub/modules/lxns/best50_tab.dart';
+import 'package:rank_hub/modules/lxns/kaleidxscope_tab.dart';
 import 'package:rank_hub/modules/lxns/pages/collection_progress_page.dart';
 import 'package:rank_hub/modules/lxns/widgets/player_info_card.dart';
 import 'package:rank_hub/models/maimai/player.dart';
@@ -39,6 +40,16 @@ class MaimaiDXGame extends BaseGame {
         label: '收藏品',
         icon: Icons.collections_outlined,
         builder: (context) => const CollectionsTab(),
+      ),
+      GameContentView(
+        label: '万花筒',
+        icon: Icons.door_front_door,
+        builder: (context) => const KaleidxscopeTab(),
+      ),
+      GameContentView(
+        label: '区域',
+        icon: Icons.map_outlined,
+        builder: (context) => const Center(child: Text('区域页面开发中...')),
       ),
     ];
   }

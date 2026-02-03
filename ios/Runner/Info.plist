@@ -42,7 +42,11 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>bilibili</string>
+		<string>taptap</string>
 		<string>iosamap</string>
+		<string>comgooglemaps</string>
+    	<string>baidumap</string>
+		<string>qqmap</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

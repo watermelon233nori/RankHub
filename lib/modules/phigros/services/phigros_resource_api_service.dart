@@ -17,8 +17,7 @@ class PhigrosResourceApiService {
 
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl:
-          'https://ghfast.top/https://raw.githubusercontent.com/7aGiven/Phigros_Resource/refs/heads',
+      baseUrl: 'https://somnia.xtower.site',
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
     ),
