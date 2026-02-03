@@ -65,7 +65,9 @@ dependencies:
   file_picker: ^10.3.8
 
   phasetida_flutter:
-    git: https://github.com/phasetida/phasetida_flutter.git
+    git:
+      url: https://github.com/phasetida/phasetida_flutter.git
+      ref: 0.1.7
   flutter_fullscreen: ^1.2.0
   simai_flutter: ^0.2.2
   fast_gbk: ^1.0.0
