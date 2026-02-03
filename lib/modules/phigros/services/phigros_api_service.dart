@@ -167,55 +167,44 @@ class PhigrosGameSave {
   }
 
   /// 解析 summary 数据
-  /// 版本格式已更新，version 字段使用 varint 编码
-  ///
-  /// 返回 Map 包含:
-  /// - version: 版本号 (varint 编码)
-  /// - challengeModeRank: 课题模式排名 (H: unsigned short)
-  /// - rks: RKS值 (f: float)
-  /// - gameProgress: 游戏进度 (B: unsigned char)
-  /// - avatarName: 头像名称 (string)
-  /// - levelRecords: 等级记录数组 (12个 unsigned short)，每个难度3个数字:
-  ///   [0-2]: EZ Clear/FC/AP 数量
-  ///   [3-5]: HD Clear/FC/AP 数量
-  ///   [6-8]: IN Clear/FC/AP 数量
-  ///   [9-11]: AT Clear/FC/AP 数量
+  /// 参照 Rust 结构进行解析:
+  /// - save_version: u8
+  /// - challenge_mode_rank: u16
+  /// - rks: f32
+  /// - game_version: VarInt
+  /// - avatar: PhiString
+  /// - level: MultiLevel (ez, hd, in, at 各包含 clear, fc, phi)
   Map<String, dynamic> parseSummary() {
     try {
       // Base64 解码
       final bytes = base64.decode(summary);
-
+      final data = ByteData.sublistView(Uint8List.fromList(bytes));
       int offset = 0;
 
-      // varint - version
-      final versionResult = _decodeVarint(bytes, offset);
-      final version = versionResult['value'] as int;
-      offset = versionResult['offset'] as int;
+      // 1. save_version: u8
+      final saveVersion = data.getUint8(offset);
+      offset += 1;
 
-      final data = ByteData.sublistView(Uint8List.fromList(bytes));
-
-      // H: unsigned short (2 bytes) - challengeModeRank
+      // 2. challenge_mode_rank: u16
       final challengeModeRank = data.getUint16(offset, Endian.little);
       offset += 2;
 
-      // f: float (4 bytes) - rks
+      // 3. rks: f32
       final rks = data.getFloat32(offset, Endian.little);
       offset += 4;
 
-      // B: unsigned char (1 byte) - gameProgress
-      final gameProgress = data.getUint8(offset);
-      offset += 1;
+      // 4. game_version: VarInt
+      final gameVersionRes = _decodeVarint(bytes, offset);
+      final gameVersion = gameVersionRes['value']!;
+      offset = gameVersionRes['offset']!;
 
-      // x: pad byte (1 byte) - skip
-      offset += 1;
+      // 5. avatar: PhiString
+      final avatarRes = _decodePhiString(bytes, offset);
+      final avatarName = avatarRes['value'] as String;
+      offset = avatarRes['offset'] as int;
 
-      // %ds: string (length from byte at offset 8)
-      final stringLength = bytes[8];
-      final avatarBytes = bytes.sublist(offset, offset + stringLength);
-      final avatarName = utf8.decode(avatarBytes);
-      offset += stringLength;
-
-      // 12H: 12 unsigned shorts (24 bytes) - level records
+      // 6. level: MultiLevel (12 * u16 = 24 bytes)
+      // 结构: ez(clear, fc, phi), hd(clear, fc, phi), in(clear, fc, phi), at(clear, fc, phi)
       final levelRecords = <int>[];
       for (int i = 0; i < 12; i++) {
         levelRecords.add(data.getUint16(offset, Endian.little));
@@ -223,10 +212,10 @@ class PhigrosGameSave {
       }
 
       return {
-        'version': version,
+        'saveVersion': saveVersion,
         'challengeModeRank': challengeModeRank,
         'rks': rks,
-        'gameProgress': gameProgress,
+        'gameVersion': gameVersion,
         'avatarName': avatarName,
         'levelRecords': levelRecords,
       };
@@ -234,6 +223,22 @@ class PhigrosGameSave {
       print('❌ 解析 summary 失败: $e');
       rethrow;
     }
+  }
+
+  /// 解码 PhiString 格式 (VarInt 长度 + UTF-8 字节)
+  Map<String, dynamic> _decodePhiString(List<int> bytes, int offset) {
+    final lengthRes = _decodeVarint(bytes, offset);
+    final length = lengthRes['value']!;
+    final currentOffset = lengthRes['offset']!;
+
+    if (currentOffset + length > bytes.length) {
+      throw Exception('PhiString 解析错误: 数据长度不足');
+    }
+
+    final stringBytes = bytes.sublist(currentOffset, currentOffset + length);
+    final value = utf8.decode(stringBytes);
+
+    return {'value': value, 'offset': currentOffset + length};
   }
 
   /// 解码 varint 格式的整数

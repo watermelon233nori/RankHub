@@ -4,6 +4,7 @@ import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/services/platform_login_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'phigros_api_service.dart';
 import 'taptap_service.dart';
 
@@ -140,6 +141,7 @@ class _QRCodeLoginTabState extends State<_QRCodeLoginTab> {
   final ShareClient _shareClient = ShareClient();
   String? _qrcodeUrl;
   String? _deviceCode;
+  String? _userCode;
   String? _deviceId;
   bool _isLoading = false;
   String? _errorMessage;
@@ -180,6 +182,7 @@ class _QRCodeLoginTabState extends State<_QRCodeLoginTab> {
       setState(() {
         _qrcodeUrl = loginData['qrcode_url'];
         _deviceCode = loginData['device_code'];
+        _userCode = loginData['user_code'];
         _deviceId = deviceId;
         _isLoading = false;
       });
@@ -230,6 +233,33 @@ class _QRCodeLoginTabState extends State<_QRCodeLoginTab> {
               '登录失败: ${e.toString().replaceFirst('Exception: ', '')}';
           _isPolling = false;
         });
+      }
+    }
+  }
+
+  Future<void> _launchTapTap() async {
+    final code = _userCode ?? _deviceCode;
+    if (code == null) return;
+
+    final url =
+        'taptap://taptap.com/login-auth?url=https%3A%2F%2Faccounts.taptap.cn%2Fdevice%3Fqrcode%3D1%26user_code%3D$code%26opener%3Dweb&sess_id=undefined';
+
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('未找到 TapTap 客户端')));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('打开 TapTap 失败: $e')));
       }
     }
   }
@@ -285,6 +315,21 @@ class _QRCodeLoginTabState extends State<_QRCodeLoginTab> {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    // 打开 TapTap 一键登录按钮
+                    FilledButton.icon(
+                      onPressed: _launchTapTap,
+                      icon: const Icon(Icons.open_in_new),
+                      label: const Text('打开 TapTap 一键登录'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF00CCCC), // TapTap 品牌色
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     if (_isPolling)
                       Column(
                         children: [
@@ -320,10 +365,9 @@ class _QRCodeLoginTabState extends State<_QRCodeLoginTab> {
                             ),
                             const SizedBox(height: 12),
                             const Text(
-                              '1. 打开 TapTap App\n'
-                              '2. 打开「二维码」\n'
-                              '3. 扫描上方二维码\n'
-                              '4. 在 TapTap 中确认授权',
+                              '1. 点击上方「打开 TapTap 一键登录」\n'
+                              '2. 或使用 TapTap 扫描上方二维码\n'
+                              '3. 在 TapTap 中确认授权',
                               style: TextStyle(fontSize: 13),
                             ),
                           ],
