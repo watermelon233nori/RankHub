@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:brotli/brotli.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +18,6 @@ import 'package:rank_hub/models/maimai/score.dart';
 import 'package:simai_flutter/simai_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart' as dio;
-import 'package:fast_gbk/fast_gbk.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// 谱面详情页面
@@ -152,11 +150,6 @@ class _DifficultyDetailPageState extends State<DifficultyDetailPage>
           _isLoadingHistory = false;
         });
       }
-      Get.snackbar(
-        '凭据已失效',
-        '请在账号管理页面重新登录',
-        snackPosition: SnackPosition.BOTTOM,
-      );
     } catch (e) {
       if (mounted) {
         setState(() {

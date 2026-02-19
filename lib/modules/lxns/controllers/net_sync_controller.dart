@@ -1,10 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
-import 'package:rank_hub/models/maimai/net_user.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_net_api_service.dart';
-import 'package:rank_hub/modules/lxns/services/net_user_service.dart';
+
 import 'package:rank_hub/modules/lxns/services/net_sync_helper.dart';
+import 'package:techno_kitchen_dart/techno_kitchen_dart.dart';
 
 /// NET数据同步Controller
 class NetSyncController extends GetxController {
@@ -17,126 +18,71 @@ class NetSyncController extends GetxController {
   final currentStep = Rx<NetSyncStep>(NetSyncStep.input);
   final input = ''.obs;
 
-  // NET用户列表
-  final recentNetUsers = <NetUser>[].obs;
-  final selectedNetUser = Rx<NetUser?>(null);
+  // 当前选中的NET用户
+  final selectedNetUser = Rx<UserPreview?>(null);
+
+  // 当前QR Code（用于同步时创建会话）
+  final currentQrCode = Rx<String?>(null);
 
   // 同步进度
   final syncProgress = 0.0.obs;
   final syncMessage = ''.obs;
   final syncedScoreCount = 0.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _loadRecentNetUsers();
-  }
-
-  /// 加载最近使用的NET用户
-  Future<void> _loadRecentNetUsers() async {
-    try {
-      final users = await NetUserService.instance.getRecentNetUsers(limit: 10);
-      recentNetUsers.value = users;
-    } catch (e) {
-      print('加载NET用户列表失败: $e');
+  /// 通过 QR Code 获取用户信息
+  Future<void> fetchUserByQrCode() async {
+    final qrCode = input.value.trim();
+    if (qrCode.isEmpty) {
+      Get.snackbar('错误', '请输入 QR Code', snackPosition: SnackPosition.BOTTOM);
+      return;
     }
-  }
 
-  /// 自动判断输入类型并获取用户
-  /// - 纯数字：User ID
-  /// - SGWCMAID开头：QR Code
-  Future<void> fetchUserByInput() async {
-    final inputValue = input.value.trim();
-    if (inputValue.isEmpty) {
+    // 验证 QR Code 格式
+    if (!qrCode.startsWith('SGWCMAID')) {
       Get.snackbar(
         '错误',
-        '请输入User ID或QR Code',
+        'QR Code 格式不正确，必须以 SGWCMAID 开头',
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
 
-    // 判断输入类型
-    if (inputValue.startsWith('SGWCMAID')) {
-      // QR Code
-      await _fetchUserByQrCode(inputValue);
-    } else if (RegExp(r'^\d+$').hasMatch(inputValue)) {
-      // 纯数字 User ID
-      final userId = int.tryParse(inputValue);
-      if (userId != null) {
-        await _fetchUserByUserId(userId);
-      } else {
-        Get.snackbar('错误', 'User ID格式错误', snackPosition: SnackPosition.BOTTOM);
-      }
-    } else {
-      Get.snackbar(
-        '错误',
-        '输入格式不正确，请输入User ID（纯数字）或QR Code（SGWCMAID开头）',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+    await _fetchUserByQrCode(qrCode);
   }
 
   /// 通过QR Code获取用户
   Future<void> _fetchUserByQrCode(String qrCode) async {
     isLoading.value = true;
     try {
-      final netUser = await MaimaiNetApiService.instance.createUserFromQrCode(
-        qrCode,
-      );
-
-      // 保存到本地
-      await NetUserService.instance.saveNetUser(netUser);
+      final netUser = await MaimaiNetApiService.instance.getUserPreview(qrCode);
 
       selectedNetUser.value = netUser;
+      currentQrCode.value = qrCode; // 保存QR code用于同步
       currentStep.value = NetSyncStep.preview;
-
-      // 刷新最近用户列表
-      await _loadRecentNetUsers();
     } catch (e) {
       Get.snackbar('错误', '获取用户信息失败: $e', snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
-  }
-
-  /// 通过User ID获取用户
-  Future<void> _fetchUserByUserId(int userId) async {
-    isLoading.value = true;
-    try {
-      final netUser = await MaimaiNetApiService.instance.createUserFromUserId(
-        userId,
-      );
-
-      // 保存到本地
-      await NetUserService.instance.saveNetUser(netUser);
-
-      selectedNetUser.value = netUser;
-      currentStep.value = NetSyncStep.preview;
-
-      // 刷新最近用户列表
-      await _loadRecentNetUsers();
-    } catch (e) {
-      Get.snackbar('错误', '获取用户信息失败: $e', snackPosition: SnackPosition.BOTTOM);
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  /// 选择最近使用的用户
-  Future<void> selectRecentUser(NetUser user) async {
-    selectedNetUser.value = user;
-    currentStep.value = NetSyncStep.preview;
-
-    // 更新最后使用时间
-    await NetUserService.instance.updateLastUsedTime(user.userId);
-    await _loadRecentNetUsers();
   }
 
   /// 开始同步成绩到查分器
   Future<void> startSync() async {
     final user = selectedNetUser.value;
     if (user == null) return;
+
+    // 检查是否有QR Code（同步必需）
+    final qrCode = currentQrCode.value;
+    if (qrCode == null || qrCode.isEmpty) {
+      Get.snackbar(
+        '提示',
+        '请使用QR Code方式获取用户信息以进行同步',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
 
     currentStep.value = NetSyncStep.syncing;
     isLoading.value = true;
@@ -150,10 +96,9 @@ class NetSyncController extends GetxController {
         throw Exception('访问令牌不存在，请重新登录');
       }
 
-      // 使用统一的同步逻辑
+      // 使用统一的同步逻辑，传入QR Code
       final count = await NetSyncHelper.syncNetScoresToLxns(
-        userId: user.userId,
-        accessToken: account.accessToken!,
+        qrCode: qrCode,
         onProgress: (progress, message, scoreCount) {
           syncProgress.value = progress;
           syncMessage.value = message;
@@ -187,6 +132,7 @@ class NetSyncController extends GetxController {
   void backToInput() {
     currentStep.value = NetSyncStep.input;
     selectedNetUser.value = null;
+    currentQrCode.value = null;
     input.value = '';
     syncProgress.value = 0.0;
     syncMessage.value = '';

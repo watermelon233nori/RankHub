@@ -1,3 +1,7 @@
+import 'package:get/get.dart';
+import 'package:rank_hub/controllers/account_controller.dart';
+import 'package:rank_hub/modules/lxns/services/lxns_credential_provider.dart';
+import 'package:techno_kitchen_dart/techno_kitchen_dart.dart';
 import 'package:rank_hub/models/maimai/net_score.dart';
 import 'package:rank_hub/models/maimai/score.dart';
 import 'package:rank_hub/models/maimai/enums/song_type.dart';
@@ -12,57 +16,92 @@ class NetSyncHelper {
 
   /// 从 NET 获取成绩并上传到 LXNS 查分器
   ///
-  /// [userId] NET 用户 ID
   /// [accessToken] LXNS 访问令牌
+  /// [qrCode] QR Code，用于创建会话
   /// [onProgress] 进度回调 (progress 0.0-1.0, message, count)
   ///
   /// 返回上传的成绩数量
   static Future<int> syncNetScoresToLxns({
-    required int userId,
-    required String accessToken,
+    required String qrCode,
     Function(double progress, String message, int count)? onProgress,
   }) async {
-    // 1. 从 NET 获取所有成绩 (0% - 50%)
-    onProgress?.call(0.0, '正在从 NET 获取成绩...', 0);
+    UserSession? session;
 
-    final netScores = await MaimaiNetApiService.instance.getAllUserScores(
-      userId,
-      onProgress: (current, total, description) {
-        final progress = total > 0 ? current / total * 0.5 : 0.0;
-        onProgress?.call(progress, description, current);
-      },
-    );
+    try {
+      // 1. 先更新曲库 (0% - 20%)
+      onProgress?.call(0.0, '正在更新曲库...', 0);
 
-    // 2. 转换为 Score 对象 (50% - 60%)
-    onProgress?.call(0.55, '正在转换成绩数据...', netScores.length);
+      await MaimaiApiService.instance.syncSongsToDatabase(
+        onProgress: (current, total, description) {
+          final progress = total > 0 ? current / total * 0.2 : 0.0;
+          onProgress?.call(progress, description, 0);
+        },
+      );
 
-    final allScores = await _convertNetScoresToScores(netScores);
+      // 2. 创建并初始化会话
+      onProgress?.call(0.2, '正在连接 NET...', 0);
 
-    // 3. 过滤本地不存在的乐曲 (60% - 70%)
-    onProgress?.call(0.65, '正在验证乐曲数据...', allScores.length);
+      session = MaimaiNetApiService.instance.createSessionFromQrCode(qrCode);
 
-    final scores = await _filterExistingSongs(allScores);
+      // 初始化并登录
+      await MaimaiNetApiService.instance.initAndLogin(session);
 
-    final filteredCount = allScores.length - scores.length;
-    if (filteredCount > 0) {
-      print('⚠️ 已过滤 $filteredCount 条本地不存在的乐曲成绩');
+      // 3. 从 NET 获取所有成绩 (20% - 60%)
+      onProgress?.call(0.2, '正在从 NET 获取成绩...', 0);
+
+      final netScores = await MaimaiNetApiService.instance.getAllUserScores(
+        session,
+        onProgress: (current, total, description) {
+          final progress = total > 0 ? 0.2 + (current / total * 0.4) : 0.2;
+          onProgress?.call(progress, description, current);
+        },
+      );
+
+      // 4. 转换为 Score 对象 (60% - 70%)
+      onProgress?.call(0.6, '正在转换成绩数据...', netScores.length);
+
+      final allScores = await _convertNetScoresToScores(netScores);
+
+      // 5. 过滤本地不存在的乐曲 (70% - 80%)
+      onProgress?.call(0.7, '正在验证乐曲数据...', allScores.length);
+
+      final scores = await _filterExistingSongs(allScores);
+
+      final filteredCount = allScores.length - scores.length;
+      if (filteredCount > 0) {
+        print('⚠️ 已过滤 $filteredCount 条本地不存在的乐曲成绩');
+      }
+
+      // 6. 上传到 LXNS 查分器 (80% - 100%)
+      onProgress?.call(0.8, '正在上传到查分器... (${scores.length}条成绩)', scores.length);
+
+      final accountController = Get.find<AccountController>();
+      final currentAccount = accountController.currentAccount;
+      final credentialProvider = LxnsCredentialProvider();
+      final account = await credentialProvider.getCredential(currentAccount!);
+
+      await MaimaiApiService.instance.uploadScoresToLxns(
+        accessToken: account.accessToken!,
+        scores: scores,
+        onProgress: (current, total, description) {
+          final progress = total > 0 ? 0.8 + (current / total * 0.2) : 0.8;
+          onProgress?.call(progress, description, scores.length);
+        },
+      );
+
+      onProgress?.call(1.0, '同步完成！', scores.length);
+
+      return scores.length;
+    } finally {
+      // 确保登出
+      if (session != null) {
+        try {
+          await MaimaiNetApiService.instance.logout(session);
+        } catch (e) {
+          print('登出失败: $e');
+        }
+      }
     }
-
-    // 4. 上传到 LXNS 查分器 (70% - 100%)
-    onProgress?.call(0.7, '正在上传到查分器... (${scores.length}条成绩)', scores.length);
-
-    await MaimaiApiService.instance.uploadScoresToLxns(
-      accessToken: accessToken,
-      scores: scores,
-      onProgress: (current, total, description) {
-        final progress = total > 0 ? 0.7 + (current / total * 0.3) : 0.7;
-        onProgress?.call(progress, description, scores.length);
-      },
-    );
-
-    onProgress?.call(1.0, '同步完成！', scores.length);
-
-    return scores.length;
   }
 
   /// 将 NET 成绩转换为标准 Score 对象

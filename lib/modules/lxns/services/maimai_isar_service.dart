@@ -7,7 +7,6 @@ import 'package:rank_hub/models/maimai/song.dart';
 import 'package:rank_hub/models/maimai/collection.dart';
 import 'package:rank_hub/models/maimai/score.dart';
 import 'package:rank_hub/models/maimai/pinned_collection.dart';
-import 'package:rank_hub/models/maimai/net_user.dart';
 import 'package:rank_hub/models/maimai/net_score.dart';
 import 'package:rank_hub/models/maimai/enums/level_index.dart';
 import 'package:rank_hub/models/maimai/enums/song_type.dart';
@@ -48,8 +47,6 @@ class MaimaiIsarService extends BaseIsarService {
     CollectionGenreSchema,
     PinnedCollectionSchema,
 
-    // NET 用户和成绩
-    NetUserSchema,
     NetScoreSchema,
   ];
 
