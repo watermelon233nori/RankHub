@@ -35,8 +35,6 @@ migrate_working_dir/
 
 config.json
 
-.vscode/
-
 # Symbolication related
 app.*.symbols
 

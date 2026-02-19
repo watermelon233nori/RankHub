@@ -40,6 +40,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.14.0
         with:
+          flutter-version: "3.38.9"
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
           cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
@@ -88,7 +89,9 @@ jobs:
             "MAIMAI_NET_API_SALT": "${{ secrets.MAIMAI_NET_API_SALT }}",
             "MAIMAI_NET_API_OPEN_GAME_ID": "${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}",
             "MAIMAI_NET_API_CHIME_ENDPOINT": "${{ secrets.MAIMAI_NET_API_CHIME_ENDPOINT }}",
-            "MAIMAI_NET_API_TITLE_ENDPOINT": "${{ secrets.MAIMAI_NET_API_TITLE_ENDPOINT }}"
+            "MAIMAI_NET_API_TITLE_ENDPOINT": "${{ secrets.MAIMAI_NET_API_TITLE_ENDPOINT }}",
+            "MAIMAI_NET_API_OPEN_GAME_ID": "${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}",
+            "MAIMAI_NET_API_MAI_ENCODING": "${{ secrets.MAIMAI_NET_API_MAI_ENCODING }}"
           }
           EOF
 
@@ -190,7 +193,9 @@ jobs:
             "MAIMAI_NET_API_SALT": "${{ secrets.MAIMAI_NET_API_SALT }}",
             "MAIMAI_NET_API_OPEN_GAME_ID": "${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}",
             "MAIMAI_NET_API_CHIME_ENDPOINT": "${{ secrets.MAIMAI_NET_API_CHIME_ENDPOINT }}",
-            "MAIMAI_NET_API_TITLE_ENDPOINT": "${{ secrets.MAIMAI_NET_API_TITLE_ENDPOINT }}"
+            "MAIMAI_NET_API_TITLE_ENDPOINT": "${{ secrets.MAIMAI_NET_API_TITLE_ENDPOINT }}",
+            "MAIMAI_NET_API_OPEN_GAME_ID": "${{ secrets.MAIMAI_NET_API_OPEN_GAME_ID }}",
+            "MAIMAI_NET_API_MAI_ENCODING": "${{ secrets.MAIMAI_NET_API_MAI_ENCODING }}"
           }
           EOF
 
