@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:rank_hub/controllers/account_controller.dart';
 import 'package:rank_hub/services/qr_code_scanner_service.dart';
 import 'package:rank_hub/modules/lxns/services/maimai_net_api_service.dart';
-import 'package:rank_hub/modules/lxns/services/net_user_service.dart';
+
 import 'package:rank_hub/modules/lxns/services/net_sync_helper.dart';
-import 'package:rank_hub/models/maimai/net_user.dart';
+import 'package:techno_kitchen_dart/techno_kitchen_dart.dart';
 
 /// 舞萌 NET 二维码处理器
 /// 支持解析格式：SGWCMAID<16-digit timestamp><64-character QR code>
@@ -50,16 +50,13 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
 
       // 从 NET 获取玩家信息
       final netApiService = MaimaiNetApiService.instance;
-      final netUser = await netApiService.createUserFromQrCode(qrContent);
-
-      // 保存到本地（会自动处理已存在的用户）
-      await NetUserService.instance.saveNetUser(netUser);
+      final userPreview = await netApiService.getUserPreview(qrContent);
 
       // 关闭加载对话框
       Get.back();
 
       // 显示玩家信息和操作选项
-      await _showPlayerInfoBottomSheet(context, netUser);
+      await _showPlayerInfoBottomSheet(context, userPreview, qrContent);
     } catch (e) {
       // 关闭加载对话框
       if (Get.isDialogOpen ?? false) {
@@ -93,7 +90,8 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
   /// 显示玩家信息底部面板
   Future<void> _showPlayerInfoBottomSheet(
     BuildContext context,
-    NetUser netUser,
+    UserPreview userPreview,
+    String qrContent,
   ) async {
     await showModalBottomSheet(
       context: context,
@@ -119,7 +117,7 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(14),
                     child: Image.network(
-                      'https://assets2.lxns.net/maimai/icon/${netUser.iconId}.png',
+                      'https://assets2.lxns.net/maimai/icon/${userPreview.iconId}.png',
                       width: 56,
                       height: 56,
                       fit: BoxFit.cover,
@@ -186,9 +184,9 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
                         children: [
                           Expanded(
                             child: Text(
-                              netUser.userName.isNotEmpty
-                                  ? netUser.userName
-                                  : 'ID: ${netUser.userId}',
+                              userPreview.userName.isNotEmpty
+                                  ? userPreview.userName
+                                  : 'ID: ${userPreview.userId}',
                               style: Theme.of(sheetContext)
                                   .textTheme
                                   .titleMedium
@@ -219,7 +217,7 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '${netUser.playerRating}',
+                                  '${userPreview.playerRating}',
                                   style: Theme.of(sheetContext)
                                       .textTheme
                                       .titleSmall
@@ -297,7 +295,7 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
                     child: FilledButton.icon(
                       onPressed: () async {
                         Navigator.of(sheetContext).pop();
-                        await _syncToLxns(context, netUser);
+                        await _syncToLxns(context, qrContent);
                       },
                       icon: const Icon(Icons.cloud_upload),
                       label: const Text('同步到查分器'),
@@ -322,7 +320,7 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
   }
 
   /// 同步到 LXNS 查分器
-  Future<void> _syncToLxns(BuildContext context, NetUser netUser) async {
+  Future<void> _syncToLxns(BuildContext context, String qrContent) async {
     final accountController = Get.find<AccountController>();
     final currentAccount = accountController.currentAccount;
 
@@ -383,8 +381,7 @@ class MaiNetQRCodeHandler implements QRCodeHandler {
 
       // 使用统一的同步逻辑
       final count = await NetSyncHelper.syncNetScoresToLxns(
-        userId: netUser.userId,
-        accessToken: currentAccount.accessToken!,
+        qrCode: qrContent,
         onProgress: (progress, message, scoreCount) {
           progressController.updateProgress(progress, message, scoreCount);
         },

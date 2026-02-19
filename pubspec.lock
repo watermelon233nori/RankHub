@@ -1573,10 +1573,11 @@ packages:
   simai_flutter:
     dependency: "direct main"
     description:
-      path: "../../simai_flutter"
-      relative: true
-    source: path
-    version: "0.2.2"
+      name: simai_flutter
+      sha256: "87073b633740e5e96ca4b1f12491205fc425f412c4287c3a8fb6a6d378f45460"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.3"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -1730,10 +1731,10 @@ packages:
     dependency: "direct main"
     description:
       name: techno_kitchen_dart
-      sha256: e81649afd5e42cba2010d5215816a041ee291636feb4f87ec03481b984f3f43d
+      sha256: c21436c9bc2e30d2973f19efca648968a36d35f909915eee99a26cf85e3ab123
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.2"
   term_glyph:
     dependency: transitive
     description:

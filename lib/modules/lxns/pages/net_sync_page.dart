@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rank_hub/models/account/account.dart';
 import 'package:rank_hub/modules/lxns/controllers/net_sync_controller.dart';
-import 'package:rank_hub/models/maimai/net_user.dart';
 
 /// NET数据同步页面
 class NetSyncPage extends StatelessWidget {
@@ -84,7 +83,7 @@ class NetSyncPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // 统一输入框
+          // QR Code 输入框
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -93,10 +92,10 @@ class NetSyncPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.input, size: 24),
+                      const Icon(Icons.qr_code, size: 24),
                       const SizedBox(width: 8),
                       const Text(
-                        '输入 User ID 或 QR Code',
+                        '输入 QR Code',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -106,14 +105,14 @@ class NetSyncPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '支持以下格式：\n• User ID（纯数字）\n• QR Code（SGWCMAID开头）',
+                    '格式：SGWCMAID 开头的字符串',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     onChanged: (value) => controller.input.value = value,
                     decoration: InputDecoration(
-                      hintText: '输入User ID或粘贴QR Code内容',
+                      hintText: '粘贴 QR Code 内容',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.content_paste),
@@ -133,7 +132,7 @@ class NetSyncPage extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: controller.isLoading.value
                             ? null
-                            : controller.fetchUserByInput,
+                            : controller.fetchUserByQrCode,
                         child: controller.isLoading.value
                             ? const SizedBox(
                                 height: 20,
@@ -150,51 +149,7 @@ class NetSyncPage extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 24),
-
-          // 最近使用的用户
-          Obx(() {
-            if (controller.recentNetUsers.isEmpty) {
-              return const SizedBox.shrink();
-            }
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '最近使用',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                ...controller.recentNetUsers.map(
-                  (user) => _buildUserListTile(context, user, controller),
-                ),
-              ],
-            );
-          }),
         ],
-      ),
-    );
-  }
-
-  /// 用户列表项
-  Widget _buildUserListTile(
-    BuildContext context,
-    NetUser user,
-    NetSyncController controller,
-  ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          child: Text(user.userName.isNotEmpty ? user.userName[0] : 'U'),
-        ),
-        title: Text(
-          user.userName.isNotEmpty ? user.userName : 'User ${user.userId}',
-        ),
-        subtitle: Text('Rating: ${user.playerRating} · ID: ${user.userId}'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => controller.selectRecentUser(user),
       ),
     );
   }
@@ -240,8 +195,6 @@ class NetSyncPage extends StatelessWidget {
                   const Divider(),
                   const SizedBox(height: 8),
                   _buildInfoRow('Rating', user.playerRating.toString()),
-                  if (user.lastPlayDate != null)
-                    _buildInfoRow('最后游玩', user.lastPlayDate!),
                 ],
               ),
             ),

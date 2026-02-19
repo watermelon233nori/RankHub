@@ -60,6 +60,8 @@ abstract class ApiKeyCredentialProvider extends CredentialProvider {
 /// OAuth2 凭据提供者
 abstract class OAuth2CredentialProvider extends CredentialProvider {
   static Future<void> _globalRefreshLock = Future.value();
+  static DateTime? _lastRefreshTime;
+  static Future<Account>? _lastRefreshFuture;
 
   @override
   Future<Account> getCredential(Account account) async {
@@ -80,12 +82,36 @@ abstract class OAuth2CredentialProvider extends CredentialProvider {
     if (account.refreshToken == null || account.refreshToken!.isEmpty) {
       throw CredentialExpiredException(account, '缺少刷新令牌，请重新登录');
     }
-    
+
+    // 检查是否在1分钟内已经有过请求
+    final now = DateTime.now();
+    if (_lastRefreshTime != null &&
+        now.difference(_lastRefreshTime!).inMinutes < 1 &&
+        _lastRefreshFuture != null) {
+      return _lastRefreshFuture!;
+    }
+
     // 确保同一时间只有一个刷新操作在进行
     await _globalRefreshLock.catchError((_) {});
     final lockCompleter = Completer<void>();
     _globalRefreshLock = lockCompleter.future;
 
+    // 再次检查（可能在等待锁期间其他请求已完成）
+    if (_lastRefreshTime != null &&
+        now.difference(_lastRefreshTime!).inMinutes < 1 &&
+        _lastRefreshFuture != null) {
+      lockCompleter.complete();
+      return _lastRefreshFuture!;
+    }
+
+    // 记录本次请求时间和Future
+    _lastRefreshTime = now;
+    _lastRefreshFuture = _doRefresh(account, lockCompleter);
+
+    return _lastRefreshFuture!;
+  }
+
+  Future<Account> _doRefresh(Account account, Completer<void> lockCompleter) async {
     try {
       // 调用具体平台的刷新逻辑
       final newTokenData = await requestTokenRefresh(account.refreshToken!);
@@ -106,6 +132,9 @@ abstract class OAuth2CredentialProvider extends CredentialProvider {
 
       return account;
     } catch (e) {
+      // 刷新失败，清除缓存以便下次可以重试
+      _lastRefreshTime = null;
+      _lastRefreshFuture = null;
       // 刷新失败，凭据已完全失效
       throw CredentialExpiredException(account, '刷新凭据失败: $e');
     } finally {

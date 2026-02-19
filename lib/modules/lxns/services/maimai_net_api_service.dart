@@ -1,15 +1,18 @@
 import 'dart:convert';
-import 'package:techno_kitchen_dart/src/request_adapter.dart';
+import 'package:flutter/material.dart';
 import 'package:techno_kitchen_dart/techno_kitchen_dart.dart';
-import 'package:rank_hub/models/maimai/net_user.dart';
 import 'package:rank_hub/models/maimai/net_score.dart';
 
 /// Maimai DX NET API 服务
-/// 使用 techno_kitchen_dart 与NET查分器通信
+/// 使用 techno_kitchen_dart 与 NET 通信
 class MaimaiNetApiService {
   static final MaimaiNetApiService _instance = MaimaiNetApiService._internal();
   factory MaimaiNetApiService() => _instance;
   static MaimaiNetApiService get instance => _instance;
+
+  late final Config _config;
+  late final RequestAdapter _requestAdapter;
+  late final ArcadeInfo _arcadeInfo;
 
   MaimaiNetApiService._internal() {
     _requestAdapter = RequestAdapter(
@@ -37,6 +40,10 @@ class MaimaiNetApiService {
         'MAIMAI_NET_API_OPEN_GAME_ID',
         defaultValue: 'SBGA',
       ),
+      maiEncoding: const String.fromEnvironment(
+        'MAIMAI_NET_API_MAI_ENCODING',
+        defaultValue: 'SBGA',
+      ),
       chimeEndpoint: const String.fromEnvironment(
         'MAIMAI_NET_API_CHIME_ENDPOINT',
         defaultValue: 'SBGA',
@@ -46,98 +53,97 @@ class MaimaiNetApiService {
         defaultValue: 'SBGA',
       ),
     );
-    _technoKitchen = TechnoKitchen(_requestAdapter);
+
+    _arcadeInfo = ArcadeInfo.defaultInfo();
+
+    _config = Config(
+      requestAdapter: _requestAdapter,
+      arcadeInfo: _arcadeInfo,
+      musicData: MusicData.defaultData(),
+    );
+
+    debugPrint(_requestAdapter.toString());
   }
 
-  late final RequestAdapter _requestAdapter;
-  late final TechnoKitchen _technoKitchen;
+  Config get config => _config;
 
-  TechnoKitchen get client => _technoKitchen;
-
-  /// 扫描QR Code获取用户信息
+  /// 从QR Code创建用户会话
   /// [qrCode] 二维码内容，格式: SGWCMAID<16-digit timestamp YYMMDDHHMMSS><64-character QR code>
-  /// 返回包含 errorID, userID, key, timestamp 的响应
-  Future<Map<String, dynamic>> scanQrCode(String qrCode) async {
-    try {
-      final result = await _technoKitchen.client.qrApi(qrCode);
-
-      // 检查错误
-      if (result['errorID'] != 0) {
-        throw Exception('QR Code扫描失败: errorID = ${result['errorID']}');
-      }
-
-      return result;
-    } catch (e) {
-      throw Exception('扫描QR Code失败: $e');
-    }
+  UserSession createSessionFromQrCode(String qrCode) {
+    return UserSession(qrCode, _config);
   }
 
-  /// 获取用户预览信息
-  /// [userId] 用户ID
-  /// 返回用户基本信息，包括用户名、Rating等
-  Future<NetUser> getUserPreview(int userId) async {
-    try {
-      final previewJson = await _technoKitchen.preview(userId);
-      final previewData = jsonDecode(previewJson);
+  /// 从URL创建用户会话
+  /// [url] 二维码URL，格式: https://wq.waleak.net/qrcode/req/MAID...
+  UserSession createSessionFromUrl(String url) {
+    return UserSession.fromUrl(url, config: _config);
+  }
 
-      return NetUser.fromPreview(previewData);
+  /// 获取用户预览信息（必须使用 QR Code）
+  /// [qrCode] QR Code，格式: SGWCMAID<16-digit timestamp><64-character code>
+  /// 返回用户基本信息，包括用户名、Rating等
+  Future<UserPreview> getUserPreview(String qrCode) async {
+    UserSession? session;
+    try {
+      // 使用 QR Code 创建会话并获取预览
+      session = createSessionFromQrCode(qrCode);
+      await session.init(); // init 后会获取 token
+      final preview = await session.getUserPreview();
+      return preview;
     } catch (e) {
       throw Exception('获取用户预览失败: $e');
     }
   }
 
-  /// 获取用户详细数据
-  /// [userId] 用户ID
-  /// 返回用户完整数据，包括统计信息等
-  Future<Map<String, dynamic>> getUserData(int userId) async {
+  /// 初始化并登录会话
+  /// [session] 用户会话
+  Future<void> initAndLogin(UserSession session) async {
     try {
-      // 登录
-      final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      await _technoKitchen.login(userId, timestamp);
+      await session.init();
+      await session.login();
+    } catch (e) {
+      throw Exception('初始化或登录失败: $e');
+    }
+  }
 
-      // 获取用户数据
-      final userDataJson = await _technoKitchen.userdata(userId);
-      final userDataResult = jsonDecode(userDataJson);
-
-      // 登出
-      await _technoKitchen.logout(userId, timestamp);
-
-      return userDataResult;
+  /// 获取用户详细数据
+  /// [session] 已登录的用户会话
+  Future<PlayerData> getUserData(UserSession session) async {
+    try {
+      final userData = await session.getUserData();
+      return userData;
     } catch (e) {
       throw Exception('获取用户数据失败: $e');
     }
   }
 
   /// 获取用户音乐成绩
-  /// [userId] 用户ID
+  /// [session] 已登录的用户会话
   /// [maxCount] 每次请求最大数量，默认2000
   /// [startIndex] 起始索引，默认0
-  /// 返回成绩列表
   Future<NetScoreResponse> getUserMusic(
-    int userId, {
+    UserSession session, {
     int maxCount = 2000,
     int startIndex = 0,
   }) async {
     try {
-      final userMusicJson = await _technoKitchen.getUserMusic(
-        userId,
-        maxCount: maxCount,
+      final responseJson = await session.getUserMusic(
         nextIndex: startIndex,
+        maxCount: maxCount,
       );
 
-      final userMusicData = jsonDecode(userMusicJson);
-      return NetScoreResponse.fromJson(userMusicData);
+      final response = jsonDecode(responseJson) as Map<String, dynamic>;
+      return NetScoreResponse.fromJson(response);
     } catch (e) {
-      throw Exception('获取用户音乐成绩失败: $e');
+      throw Exception('获取用户乐曲成绩失败: $e');
     }
   }
 
   /// 获取用户所有成绩（分页获取）
-  /// [userId] 用户ID
+  /// [session] 已登录的用户会话
   /// [onProgress] 进度回调 (current, total, description)
-  /// 返回所有成绩列表
   Future<List<NetScore>> getAllUserScores(
-    int userId, {
+    UserSession session, {
     Function(int current, int total, String description)? onProgress,
   }) async {
     final allScores = <NetScore>[];
@@ -152,7 +158,7 @@ class MaimaiNetApiService {
       );
 
       final response = await getUserMusic(
-        userId,
+        session,
         maxCount: 2000,
         startIndex: nextIndex,
       );
@@ -166,7 +172,6 @@ class MaimaiNetApiService {
 
       // 更新总数估计
       if (totalLength == 0 && response.length > 0) {
-        // 粗略估计总数
         totalLength =
             allScores.length +
             (response.nextIndex > 0 ? response.length * 10 : 0);
@@ -183,32 +188,42 @@ class MaimaiNetApiService {
     return allScores;
   }
 
-  /// 从QR Code创建并保存NET用户
+  /// 从QR Code获取NET用户信息（不保存）
   /// [qrCode] 二维码内容
   /// 返回完整的用户信息
-  Future<NetUser> createUserFromQrCode(String qrCode) async {
-    // 1. 扫描QR Code
-    final qrResult = await scanQrCode(qrCode);
-
-    // 2. 创建基础用户信息
-    final netUser = NetUser.fromQrApi(qrResult);
-
-    // 3. 获取用户详细信息
+  Future<PlayerData> getUserFromQrCode(String qrCode) async {
+    UserSession? session;
     try {
-      final preview = await getUserPreview(netUser.userId);
-      netUser.updateFromPreview(preview.toJson());
-    } catch (e) {
-      print('获取用户预览失败，使用基本信息: $e');
-    }
+      // 1. 创建会话
+      session = createSessionFromQrCode(qrCode);
 
-    return netUser;
+      // 2. 初始化并登录
+      await initAndLogin(session);
+
+      // 3. 获取用户数据
+      final playerData = await getUserData(session);
+
+      return playerData;
+    } catch (e) {
+      throw Exception('从QR Code获取用户失败: $e');
+    } finally {
+      // 5. 登出
+      if (session != null && session.isLoggedIn) {
+        try {
+          await session.logout();
+        } catch (e) {
+          print('登出失败: $e');
+        }
+      }
+    }
   }
 
-  /// 通过用户ID创建NET用户
-  /// [userId] 用户ID
-  Future<NetUser> createUserFromUserId(int userId) async {
-    // 直接获取用户预览信息
-    final netUser = await getUserPreview(userId);
-    return netUser;
+  /// 登出会话
+  Future<void> logout(UserSession session) async {
+    try {
+      await session.logout();
+    } catch (e) {
+      print('登出失败: $e');
+    }
   }
 }
