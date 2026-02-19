@@ -1,6 +1,6 @@
 name: rank_hub
 description: "A Otoge Ranking explorer app"
-version: 1.0.7
+version: 1.0.8
 publish_to: "none"
 
 environment:
