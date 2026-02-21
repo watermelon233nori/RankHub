@@ -1301,8 +1301,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: dev
-      resolved-ref: "36face8976864352c365f4192ee42a23ee895813"
+      ref: "0.3.0"
+      resolved-ref: "8450f348c47ce7f0370740ad3a4515a88add2563"
       url: "https://github.com/phasetida/phasetida_flutter.git"
     source: git
     version: "0.3.0"
