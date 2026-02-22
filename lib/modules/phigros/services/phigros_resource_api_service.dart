@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:rank_hub/models/phigros/avatar.dart';
@@ -277,5 +278,26 @@ class PhigrosResourceApiService {
     }
 
     return charts;
+  }
+
+  /// 获取乐曲音轨
+  /// [songId] 曲目ID
+  Future<Uint8List> fetchOgg(String songId) async {
+    print('📥 开始获取音频: $songId...');
+    try {
+      final url = '/music/$songId.ogg';
+      final response = await _dio.get<Uint8List>(
+        url,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final responseData = response.data;
+      if (responseData == null) {
+        throw Exception("获取音频失败：值为null");
+      }
+      return responseData;
+    } catch (e) {
+      print('❌ 获取音频失败: $songId, 错误: $e');
+      rethrow;
+    }
   }
 }

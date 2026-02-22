@@ -665,7 +665,7 @@ class _PhigrosSongDetailPageState extends State<PhigrosSongDetailPage>
                       ),
                     );
                   },
-                  label: Text("铺面预览（实验性）"),
+                  label: Text("谱面预览（实验性）"),
                   icon: Icon(Icons.play_arrow_outlined),
                 ),
               ),
