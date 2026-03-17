@@ -100,7 +100,18 @@ class PhigrosPlayerSummary {
       0.0,
       (sum, record) => sum + record.rks,
     );
-    final b19Average = b19Records.isNotEmpty ? b19Sum / b19Records.length : 0.0;
+    final b19Average = b19Records.isNotEmpty ? b19Sum / 19 : 0.0;
+
+    // 计算B30用于总RKS
+    final phiRecords = sortedRecords
+        .where((record) => record.rating == 'ϕ')
+        .take(3)
+        .toList();
+    final best27Records = sortedRecords.take(27).toList();
+
+    final phiSum = phiRecords.fold<double>(0.0, (sum, r) => sum + r.rks);
+    final best27Sum = best27Records.fold<double>(0.0, (sum, r) => sum + r.rks);
+    final totalRksCalc = (phiSum + best27Sum) / 30;
 
     // 统计各种数据
     int phiCount = 0;
@@ -148,7 +159,7 @@ class PhigrosPlayerSummary {
     return PhigrosPlayerSummary()
       ..accountId = accountId
       ..totalRks =
-          b19Average // 实际RKS通常就是B19平均值
+          totalRksCalc // 计算得出的总RKS
       ..b19AverageRks = b19Average
       ..phiCount = phiCount
       ..totalSongsPlayed = records.length
@@ -189,7 +200,7 @@ class PhigrosPlayerSummary {
       0.0,
       (sum, record) => sum + record.rks,
     );
-    final b19Average = b19Records.isNotEmpty ? b19Sum / b19Records.length : 0.0;
+    final b19Average = b19Records.isNotEmpty ? b19Sum / 19 : 0.0;
 
     // 统计各种数据（如果 API 没有提供，则从记录计算）
     int phiCount = 0;
