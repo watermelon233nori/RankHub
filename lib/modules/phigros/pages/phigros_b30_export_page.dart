@@ -425,12 +425,11 @@ class _PhigrosB30ExportPageState extends State<PhigrosB30ExportPage> {
     // 计算 B30 平均 RKS
     final b30Average = b30Records.isEmpty
         ? 0.0
-        : b30Records.map((r) => r.rks).reduce((a, b) => a + b) /
-              b30Records.length;
+        : b30Records.map((r) => r.rks).reduce((a, b) => a + b) / 30;
 
     // 获取头像 URL
     final avatarUrl = widget.avatarName.isNotEmpty
-        ? 'https://ghfast.top/https://raw.githubusercontent.com/7aGiven/Phigros_Resource/refs/heads/avatar/${widget.avatarName}.png'
+        ? 'https://somnia.xtower.site/avatar/${widget.avatarName}.png'
         : '';
 
     // 获取挑战模式等级颜色

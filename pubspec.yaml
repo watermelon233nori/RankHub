@@ -1,6 +1,6 @@
 name: rank_hub
 description: "A Otoge Ranking explorer app"
-version: 1.0.8
+version: 1.0.9
 publish_to: "none"
 
 environment:
@@ -69,7 +69,7 @@ dependencies:
       url: https://github.com/phasetida/phasetida_flutter.git
       ref: 0.3.1
   flutter_fullscreen: ^1.2.0
-  simai_flutter: ^0.2.3
+  simai_flutter: 0.2.4
   fast_gbk: ^1.0.0
   brotli: ^0.6.0
   slide_countdown: ^2.0.2

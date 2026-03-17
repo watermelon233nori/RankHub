@@ -1598,10 +1598,10 @@ packages:
     dependency: "direct main"
     description:
       name: simai_flutter
-      sha256: "87073b633740e5e96ca4b1f12491205fc425f412c4287c3a8fb6a6d378f45460"
+      sha256: bfdeae45d86b8540495ee352b5311e8a3fa4410860bffce3c6e7f9b9343d964a
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.3"
+    version: "0.2.4"
   sky_engine:
     dependency: transitive
     description: flutter
